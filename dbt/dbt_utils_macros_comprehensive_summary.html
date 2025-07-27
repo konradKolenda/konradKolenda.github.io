@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt_utils Package - Comprehensive Macro Summary</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .toc {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 5px 0;
+        }
+        .toc a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .macro-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+        }
+        .macro-name {
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: #e8f4f8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .usage-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .usage-example code {
+            color: #ecf0f1;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        .parameter-list {
+            background: #f1f2f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .parameter-list ul {
+            margin: 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-right: 5px;
+        }
+        .badge-test { background-color: #e74c3c; }
+        .badge-sql { background-color: #27ae60; }
+        .badge-introspective { background-color: #f39c12; }
+        .badge-web { background-color: #9b59b6; }
+        .badge-jinja { background-color: #34495e; }
+        .description {
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+        .result-example {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .result-example h4 {
+            margin: 0 0 8px 0;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+        .sample-data {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt_utils Package - Comprehensive Macro Summary</h1>
+        
+        <div class="highlight">
+            <strong>About dbt_utils:</strong> This package contains reusable macros that can be used across dbt projects. 
+            It provides a comprehensive set of utilities for testing, SQL generation, introspection, and data manipulation.
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#generic-tests">Generic Tests (15 macros)</a></li>
+                <li><a href="#introspective-macros">Introspective Macros (6 macros)</a></li>
+                <li><a href="#sql-generators">SQL Generators (15 macros)</a></li>
+                <li><a href="#web-macros">Web Macros (3 macros)</a></li>
+                <li><a href="#jinja-helpers">Jinja Helpers (4 macros)</a></li>
+                <li><a href="#cross-database-macros">Cross-database Macros (Deprecated)</a></li>
+                <li><a href="#summary-table">Summary Table</a></li>
+            </ul>
+        </div>
+
+        <section id="generic-tests">
+            <h2><span class="badge badge-test">TESTS</span>Generic Tests</h2>
+            <p>Generic tests that can be applied to models, sources, and snapshots to validate data quality and integrity.</p>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">equal_rowcount</span></h3>
+                <div class="description">Asserts that two relations have the same number of rows.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>compare_model</code> (required): The model to compare against</li>
+                        <li><code>group_by_columns</code> (optional): Columns to group by for granular comparison</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+# In schema.yml<br>
+models:<br>
+&nbsp;&nbsp;- name: orders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.equal_rowcount:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('expected_orders')<br><br>
+# With grouping<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.equal_rowcount:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('orders_backup')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by_columns: ['status']
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Both tables have exactly 1,250 rows<br>
+❌ Fail: "got 1,250 rows, expected 1,180 rows" (shows difference)
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">fewer_rows_than</span></h3>
+                <div class="description">Asserts that the model has fewer rows than the comparison model.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>compare_model</code> (required): The model to compare against</li>
+                        <li><code>group_by_columns</code> (optional): Columns to group by</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: failed_orders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.fewer_rows_than:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('all_orders')
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: failed_orders has 45 rows, all_orders has 1,250 rows<br>
+❌ Fail: "failed_orders has more rows (1,300) than all_orders (1,250)"
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">equality</span></h3>
+                <div class="description">Asserts the equality of two relations, with options to compare specific columns or exclude columns, and set precision for numeric comparisons.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>compare_model</code> (required): The model to compare against</li>
+                        <li><code>compare_columns</code> (optional): List of specific columns to compare</li>
+                        <li><code>exclude_columns</code> (optional): List of columns to exclude from comparison</li>
+                        <li><code>precision</code> (optional): Decimal places for numeric comparison</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: orders_current<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Compare entire tables<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.equality:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('orders_expected')<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Compare specific columns only<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.equality:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('orders_backup')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_columns: ['order_id', 'customer_id', 'total']<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Exclude timestamp columns from comparison<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.equality:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;compare_model: ref('orders_snapshot')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exclude_columns: ['created_at', 'updated_at']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;precision: 2
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All rows match between tables<br>
+❌ Fail: Returns differing rows with 'which_diff' column showing 'a_minus_b' or 'b_minus_a'
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">expression_is_true</span></h3>
+                <div class="description">Asserts that a valid SQL expression is true for all records. Useful for cross-column integrity checks.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>expression</code> (required): SQL expression to evaluate</li>
+                        <li><code>where</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: financial_data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test that revenue + tax = total<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.expression_is_true:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expression: "revenue + tax = total"<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test percentage is between 0 and 100<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.expression_is_true:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expression: "discount_pct >= 0 and discount_pct <= 100"<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test with WHERE condition<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.expression_is_true:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;expression: "end_date > start_date"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;config:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where: "status = 'active'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All rows satisfy the expression<br>
+❌ Fail: Returns rows where expression is false, e.g.:<br>
+&nbsp;&nbsp;| revenue | tax | total | expression_result |<br>
+&nbsp;&nbsp;| 100.00  | 8.5 | 110.0 | false            |
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">recency</span></h3>
+                <div class="description">Asserts that a timestamp column contains data at least as recent as the defined interval.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>datepart</code> (required): Date part (day, hour, etc.)</li>
+                        <li><code>field</code> (required): Timestamp column name</li>
+                        <li><code>interval</code> (required): Number of dateparts</li>
+                        <li><code>group_by_columns</code> (optional): Columns to group by</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: user_events<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test data is less than 1 day old<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.recency:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field: created_at<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interval: 1<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test each customer has recent activity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.recency:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;field: last_activity<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interval: 24<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by_columns: ['customer_id']
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Most recent record is within specified timeframe<br>
+❌ Fail: "Most recent record is 2 days old, expected within 1 day"<br>
+With grouping: Each group has recent data or shows which groups are stale
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">at_least_one</span></h3>
+                <div class="description">Asserts that a column has at least one non-null value.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>group_by_columns</code> (optional): Columns to group by</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: customer_profiles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.at_least_one<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ensure each customer segment has at least one email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.at_least_one:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by_columns: ['customer_segment']
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: At least one non-null value found<br>
+❌ Fail: "All values in column 'email' are null"<br>
+With grouping: Shows which groups have all null values
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">not_constant</span></h3>
+                <div class="description">Asserts that a column does not have the same value in all rows.</div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: orders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: status<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.not_constant<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Test by customer that order amounts vary<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: order_amount<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_utils.not_constant:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by_columns: ['customer_id']
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Column has varying values (e.g., 'pending', 'completed', 'cancelled')<br>
+❌ Fail: "Column 'status' has the same value 'pending' in all 1,250 rows"<br>
+With grouping: Identifies groups where all values are identical
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">not_empty_string</span></h3>
+                <div class="description">Asserts that a column does not have any empty string values.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>trim_whitespace</code> (optional, default=true): Whether to trim whitespace</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">cardinality_equality</span></h3>
+                <div class="description">Asserts that values in a column have exactly the same cardinality as values from a different column in a different model.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field</code> (required): Column in the comparison model</li>
+                        <li><code>to</code> (required): The comparison model</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">not_null_proportion</span></h3>
+                <div class="description">Asserts that the proportion of non-null values in a column is within a specified range.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>at_least</code> (required): Minimum proportion</li>
+                        <li><code>at_most</code> (optional, default=1.0): Maximum proportion</li>
+                        <li><code>group_by_columns</code> (optional): Columns to group by</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">not_accepted_values</span></h3>
+                <div class="description">Asserts that there are no rows matching the specified values.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>values</code> (required): List of unacceptable values</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">relationships_where</span></h3>
+                <div class="description">Asserts referential integrity between two relations with additional filtering conditions.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>to</code> (required): Referenced model</li>
+                        <li><code>field</code> (required): Referenced column</li>
+                        <li><code>from_condition</code> (optional): Filter condition for source</li>
+                        <li><code>to_condition</code> (optional): Filter condition for target</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">mutually_exclusive_ranges</span></h3>
+                <div class="description">Asserts that ranges between lower and upper bound columns do not overlap.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>lower_bound_column</code> (required): Lower bound column</li>
+                        <li><code>upper_bound_column</code> (required): Upper bound column</li>
+                        <li><code>partition_by</code> (optional): Partitioning columns</li>
+                        <li><code>gaps</code> (optional): Gap allowance ('allowed', 'not_allowed', 'required')</li>
+                        <li><code>zero_length_range_allowed</code> (optional): Allow zero-length ranges</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">sequential_values</span></h3>
+                <div class="description">Confirms that a column contains sequential values (numeric or datetime).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>interval</code> (optional, default=1): Gap between sequential values</li>
+                        <li><code>datepart</code> (optional): Date part for datetime sequences</li>
+                        <li><code>group_by_columns</code> (optional): Columns to group by</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">unique_combination_of_columns</span></h3>
+                <div class="description">Asserts that the combination of specified columns is unique.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>combination_of_columns</code> (required): List of columns</li>
+                        <li><code>quote_columns</code> (optional, default=false): Quote column names</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">accepted_range</span></h3>
+                <div class="description">Asserts that a column's values fall within an expected range.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum value</li>
+                        <li><code>max_value</code> (optional): Maximum value</li>
+                        <li><code>inclusive</code> (optional, default=true): Include boundary values</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="introspective-macros">
+            <h2><span class="badge badge-introspective">INTROSPECTIVE</span>Introspective Macros</h2>
+            <p>These macros run queries and return results as objects, typically abstracting over dbt statement blocks.</p>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_column_values</span></h3>
+                <div class="description">Returns unique values for a column in a relation as an array.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>table</code> (required): Relation to query</li>
+                        <li><code>column</code> (required): Column name</li>
+                        <li><code>where</code> (optional): Filter condition</li>
+                        <li><code>order_by</code> (optional, default='count(*) desc'): Sort order</li>
+                        <li><code>max_records</code> (optional): Limit results</li>
+                        <li><code>default</code> (optional, default=[]): Default if relation doesn't exist</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Get all unique payment methods #}<br>
+{% set payment_methods = dbt_utils.get_column_values(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table=ref('payments'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column='payment_method'<br>
+) %}<br><br>
+{# Use in pivot or conditional logic #}<br>
+select<br>
+&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;{% for method in payment_methods %}<br>
+&nbsp;&nbsp;sum(case when payment_method = '{{ method }}' then amount else 0 end) as {{ method }}_total,<br>
+&nbsp;&nbsp;{% endfor %}<br>
+&nbsp;&nbsp;sum(amount) as total_amount<br>
+from {{ ref('payments') }}<br>
+group by customer_id<br><br>
+{# With filtering and ordering #}<br>
+{% set recent_customers = dbt_utils.get_column_values(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;table=ref('customers'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column='customer_id',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where="created_at >= '2023-01-01'",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;order_by='created_at desc',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_records=100<br>
+) %}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Returns: ['credit_card', 'paypal', 'bank_transfer', 'cash']<br><br>
+Generated SQL creates columns:<br>
+| customer_id | credit_card_total | paypal_total | bank_transfer_total | cash_total | total_amount |<br>
+| 1001        | 150.00           | 75.00        | 0.00               | 25.00      | 250.00       |
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_filtered_columns_in_relation</span></h3>
+                <div class="description">Returns an iterable list of columns for a relation, with optional exclusions.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>from</code> (required): Source relation</li>
+                        <li><code>except</code> (optional, default=[]): Columns to exclude</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Get all columns except system fields #}<br>
+{% set columns = dbt_utils.get_filtered_columns_in_relation(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;from=ref('raw_data'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;except=['_loaded_at', '_row_hash', 'dbt_updated_at']<br>
+) %}<br><br>
+select<br>
+&nbsp;&nbsp;{% for column in columns %}<br>
+&nbsp;&nbsp;max({{ column }}) as max_{{ column }},<br>
+&nbsp;&nbsp;{% endfor %}<br>
+&nbsp;&nbsp;count(*) as total_rows<br>
+from {{ ref('raw_data') }}<br><br>
+{# Create a clean version without metadata columns #}<br>
+select<br>
+&nbsp;&nbsp;{% for column in columns %}<br>
+&nbsp;&nbsp;{{ column }}{% if not loop.last %},{% endif %}<br>
+&nbsp;&nbsp;{% endfor %}<br>
+from {{ ref('source_table') }}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+From table with columns: [id, name, email, _loaded_at, amount, _row_hash]<br><br>
+Returns: ['id', 'name', 'email', 'amount']<br><br>
+Generated SQL includes only business columns, excludes system metadata
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_relations_by_pattern</span></h3>
+                <div class="description">Returns a list of relations that match schema or table name patterns.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>schema_pattern</code> (required): Schema pattern</li>
+                        <li><code>table_pattern</code> (required): Table pattern</li>
+                        <li><code>exclude</code> (optional): Exclusion pattern</li>
+                        <li><code>database</code> (optional): Target database</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_relations_by_prefix</span></h3>
+                <div class="description">Returns a list of relations matching a prefix (soon to be deprecated in favor of get_relations_by_pattern).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>schema</code> (required): Schema name</li>
+                        <li><code>prefix</code> (required): Table prefix</li>
+                        <li><code>exclude</code> (optional): Exclusion pattern</li>
+                        <li><code>database</code> (optional): Target database</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_query_results_as_dict</span></h3>
+                <div class="description">Returns a dictionary from a SQL query for easier manipulation without Agate library.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>sql_statement</code> (required): SQL query to execute</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_single_value</span></h3>
+                <div class="description">Returns a single value from a SQL query.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>sql_statement</code> (required): SQL query to execute</li>
+                        <li><code>default</code> (optional): Default value if query fails</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="sql-generators">
+            <h2><span class="badge badge-sql">SQL</span>SQL Generators</h2>
+            <p>These macros generate SQL code or complete queries, implementing common patterns that are difficult to write in pure SQL.</p>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">date_spine</span></h3>
+                <div class="description">Generates SQL to build a date spine between start and end dates.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>datepart</code> (required): Date interval (day, month, etc.)</li>
+                        <li><code>start_date</code> (required): Start date</li>
+                        <li><code>end_date</code> (required): End date (exclusive)</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Create daily date spine for 2023 #}<br>
+{{ dbt_utils.date_spine(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;datepart="day",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_date="cast('2023-01-01' as date)",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;end_date="cast('2024-01-01' as date)"<br>
+) }}<br><br>
+{# Monthly spine for reporting #}<br>
+{{ dbt_utils.date_spine(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;datepart="month",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;start_date="cast('2020-01-01' as date)",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;end_date="cast('2025-01-01' as date)"<br>
+) }}<br><br>
+{# Use in model for gap analysis #}<br>
+with date_spine as (<br>
+&nbsp;&nbsp;{{ dbt_utils.date_spine(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart="day",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;start_date="'2023-01-01'",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;end_date="current_date"<br>
+&nbsp;&nbsp;) }}<br>
+),<br>
+sales_data as (<br>
+&nbsp;&nbsp;select date_trunc('day', order_date) as order_day, sum(amount) as daily_sales<br>
+&nbsp;&nbsp;from {{ ref('orders') }}<br>
+&nbsp;&nbsp;group by 1<br>
+)<br>
+select<br>
+&nbsp;&nbsp;ds.date_day,<br>
+&nbsp;&nbsp;coalesce(sd.daily_sales, 0) as sales<br>
+from date_spine ds<br>
+left join sales_data sd on ds.date_day = sd.order_day
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Generates complete date series:<br>
+| date_day   |<br>
+| 2023-01-01 |<br>
+| 2023-01-02 |<br>
+| 2023-01-03 |<br>
+| ...        |<br>
+| 2023-12-31 |<br><br>
+With sales join shows zero sales for missing days, enables gap analysis
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">deduplicate</span></h3>
+                <div class="description">Generates SQL to remove duplicate rows from a model, source, or CTE.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>relation</code> (required): Source relation</li>
+                        <li><code>partition_by</code> (required): Columns to partition by</li>
+                        <li><code>order_by</code> (required): Priority order for deduplication</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">haversine_distance</span></h3>
+                <div class="description">Calculates the haversine distance between two sets of coordinates.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>lat1</code> (required): First latitude</li>
+                        <li><code>lon1</code> (required): First longitude</li>
+                        <li><code>lat2</code> (required): Second latitude</li>
+                        <li><code>lon2</code> (required): Second longitude</li>
+                        <li><code>unit</code> (optional, default='mi'): Distance unit ('mi' or 'km')</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">group_by</span></h3>
+                <div class="description">Builds a GROUP BY statement for fields 1...N.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>n</code> (required): Number of fields to group by</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+select<br>
+&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;order_date,<br>
+&nbsp;&nbsp;status,<br>
+&nbsp;&nbsp;count(*) as order_count,<br>
+&nbsp;&nbsp;sum(amount) as total_amount<br>
+from {{ ref('orders') }}<br>
+{{ dbt_utils.group_by(n=3) }}<br><br>
+{# Dynamic grouping based on columns #}<br>
+{% set group_cols = ['region', 'product_category', 'month'] %}<br>
+select<br>
+&nbsp;&nbsp;{% for col in group_cols %}<br>
+&nbsp;&nbsp;{{ col }},<br>
+&nbsp;&nbsp;{% endfor %}<br>
+&nbsp;&nbsp;sum(revenue) as total_revenue,<br>
+&nbsp;&nbsp;count(*) as transaction_count<br>
+from {{ ref('sales') }}<br>
+{{ dbt_utils.group_by(n=group_cols|length) }}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Generates: "GROUP BY 1,2,3" (references select columns by position)<br><br>
+Equivalent to writing:<br>
+GROUP BY customer_id, order_date, status<br><br>
+Useful for maintaining consistency and reducing repetition in complex models
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">star</span></h3>
+                <div class="description">Generates a comma-separated list of all fields from a relation, with optional exclusions and transformations.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>from</code> (required): Source relation</li>
+                        <li><code>except</code> (optional, default=[]): Columns to exclude</li>
+                        <li><code>relation_alias</code> (optional): Table alias for columns</li>
+                        <li><code>prefix</code> (optional): Column prefix</li>
+                        <li><code>suffix</code> (optional): Column suffix</li>
+                        <li><code>quote_identifiers</code> (optional, default=true): Quote column names</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">union_relations</span></h3>
+                <div class="description">Combines multiple relations via UNION ALL, handling column differences and adding source tracking.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>relations</code> (required): Array of relations to union</li>
+                        <li><code>exclude</code> (optional): Columns to exclude</li>
+                        <li><code>include</code> (optional): Columns to include (mutually exclusive with exclude)</li>
+                        <li><code>column_override</code> (optional): Explicit column type overrides</li>
+                        <li><code>source_column_name</code> (optional, default='_dbt_source_relation'): Source tracking column name</li>
+                        <li><code>where</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Basic union of similar tables #}<br>
+{{ dbt_utils.union_relations(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;relations=[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref('orders_2022'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref('orders_2023'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref('orders_2024')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+) }}<br><br>
+{# Union with column exclusions #}<br>
+{{ dbt_utils.union_relations(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;relations=[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source('raw', 'customers_us'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source('raw', 'customers_eu'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source('raw', 'customers_asia')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exclude=['_loaded_at', '_metadata', 'region_specific_field']<br>
+) }}<br><br>
+{# Advanced: Type overrides and filtering #}<br>
+{{ dbt_utils.union_relations(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;relations=[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref('legacy_sales'),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ref('modern_sales')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_override={<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'amount': 'decimal(10,2)',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'customer_id': 'varchar(50)'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;source_column_name='data_source',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;where="status = 'active'"<br>
+) }}<br><br>
+{# Dynamic union with pattern matching #}<br>
+{% set event_relations = dbt_utils.get_relations_by_pattern('events%', 'page_views_%') %}<br>
+{{ dbt_utils.union_relations(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;relations=event_relations,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;include=['user_id', 'page_url', 'timestamp', 'session_id']<br>
+) }}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Tables with different schemas:<br>
+orders_2022: [id, customer_id, amount, status]<br>
+orders_2023: [id, customer_id, amount, status, discount]<br>
+orders_2024: [id, customer_id, amount, status, discount, channel]<br><br>
+Union result:<br>
+| id | customer_id | amount | status | discount | channel | _dbt_source_relation |
+| 1  | 101         | 100.0  | paid   | null     | null    | orders_2022          |
+| 2  | 102         | 150.0  | paid   | 10.0     | null    | orders_2023          |
+| 3  | 103         | 200.0  | paid   | 15.0     | web     | orders_2024          |
+<br>
+Automatically handles missing columns with NULL values and tracks source
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">generate_series</span></h3>
+                <div class="description">Generates a 1-indexed series of numbers up to the specified bound.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>upper_bound</code> (required): Maximum number in series</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">generate_surrogate_key</span></h3>
+                <div class="description">Generates a hashed surrogate key using specified fields (cross-database compatible).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field_list</code> (required): List of fields to hash</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Simple surrogate key from multiple fields #}<br>
+select<br>
+&nbsp;&nbsp;{{ dbt_utils.generate_surrogate_key(['customer_id', 'order_date']) }} as order_key,<br>
+&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;order_date,<br>
+&nbsp;&nbsp;amount<br>
+from {{ ref('raw_orders') }}<br><br>
+{# Complex example with many fields #}<br>
+select<br>
+&nbsp;&nbsp;{{ dbt_utils.generate_surrogate_key([<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'customer_id', <br>
+&nbsp;&nbsp;&nbsp;&nbsp;'product_id', <br>
+&nbsp;&nbsp;&nbsp;&nbsp;'cast(order_date as string)',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'channel'<br>
+&nbsp;&nbsp;]) }} as composite_key,<br>
+&nbsp;&nbsp;*<br>
+from {{ ref('order_details') }}<br><br>
+{# Use as primary key in model #}<br>
+{{ config(materialized='table') }}<br>
+select<br>
+&nbsp;&nbsp;{{ dbt_utils.generate_surrogate_key(['id', 'version']) }} as pk,<br>
+&nbsp;&nbsp;id,<br>
+&nbsp;&nbsp;version,<br>
+&nbsp;&nbsp;data<br>
+from {{ source('raw', 'versioned_records') }}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Generates: md5(concat(coalesce(cast(customer_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(order_date as string), '_dbt_utils_surrogate_key_null_')))<br><br>
+Example output:<br>
+| order_key                        | customer_id | order_date |
+| a1b2c3d4e5f6789012345678901234ab | 1001        | 2023-01-15 |
+| f9e8d7c6b5a4321098765432109876fe | 1002        | 2023-01-15 |
+<br>
+Creates consistent, deterministic hash keys for composite primary keys
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">safe_add</span></h3>
+                <div class="description">Implements safe addition of nullable fields across databases.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field_list</code> (required): List of fields to sum</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">safe_divide</span></h3>
+                <div class="description">Performs division returning null if denominator is 0.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>numerator</code> (required): Numerator expression</li>
+                        <li><code>denominator</code> (required): Denominator expression</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">safe_subtract</span></h3>
+                <div class="description">Implements safe subtraction of nullable fields across databases.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field_list</code> (required): List of fields to subtract</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">pivot</span></h3>
+                <div class="description">Pivots values from rows to columns with extensive customization options.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column</code> (required): Column to pivot</li>
+                        <li><code>values</code> (required): List of values to turn into columns</li>
+                        <li><code>alias</code> (optional, default=true): Create column aliases</li>
+                        <li><code>agg</code> (optional, default='sum'): Aggregation function</li>
+                        <li><code>cmp</code> (optional, default='='): Comparison operator</li>
+                        <li><code>prefix</code> (optional): Column prefix</li>
+                        <li><code>suffix</code> (optional): Column suffix</li>
+                        <li><code>then_value</code> (optional, default=1): Value when condition is true</li>
+                        <li><code>else_value</code> (optional, default=0): Value when condition is false</li>
+                        <li><code>quote_identifiers</code> (optional, default=true): Quote column aliases</li>
+                        <li><code>distinct</code> (optional, default=false): Use DISTINCT in aggregation</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Basic pivot - count by status #}<br>
+select<br>
+&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;{{ dbt_utils.pivot(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'order_status',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dbt_utils.get_column_values(ref('orders'), 'order_status')<br>
+&nbsp;&nbsp;) }}<br>
+from {{ ref('orders') }}<br>
+group by customer_id<br><br>
+{# Revenue pivot with custom aggregation #}<br>
+select<br>
+&nbsp;&nbsp;product_category,<br>
+&nbsp;&nbsp;{{ dbt_utils.pivot(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'payment_method',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;['credit_card', 'paypal', 'cash'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;agg='sum',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;then_value='amount',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else_value=0,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;prefix='revenue_',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;suffix='_total'<br>
+&nbsp;&nbsp;) }}<br>
+from {{ ref('sales') }}<br>
+group by product_category<br><br>
+{# Advanced: Distinct count with custom comparison #}<br>
+select<br>
+&nbsp;&nbsp;date_trunc('month', order_date) as month,<br>
+&nbsp;&nbsp;{{ dbt_utils.pivot(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;'customer_tier',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;['bronze', 'silver', 'gold', 'platinum'],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;agg='count',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;then_value='distinct customer_id',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;distinct=true<br>
+&nbsp;&nbsp;) }}<br>
+from {{ ref('customer_orders') }}<br>
+group by 1
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Input data (orders):<br>
+| customer_id | order_status |
+| 101         | completed    |
+| 101         | pending      |
+| 101         | completed    |
+| 102         | cancelled    |
+<br>
+Pivot output:<br>
+| customer_id | completed | pending | cancelled |
+| 101         | 2         | 1       | 0         |
+| 102         | 0         | 0       | 1         |
+<br>
+Revenue pivot generates: revenue_credit_card_total, revenue_paypal_total, etc.
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">unpivot</span></h3>
+                <div class="description">Un-pivots a table from wide to long format (similar to pandas melt).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>relation</code> (required): Source relation</li>
+                        <li><code>cast_to</code> (optional, default='varchar'): Data type for values</li>
+                        <li><code>exclude</code> (optional): Columns to exclude from unpivot but keep</li>
+                        <li><code>remove</code> (optional): Columns to remove completely</li>
+                        <li><code>field_name</code> (optional): Column name for field names</li>
+                        <li><code>value_name</code> (optional): Column name for values</li>
+                        <li><code>quote_identifiers</code> (optional, default=false): Quote identifiers</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">width_bucket</span></h3>
+                <div class="description">Creates equi-width histograms (modeled after Snowflake's width_bucket function).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>expr</code> (required): Expression to create histogram for</li>
+                        <li><code>min_value</code> (required): Lower bound</li>
+                        <li><code>max_value</code> (required): Upper bound</li>
+                        <li><code>num_buckets</code> (required): Number of buckets</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="web-macros">
+            <h2><span class="badge badge-web">WEB</span>Web Macros</h2>
+            <p>Macros for extracting and manipulating URL components.</p>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_url_parameter</span></h3>
+                <div class="description">Extracts a URL parameter from a column containing a URL.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field</code> (required): Column containing URL</li>
+                        <li><code>url_parameter</code> (required): Parameter name to extract</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+select<br>
+&nbsp;&nbsp;page_url,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_parameter(field='page_url', url_parameter='utm_source') }} as utm_source,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_parameter(field='page_url', url_parameter='utm_medium') }} as utm_medium,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_parameter(field='page_url', url_parameter='utm_campaign') }} as utm_campaign<br>
+from {{ ref('web_analytics') }}<br><br>
+{# Extract multiple parameters for marketing analysis #}<br>
+select<br>
+&nbsp;&nbsp;session_id,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_parameter(field='referrer_url', url_parameter='q') }} as search_query,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_parameter(field='current_url', url_parameter='product_id') }} as viewed_product,<br>
+&nbsp;&nbsp;timestamp<br>
+from {{ ref('page_views') }}<br>
+where referrer_url is not null
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+From URL: "https://example.com/page?utm_source=google&utm_medium=cpc&utm_campaign=spring_sale"<br><br>
+| page_url                              | utm_source | utm_medium | utm_campaign |
+| https://example.com/page?utm_source=g...| google     | cpc        | spring_sale  |
+| https://example.com/other             | null       | null       | null         |
+<br>
+Extracts URL parameters for marketing attribution and campaign tracking
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_url_host</span></h3>
+                <div class="description">Extracts the hostname from a URL column.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field</code> (required): Column containing URL</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+select<br>
+&nbsp;&nbsp;referrer_url,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_host(field='referrer_url') }} as referrer_domain,<br>
+&nbsp;&nbsp;count(*) as visits<br>
+from {{ ref('web_sessions') }}<br>
+where referrer_url is not null<br>
+group by 1, 2<br>
+order by visits desc<br><br>
+{# Analyze traffic sources by domain #}<br>
+select<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_host(field='page_url') }} as site_domain,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_host(field='referrer_url') }} as referrer_domain,<br>
+&nbsp;&nbsp;count(*) as sessions,<br>
+&nbsp;&nbsp;sum(revenue) as total_revenue<br>
+from {{ ref('session_data') }}<br>
+group by 1, 2
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+| referrer_url                     | referrer_domain | visits |
+| https://google.com/search?q=...  | google.com      | 1,250  |
+| https://facebook.com/post/123    | facebook.com    | 850    |
+| https://twitter.com/user/tweet   | twitter.com     | 420    |
+<br>
+Clean domain extraction for referrer analysis and traffic source reporting
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">get_url_path</span></h3>
+                <div class="description">Extracts the path from a URL column.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>field</code> (required): Column containing URL</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+select<br>
+&nbsp;&nbsp;page_url,<br>
+&nbsp;&nbsp;{{ dbt_utils.get_url_path(field='page_url') }} as page_path,<br>
+&nbsp;&nbsp;count(*) as page_views,<br>
+&nbsp;&nbsp;count(distinct session_id) as unique_sessions<br>
+from {{ ref('page_analytics') }}<br>
+group by 1, 2<br>
+order by page_views desc<br><br>
+{# Content performance analysis #}<br>
+select<br>
+&nbsp;&nbsp;case<br>
+&nbsp;&nbsp;&nbsp;&nbsp;when {{ dbt_utils.get_url_path(field='page_url') }} like '/product/%' then 'Product'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;when {{ dbt_utils.get_url_path(field='page_url') }} like '/blog/%' then 'Blog'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;when {{ dbt_utils.get_url_path(field='page_url') }} = '/' then 'Homepage'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;else 'Other'<br>
+&nbsp;&nbsp;end as page_category,<br>
+&nbsp;&nbsp;avg(time_on_page) as avg_time_on_page,<br>
+&nbsp;&nbsp;count(*) as total_views<br>
+from {{ ref('user_behavior') }}<br>
+group by 1
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+| page_url                         | page_path        | page_views |
+| https://shop.com/products/shoes  | /products/shoes  | 5,420      |
+| https://shop.com/blog/style-tips | /blog/style-tips | 2,180      |
+| https://shop.com/                | /                | 8,950      |
+<br>
+Enables path-based analysis for content performance and user journey mapping
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="jinja-helpers">
+            <h2><span class="badge badge-jinja">JINJA</span>Jinja Helpers</h2>
+            <p>Utility macros for Jinja templating and logging.</p>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">pretty_time</span></h3>
+                <div class="description">Returns a formatted string of the current timestamp.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>format</code> (optional): Date format string</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Basic timestamp in logs #}<br>
+{{ log(dbt_utils.pretty_time() ~ " - Starting data processing", info=true) }}<br><br>
+{# Custom format for model documentation #}<br>
+/*<br>
+  Model refreshed: {{ dbt_utils.pretty_time(format='%Y-%m-%d %H:%M:%S') }}<br>
+  Generated by: {{ this.name }}<br>
+*/<br>
+select * from {{ ref('source_data') }}<br><br>
+{# In macro for conditional processing #}<br>
+{% if target.name == 'prod' %}<br>
+&nbsp;&nbsp;{{ log("Production run started at " ~ dbt_utils.pretty_time(), info=true) }}<br>
+{% endif %}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Default format: "14:50:34"<br>
+Custom format: "2024-01-15 14:50:34"<br><br>
+In logs appears as:<br>
+14:50:34 - Starting data processing<br>
+15:23:18 | Production run started at 15:23:18
+                    </div>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">pretty_log_format</span></h3>
+                <div class="description">Formats input for pretty command line logging.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>message</code> (required): Message to format</li>
+                    </ul>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">log_info</span></h3>
+                <div class="description">Logs a formatted message with timestamp to the command line.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>message</code> (required): Message to log</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="macro-section">
+                <h3><span class="macro-name">slugify</span></h3>
+                <div class="description">Transforms Jinja strings into database-friendly "slugs" by removing special characters and spaces.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>string</code> (required): String to slugify</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+{# Dynamic column creation from data values #}<br>
+{% set payment_methods = dbt_utils.get_column_values(ref('payments'), 'payment_method') %}<br><br>
+select<br>
+&nbsp;&nbsp;customer_id,<br>
+&nbsp;&nbsp;{% for method in payment_methods %}<br>
+&nbsp;&nbsp;sum(case when payment_method = '{{ method }}' then amount end) as {{ dbt_utils.slugify(method) }}_total,<br>
+&nbsp;&nbsp;{% endfor %}<br>
+&nbsp;&nbsp;sum(amount) as total<br>
+from {{ ref('payments') }}<br>
+group by customer_id<br><br>
+{# Clean column names for complex strings #}<br>
+{% set categories = ['High-Value Customer', 'New User!', 'VIP (Premium)', '30-Day Trial'] %}<br><br>
+select<br>
+&nbsp;&nbsp;{% for cat in categories %}<br>
+&nbsp;&nbsp;sum(case when category = '{{ cat }}' then 1 else 0 end) as {{ dbt_utils.slugify(cat) }}_count,<br>
+&nbsp;&nbsp;{% endfor %}<br>
+&nbsp;&nbsp;count(*) as total_users<br>
+from {{ ref('customer_segments') }}
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Input → Output transformations:<br>
+'ca$h money' → 'cah_money'<br>
+'Venmo App' → 'venmo_app'<br>
+'High-Value Customer' → 'high_value_customer'<br>
+'VIP (Premium)' → 'vip_premium'<br>
+'30-Day Trial' → '_30_day_trial'<br><br>
+Generated columns are database-safe identifiers for dynamic SQL generation
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="cross-database-macros">
+            <h2>Cross-database Macros (Deprecated)</h2>
+            <div class="highlight">
+                <strong>Note:</strong> Cross-database macros have been removed from dbt_utils version 1.0 as they are now implemented in dbt Core. 
+                See <a href="https://docs.getdbt.com/reference/dbt-jinja-functions/cross-database-macros">dbt Core documentation</a> for current implementations.
+            </div>
+        </section>
+
+        <section id="summary-table">
+            <h2>Summary Table</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Count</th>
+                        <th>Primary Use Cases</th>
+                        <th>Key Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-test">Generic Tests</span></td>
+                        <td>15</td>
+                        <td>Data quality validation, integrity checks, relationship testing</td>
+                        <td>equality, recency, mutually_exclusive_ranges</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-introspective">Introspective</span></td>
+                        <td>6</td>
+                        <td>Database introspection, metadata extraction, dynamic queries</td>
+                        <td>get_column_values, get_relations_by_pattern</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-sql">SQL Generators</span></td>
+                        <td>15</td>
+                        <td>Complex SQL patterns, data manipulation, cross-database compatibility</td>
+                        <td>pivot, union_relations, generate_surrogate_key</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-web">Web</span></td>
+                        <td>3</td>
+                        <td>URL parsing and manipulation</td>
+                        <td>get_url_parameter, get_url_host</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-jinja">Jinja Helpers</span></td>
+                        <td>4</td>
+                        <td>Template utilities, logging, string manipulation</td>
+                        <td>slugify, pretty_time, log_info</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Key Features of dbt_utils:</h3>
+            <ul>
+                <li><strong>Cross-database Compatibility:</strong> Most macros work across different SQL databases via adapter dispatch</li>
+                <li><strong>Comprehensive Testing:</strong> Extensive generic tests for data quality assurance</li>
+                <li><strong>SQL Code Generation:</strong> Automates complex SQL patterns that are difficult to write manually</li>
+                <li><strong>Database Introspection:</strong> Dynamically queries database metadata for flexible data processing</li>
+                <li><strong>Reusability:</strong> All macros are designed to be reused across different dbt projects</li>
+                <li><strong>Active Development:</strong> Regularly updated with new features and improvements</li>
+            </ul>
+
+            <div class="highlight">
+                <strong>Installation:</strong> Add <code>dbt-labs/dbt_utils</code> to your <code>packages.yml</code> and run <code>dbt deps</code>.<br>
+                <strong>Usage:</strong> Reference macros with <code>dbt_utils.</code> prefix, e.g., <code>{{ dbt_utils.generate_surrogate_key(['col1', 'col2']) }}</code><br>
+                <strong>Documentation:</strong> Each macro supports adapter dispatch for database-specific implementations.
+            </div>
+        </section>
+
+        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
+            <p>This comprehensive summary covers all 43 macros in the dbt_utils package. For the most up-to-date information, 
+            refer to the <a href="https://hub.getdbt.com/dbt-labs/dbt_utils/latest/">official dbt_utils documentation</a>.</p>
+            <p><em>Generated on: {{ current_timestamp() }}</em></p>
+        </footer>
+    </div>
+</body>
+</html>

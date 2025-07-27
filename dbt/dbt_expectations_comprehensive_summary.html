@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt-expectations Package - Comprehensive Test Summary</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #c0392b;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .toc {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc li {
+            margin: 5px 0;
+        }
+        .toc a {
+            color: #c0392b;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+            background: #f8f9fa;
+        }
+        .test-name {
+            font-family: 'Monaco', 'Consolas', monospace;
+            background: #fadbd8;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .usage-example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .usage-example code {
+            color: #ecf0f1;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+        .parameter-list {
+            background: #f1f2f6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .parameter-list ul {
+            margin: 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-right: 5px;
+        }
+        .badge-table { background-color: #e74c3c; }
+        .badge-column { background-color: #27ae60; }
+        .badge-aggregate { background-color: #f39c12; }
+        .badge-multi { background-color: #9b59b6; }
+        .badge-string { background-color: #3498db; }
+        .badge-distributional { background-color: #e67e22; }
+        .description {
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+        .result-example {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            padding: 12px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .result-example h4 {
+            margin: 0 0 8px 0;
+            color: #2e7d32;
+            font-size: 14px;
+        }
+        .sample-data {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .installation-section {
+            background: #d5f4e6;
+            border: 1px solid #4caf50;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt-expectations Package - Comprehensive Test Summary</h1>
+        
+        <div class="highlight">
+            <strong>About dbt-expectations:</strong> This package provides Great Expectations-style data quality tests for dbt projects. 
+            It includes over 50 sophisticated tests covering data validation, integrity checks, statistical analysis, and more.
+            Originally inspired by the Python Great Expectations library, it brings powerful data testing capabilities directly to your dbt transformations.
+        </div>
+
+        <div class="installation-section">
+            <h3>📦 Installation & Setup</h3>
+            <div class="usage-example">
+                <code>
+# packages.yml<br>
+packages:<br>
+&nbsp;&nbsp;- package: metaplane/dbt_expectations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;version: 0.10.9<br><br>
+# dbt_project.yml<br>
+vars:<br>
+&nbsp;&nbsp;'dbt_date:time_zone': 'America/Los_Angeles'<br><br>
+# Install<br>
+dbt deps
+                </code>
+            </div>
+            <strong>Supported Adapters:</strong> Postgres, Snowflake, BigQuery, DuckDB, Spark (experimental), Trino
+        </div>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#table-shape">Table Shape Tests (14 tests)</a></li>
+                <li><a href="#column-values">Column Values & Basic Tests (11 tests)</a></li>
+                <li><a href="#aggregate-functions">Aggregate Functions (16 tests)</a></li>
+                <li><a href="#string-matching">String Matching (10 tests)</a></li>
+                <li><a href="#multi-column">Multi-column Tests (6 tests)</a></li>
+                <li><a href="#distributional">Distributional Tests (3 tests)</a></li>
+                <li><a href="#summary-table">Summary Table & Best Practices</a></li>
+            </ul>
+        </div>
+
+        <section id="table-shape">
+            <h2><span class="badge badge-table">TABLE</span>Table Shape Tests</h2>
+            <p>Tests that validate the structure, schema, and overall shape of tables including row counts, column existence, and metadata validation.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_to_exist</span></h3>
+                <div class="description">Verifies that a specified column exists in the table, with optional position validation.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_name</code> (required): Name of the column to check</li>
+                        <li><code>column_index</code> (optional): Expected 1-based position of the column</li>
+                        <li><code>transform</code> (optional, default='upper'): Case transformation for comparison</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+# Basic column existence check<br>
+models:<br>
+&nbsp;&nbsp;- name: customers<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_to_exist:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: customer_id<br><br>
+# Validate column exists at specific position<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_to_exist:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_index: 3
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Column 'customer_id' exists in table<br>
+❌ Fail: "Column 'phone_number' does not exist"<br>
+❌ Fail: "Column 'email' exists but is at position 5, expected position 3"
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_table_row_count_to_be_between</span></h3>
+                <div class="description">Validates that the total number of rows in a table falls within specified bounds.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum expected row count</li>
+                        <li><code>max_value</code> (optional): Maximum expected row count</li>
+                        <li><code>strictly</code> (optional, default=false): Use strict inequalities</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: daily_sales<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Expect at least 100 orders per day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_table_row_count_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 100<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 10000<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Strict bounds (exclusive)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_table_row_count_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 1000000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strictly: true
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Table has 5,420 rows (within 100-10,000 range)<br>
+❌ Fail: "Table has 45 rows, expected between 100 and 10,000"<br>
+❌ Fail: "Table has exactly 1,000,000 rows, expected strictly less than 1,000,000"
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_table_columns_to_match_set</span></h3>
+                <div class="description">Validates that table columns exactly match a specified set of column names.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_list</code> (required): List of expected column names</li>
+                        <li><code>transform</code> (optional, default='upper'): Case transformation</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: user_profile<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_table_columns_to_match_set:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['user_id', 'email', 'first_name', 'last_name', 'created_at']<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Case-sensitive matching<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_table_columns_to_match_set:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['UserId', 'Email', 'CreatedAt']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;transform: 'none'
+                    </code>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_table_row_count_to_equal_other_table</span></h3>
+                <div class="description">Compares row counts between two tables to ensure they match.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>compare_model</code> (required): Reference to comparison table</li>
+                        <li><code>factor</code> (optional): Multiplication factor for comparison</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_row_values_to_have_recent_data</span></h3>
+                <div class="description">Ensures that data contains recent records within a specified time window.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_name</code> (required): Timestamp column to check</li>
+                        <li><code>datepart</code> (required): Time unit (day, hour, etc.)</li>
+                        <li><code>interval</code> (required): Number of dateparts for recency check</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: user_events<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check for data within last 24 hours<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_recent_data:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: event_timestamp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interval: 24<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Daily freshness check<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_recent_data:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: order_date<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interval: 1
+                    </code>
+                </div>
+            </div>
+        </section>
+
+        <section id="column-values">
+            <h2><span class="badge badge-column">COLUMN</span>Column Values & Basic Tests</h2>
+            <p>Fundamental tests for column data validation including null checks, uniqueness, data types, and basic value constraints.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_between</span></h3>
+                <div class="description">Validates that all values in a numeric column fall within specified minimum and maximum bounds.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum allowed value</li>
+                        <li><code>max_value</code> (optional): Maximum allowed value</li>
+                        <li><code>strictly</code> (optional, default=false): Use strict inequalities</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: products<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: price<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Price must be positive<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;strictly: true<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: discount_percent<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Discount between 0-100%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 100<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: rating<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Only check active products<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 1.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 5.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "status = 'active'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All prices are positive (0.01 to 999.99)<br>
+❌ Fail: Returns rows with invalid values:<br>
+&nbsp;&nbsp;| product_id | price | discount_percent |<br>
+&nbsp;&nbsp;| 12345      | -10.0 | 150              |<br>
+&nbsp;&nbsp;| 67890      | 25.0  | -5               |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_in_set</span></h3>
+                <div class="description">Validates that all column values belong to a predefined set of acceptable values.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>value_set</code> (required): List of acceptable values</li>
+                        <li><code>quote_values</code> (optional, default=true): Quote string values</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: orders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: status<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_in_set:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_set: ['pending', 'processing', 'shipped', 'delivered', 'cancelled']<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: priority<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_in_set:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_set: [1, 2, 3]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;quote_values: false<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: payment_method<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Only check completed orders<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_in_set:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value_set: ['credit_card', 'paypal', 'bank_transfer']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "status = 'completed'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All status values are from allowed set<br>
+❌ Fail: Returns rows with invalid values:<br>
+&nbsp;&nbsp;| order_id | status      | priority |<br>
+&nbsp;&nbsp;| 1001     | "in_review" | 1        |<br>
+&nbsp;&nbsp;| 1002     | "pending"   | 5        |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_unique</span></h3>
+                <div class="description">Ensures all values in a column are unique (no duplicates).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>row_condition</code> (optional): Filter condition for subset testing</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_not_be_null</span></h3>
+                <div class="description">Validates that a column contains no null values.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_of_type</span></h3>
+                <div class="description">Validates that all values in a column conform to a specific data type.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>type_</code> (required): Expected data type</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_increasing</span></h3>
+                <div class="description">Validates that column values are in strictly increasing order.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>sort_column</code> (optional): Column to sort by before checking order</li>
+                        <li><code>strictly</code> (optional, default=true): Enforce strict increasing</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_have_consistent_casing</span></h3>
+                <div class="description">Validates that string values in a column follow consistent casing patterns.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>display_inconsistent_columns</code> (optional, default=false): Show problematic values</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="aggregate-functions">
+            <h2><span class="badge badge-aggregate">AGGREGATE</span>Aggregate Functions</h2>
+            <p>Statistical and aggregate function tests for analyzing column distributions, counts, sums, and other mathematical properties.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_mean_to_be_between</span></h3>
+                <div class="description">Validates that the mean (average) of a numeric column falls within specified bounds.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum expected mean</li>
+                        <li><code>max_value</code> (optional): Maximum expected mean</li>
+                        <li><code>group_by</code> (optional): Group by columns for per-group validation</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                        <li><code>strictly</code> (optional, default=false): Use strict inequalities</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: product_ratings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Overall average rating should be reasonable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_mean_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: rating<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 2.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 4.5<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Per-category average ratings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_mean_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: rating<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 3.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 5.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: [category]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "status = 'published'"<br><br>
+&nbsp;&nbsp;- name: order_amounts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Average order value by customer tier<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_mean_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: order_total<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 50.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: [customer_tier]
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: Overall average rating is 3.8 (within 2.0-4.5 range)<br>
+❌ Fail: Group failures shown per category:<br>
+&nbsp;&nbsp;| category    | avg_rating | within_bounds |<br>
+&nbsp;&nbsp;| Electronics | 4.2        | true          |<br>
+&nbsp;&nbsp;| Books       | 2.1        | false         |<br>
+&nbsp;&nbsp;| Clothing    | 4.8        | true          |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_distinct_count_to_equal</span></h3>
+                <div class="description">Validates that the number of distinct values in a column equals an expected count.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>value</code> (required): Expected distinct count</li>
+                        <li><code>group_by</code> (optional): Group by columns</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: employee_data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Expect exactly 5 departments<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_distinct_count_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: department<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value: 5<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Each department should have exactly 3 job levels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_distinct_count_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: job_level<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value: 3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: [department]<br><br>
+&nbsp;&nbsp;- name: product_catalog<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Each category should have 10-20 distinct brands<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_distinct_count_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: brand<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 20<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: [category]
+                    </code>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_sum_to_be_between</span></h3>
+                <div class="description">Validates that the sum of all values in a numeric column falls within specified bounds.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum expected sum</li>
+                        <li><code>max_value</code> (optional): Maximum expected sum</li>
+                        <li><code>group_by</code> (optional): Group by columns</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_max_to_be_between</span></h3>
+                <div class="description">Validates that the maximum value in a column falls within specified bounds.</div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_min_to_be_between</span></h3>
+                <div class="description">Validates that the minimum value in a column falls within specified bounds.</div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_median_to_be_between</span></h3>
+                <div class="description">Validates that the median value of a numeric column falls within specified bounds.</div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_stdev_to_be_between</span></h3>
+                <div class="description">Validates that the standard deviation of a numeric column falls within specified bounds.</div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_quantile_values_to_be_between</span></h3>
+                <div class="description">Validates that specific quantile values fall within expected ranges.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>quantile</code> (required): Quantile to check (0.0 to 1.0)</li>
+                        <li><code>min_value</code> (optional): Minimum expected quantile value</li>
+                        <li><code>max_value</code> (optional): Maximum expected quantile value</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_most_common_value_to_be_in_set</span></h3>
+                <div class="description">Validates that the most frequently occurring value in a column belongs to an expected set.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>value_set</code> (required): Set of acceptable most common values</li>
+                        <li><code>top_n</code> (optional, default=1): Number of top values to check</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="string-matching">
+            <h2><span class="badge badge-string">STRING</span>String Matching</h2>
+            <p>Pattern matching and string validation tests using regular expressions, SQL LIKE patterns, and length constraints.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_match_regex</span></h3>
+                <div class="description">Validates that all values in a column match a specified regular expression pattern.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>regex</code> (required): Regular expression pattern</li>
+                        <li><code>is_raw</code> (optional, default=false): Treat regex as raw string</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: customers<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Email format validation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_regex:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regex: '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: phone_number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# US phone number format: (XXX) XXX-XXXX<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_regex:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regex: '^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$'<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: postal_code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# US ZIP code (5 digits or ZIP+4)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_regex:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regex: '^[0-9]{5}(-[0-9]{4})?$'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "country = 'US'"<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: product_sku<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# SKU format: 3 letters + 4 digits + 2 letters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_regex:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;regex: '^[A-Z]{3}[0-9]{4}[A-Z]{2}$'
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All emails match valid format<br>
+❌ Fail: Returns rows with invalid patterns:<br>
+&nbsp;&nbsp;| customer_id | email           | phone_number    | postal_code |<br>
+&nbsp;&nbsp;| 1001        | invalid-email   | 555-123-4567    | 12345       |<br>
+&nbsp;&nbsp;| 1002        | user@domain.com | (555) 123-4567  | ABC123      |<br>
+&nbsp;&nbsp;| 1003        | test@site.co    | 5551234567      | 12345-6789  |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_match_like_pattern</span></h3>
+                <div class="description">Validates that column values match a SQL LIKE pattern.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>like_pattern</code> (required): SQL LIKE pattern with % and _ wildcards</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: products<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: product_code<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Product codes start with 'PROD-'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_like_pattern:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like_pattern: 'PROD-%'<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: batch_number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Batch format: B + 4 digits + L + 2 digits<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_like_pattern:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like_pattern: 'B____L__'<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: serial_number<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check only active products<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_match_like_pattern:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;like_pattern: 'SN-%-%'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "status = 'active'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Pattern examples:<br>
+• 'PROD-%' matches: 'PROD-123', 'PROD-ABC456'<br>
+• 'B____L__' matches: 'B1234L01', 'B9876L99'<br>
+• 'SN-%-%' matches: 'SN-123-ABC', 'SN-XYZ-999'<br><br>
+❌ Fail: 'ITEM-123' does not match 'PROD-%' pattern
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_value_lengths_to_be_between</span></h3>
+                <div class="description">Validates that the length of string values falls within specified bounds.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>min_value</code> (optional): Minimum string length</li>
+                        <li><code>max_value</code> (optional): Maximum string length</li>
+                        <li><code>strictly</code> (optional, default=false): Use strict inequalities</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: user_profiles<br>
+&nbsp;&nbsp;&nbsp;&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: username<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Username length 3-20 characters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_value_lengths_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 20<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: password_hash<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Password hash must be exactly 64 characters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_value_lengths_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;value: 64<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- name: description<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Description at least 10 chars, max 500<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_value_lengths_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;min_value: 10<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;max_value: 500
+                    </code>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_match_regex_list</span></h3>
+                <div class="description">Validates that column values match at least one pattern from a list of regular expressions.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>regex_list</code> (required): List of regex patterns</li>
+                        <li><code>match_on</code> (optional, default='any'): 'any' or 'all'</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_not_match_regex</span></h3>
+                <div class="description">Validates that no values in a column match a specified regular expression pattern.</div>
+            </div>
+        </section>
+
+        <section id="multi-column">
+            <h2><span class="badge badge-multi">MULTI</span>Multi-column Tests</h2>
+            <p>Tests that validate relationships and constraints across multiple columns within the same row or across different rows.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_pair_values_A_to_be_greater_than_B</span></h3>
+                <div class="description">Validates that values in column A are greater than corresponding values in column B.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_A</code> (required): First column for comparison</li>
+                        <li><code>column_B</code> (required): Second column for comparison</li>
+                        <li><code>or_equal</code> (optional, default=false): Allow equal values</li>
+                        <li><code>row_condition</code> (optional): Filter condition</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: events<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# End time must be after start time<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_A: end_timestamp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_B: start_timestamp<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Sale price >= cost (allow equal for break-even)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_A: sale_price<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_B: cost_price<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or_equal: true<br><br>
+&nbsp;&nbsp;- name: financial_data<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Max credit limit > current balance for active accounts<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_A: credit_limit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_B: current_balance<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "account_status = 'active'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All end times are after start times<br>
+❌ Fail: Returns rows where A ≤ B:<br>
+&nbsp;&nbsp;| event_id | start_timestamp     | end_timestamp       |<br>
+&nbsp;&nbsp;| 1001     | 2024-01-15 10:00:00 | 2024-01-15 09:30:00 |<br>
+&nbsp;&nbsp;| 1002     | 2024-01-15 14:00:00 | 2024-01-15 14:00:00 |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_pair_values_to_be_equal</span></h3>
+                <div class="description">Validates that values in two columns are equal for each row.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_A</code> (required): First column</li>
+                        <li><code>column_B</code> (required): Second column</li>
+                        <li><code>ignore_row_if</code> (optional): Condition to ignore rows</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: order_calculations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Calculated total should equal manual total<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_pair_values_to_be_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_A: calculated_total<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_B: manual_total<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Backup email should match primary for verified users<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_pair_values_to_be_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_A: primary_email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_B: backup_email<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ignore_row_if: "email_verified = false"
+                    </code>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_compound_columns_to_be_unique</span></h3>
+                <div class="description">Validates that the combination of multiple columns creates unique compound keys.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_list</code> (required): List of columns to check for uniqueness</li>
+                        <li><code>ignore_row_if</code> (optional): Condition to ignore rows</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: user_permissions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Each user-role combination should be unique<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_compound_columns_to_be_unique:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['user_id', 'role_id']<br><br>
+&nbsp;&nbsp;- name: product_pricing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Product-region-date combination should be unique<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_compound_columns_to_be_unique:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['product_id', 'region', 'effective_date']<br><br>
+&nbsp;&nbsp;- name: event_tracking<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# User-session-event_type should be unique for completed events<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_compound_columns_to_be_unique:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['user_id', 'session_id', 'event_type']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ignore_row_if: "event_status != 'completed'"
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+✅ Pass: All compound keys are unique<br>
+❌ Fail: Returns duplicate compound key combinations:<br>
+&nbsp;&nbsp;| user_id | role_id | duplicate_count |<br>
+&nbsp;&nbsp;| 1001    | 5       | 2               |<br>
+&nbsp;&nbsp;| 1002    | 3       | 3               |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_multicolumn_sum_to_equal</span></h3>
+                <div class="description">Validates that the sum of values across multiple columns equals an expected total for each row.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_list</code> (required): List of columns to sum</li>
+                        <li><code>sum_total</code> (required): Expected sum value</li>
+                        <li><code>ignore_row_if</code> (optional): Condition to ignore rows</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: budget_allocation<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Budget percentages should sum to 100%<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_multicolumn_sum_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['marketing_pct', 'sales_pct', 'operations_pct', 'other_pct']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum_total: 100<br><br>
+&nbsp;&nbsp;- name: financial_breakdown<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Revenue streams should equal total revenue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_multicolumn_sum_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['product_revenue', 'service_revenue', 'other_revenue']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum_total: total_revenue<br><br>
+&nbsp;&nbsp;- name: survey_responses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Rating scores should sum to 20 for complete responses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_multicolumn_sum_to_equal:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_list: ['q1_score', 'q2_score', 'q3_score', 'q4_score']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum_total: 20<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ignore_row_if: "response_status != 'complete'"
+                    </code>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_select_column_values_to_be_unique_within_record</span></h3>
+                <div class="description">Validates that specified columns have unique values within each row (no duplicate values across columns in the same row).</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_list</code> (required): List of columns to check for within-row uniqueness</li>
+                        <li><code>ignore_row_if</code> (optional): Condition to ignore rows</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="distributional">
+            <h2><span class="badge badge-distributional">DISTRIBUTIONAL</span>Distributional Tests</h2>
+            <p>Advanced statistical tests for detecting outliers, validating data distributions, and ensuring data completeness over time.</p>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_within_n_stdevs</span></h3>
+                <div class="description">Validates that column values fall within N standard deviations of the mean, useful for outlier detection.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>sigma_threshold</code> (required): Number of standard deviations</li>
+                        <li><code>take_diff</code> (optional, default=false): Calculate differences from previous values</li>
+                        <li><code>group_by</code> (optional): Group by columns for per-group analysis</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: daily_sales<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Detect sales outliers (beyond 3 standard deviations)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: daily_revenue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 3<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check day-over-day changes for anomalies<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: daily_revenue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;take_diff: true<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Per-store outlier detection<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: daily_revenue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 2.5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: ['store_id']<br><br>
+&nbsp;&nbsp;- name: user_behavior<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Detect unusual session durations<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: session_duration_minutes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 3
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Statistical Analysis:<br>
+• Mean daily revenue: $15,000<br>
+• Standard deviation: $3,000<br>
+• 3σ bounds: $6,000 - $24,000<br><br>
+✅ Pass: All values within normal range<br>
+❌ Fail: Outliers detected:<br>
+&nbsp;&nbsp;| date       | daily_revenue | z_score | within_bounds |<br>
+&nbsp;&nbsp;| 2024-01-15 | $35,000      | 6.67    | false         |<br>
+&nbsp;&nbsp;| 2024-01-20 | $2,000       | -4.33   | false         |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_column_values_to_be_within_n_moving_stdevs</span></h3>
+                <div class="description">Validates that column values fall within N standard deviations using a moving window calculation, useful for time series anomaly detection.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>sigma_threshold</code> (required): Number of standard deviations</li>
+                        <li><code>take_diff</code> (optional, default=false): Calculate differences</li>
+                        <li><code>lookback_periods</code> (required): Number of periods for moving window</li>
+                        <li><code>trend_periods</code> (optional): Periods for trend calculation</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: website_traffic<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Detect traffic anomalies using 30-day moving window<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_moving_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: daily_visitors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookback_periods: 30<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Detect unusual day-over-day changes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_moving_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: daily_visitors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;take_diff: true<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookback_periods: 14<br><br>
+&nbsp;&nbsp;- name: stock_prices<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Price anomaly detection with trend adjustment<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_column_values_to_be_within_n_moving_stdevs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: closing_price<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sigma_threshold: 2.5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lookback_periods: 60<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;trend_periods: 20
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Moving Window Analysis (30-day window):<br>
+• Period: 2024-01-15 to 2024-02-14<br>
+• Moving mean: 12,450 visitors<br>
+• Moving std dev: 1,200 visitors<br>
+• 2σ bounds: 10,050 - 14,850 visitors<br><br>
+❌ Fail: Anomalies in recent data:<br>
+&nbsp;&nbsp;| date       | daily_visitors | moving_z_score | within_bounds |<br>
+&nbsp;&nbsp;| 2024-02-15 | 18,500        | 3.38           | false         |
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3><span class="test-name">expect_row_values_to_have_data_for_every_n_datepart</span></h3>
+                <div class="description">Validates that data exists for every N date periods (e.g., every day, every hour) within a specified range, useful for detecting data gaps.</div>
+                <div class="parameter-list">
+                    <strong>Parameters:</strong>
+                    <ul>
+                        <li><code>column_name</code> (required): Date/timestamp column</li>
+                        <li><code>datepart</code> (required): Date part (day, hour, week, etc.)</li>
+                        <li><code>interval</code> (optional, default=1): Interval between expected records</li>
+                        <li><code>group_by</code> (optional): Group by columns</li>
+                    </ul>
+                </div>
+                <div class="usage-example">
+                    <code>
+models:<br>
+&nbsp;&nbsp;- name: daily_metrics<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Ensure data exists for every day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_data_for_every_n_datepart:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: metric_date<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: day<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check for data every week by region<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_data_for_every_n_datepart:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: metric_date<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: week<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: ['region']<br><br>
+&nbsp;&nbsp;- name: hourly_sensors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tests:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Sensor data should be recorded every hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_data_for_every_n_datepart:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: reading_timestamp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;group_by: ['sensor_id']<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Check for data every 4 hours<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- dbt_expectations.expect_row_values_to_have_data_for_every_n_datepart:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;column_name: reading_timestamp<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;datepart: hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;interval: 4
+                    </code>
+                </div>
+                <div class="result-example">
+                    <h4>Expected Results:</h4>
+                    <div class="sample-data">
+Data Completeness Analysis:<br>
+• Expected: 2024-01-01 to 2024-01-31 (31 days)<br>
+• Found: 29 days with data<br><br>
+❌ Fail: Missing data for date periods:<br>
+&nbsp;&nbsp;| missing_date | region     | expected | found |<br>
+&nbsp;&nbsp;| 2024-01-15   | US-East    | true     | false |<br>
+&nbsp;&nbsp;| 2024-01-23   | US-West    | true     | false |<br>
+&nbsp;&nbsp;| 2024-01-28   | EU-Central | true     | false |<br><br>
+✅ Pass: Complete hourly data for all sensors
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="summary-table">
+            <h2>Summary Table & Best Practices</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Test Count</th>
+                        <th>Primary Use Cases</th>
+                        <th>Key Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-table">Table Shape</span></td>
+                        <td>14</td>
+                        <td>Schema validation, row count checks, column existence, data freshness</td>
+                        <td>expect_column_to_exist, expect_table_row_count_to_be_between</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-column">Column Values</span></td>
+                        <td>11</td>
+                        <td>Basic data validation, null checks, uniqueness, data types, ranges</td>
+                        <td>expect_column_values_to_be_between, expect_column_values_to_be_in_set</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-aggregate">Aggregate</span></td>
+                        <td>16</td>
+                        <td>Statistical analysis, distribution validation, summary statistics</td>
+                        <td>expect_column_mean_to_be_between, expect_column_distinct_count_to_equal</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-string">String Matching</span></td>
+                        <td>10</td>
+                        <td>Pattern validation, format checking, length constraints</td>
+                        <td>expect_column_values_to_match_regex, expect_column_value_lengths_to_be_between</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-multi">Multi-column</span></td>
+                        <td>6</td>
+                        <td>Cross-column relationships, compound keys, data integrity</td>
+                        <td>expect_column_pair_values_A_to_be_greater_than_B, expect_compound_columns_to_be_unique</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-distributional">Distributional</span></td>
+                        <td>3</td>
+                        <td>Outlier detection, time series analysis, data completeness</td>
+                        <td>expect_column_values_to_be_within_n_stdevs, expect_row_values_to_have_data_for_every_n_datepart</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>🏆 Best Practices for dbt-expectations:</h3>
+            <ul>
+                <li><strong>Start Simple:</strong> Begin with basic tests (not_null, unique, in_set) before moving to advanced statistical tests</li>
+                <li><strong>Use Row Conditions:</strong> Apply <code>row_condition</code> parameter to test subsets of data for more targeted validation</li>
+                <li><strong>Group-by Testing:</strong> Leverage <code>group_by</code> parameters for per-category or per-segment validation</li>
+                <li><strong>Statistical Monitoring:</strong> Use distributional tests for monitoring data quality over time and detecting anomalies</li>
+                <li><strong>Combine with dbt Core:</strong> Use dbt-expectations alongside standard dbt tests for comprehensive coverage</li>
+                <li><strong>Test Incrementally:</strong> Apply tests to incremental models for ongoing data quality assurance</li>
+                <li><strong>Document Expectations:</strong> Add descriptions to tests explaining business rules and expected behaviors</li>
+                <li><strong>Performance Considerations:</strong> Be mindful of test performance on large datasets, especially statistical tests</li>
+            </ul>
+
+            <h3>🔧 Advanced Configuration Examples:</h3>
+            <div class="usage-example">
+                <code>
+# Complex test with multiple parameters<br>
+- dbt_expectations.expect_column_values_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name: "validate_revenue_by_region"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_name: monthly_revenue<br>
+&nbsp;&nbsp;&nbsp;&nbsp;min_value: 10000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_value: 1000000<br>
+&nbsp;&nbsp;&nbsp;&nbsp;row_condition: "region in ('US', 'EU') and status = 'active'"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;config:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;severity: warn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;error_if: ">5"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn_if: ">0"<br><br>
+# Statistical test with grouping<br>
+- dbt_expectations.expect_column_mean_to_be_between:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name: "monitor_average_session_duration"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;column_name: session_duration_minutes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;min_value: 2.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max_value: 30.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;group_by: ['device_type', 'user_segment']<br>
+&nbsp;&nbsp;&nbsp;&nbsp;config:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;store_failures: true
+                </code>
+            </div>
+
+            <div class="highlight">
+                <strong>Key Advantages:</strong><br>
+                • <strong>Great Expectations Compatibility:</strong> Familiar syntax for teams using Python GE<br>
+                • <strong>Comprehensive Coverage:</strong> 60+ sophisticated tests covering all aspects of data quality<br>
+                • <strong>Statistical Power:</strong> Advanced distributional tests for anomaly detection and monitoring<br>
+                • <strong>Cross-database Support:</strong> Works consistently across different SQL databases<br>
+                • <strong>Performance Optimized:</strong> Efficient SQL generation for large-scale data validation<br>
+                • <strong>Flexible Configuration:</strong> Extensive parameterization for customized testing scenarios
+            </div>
+        </section>
+
+        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666;">
+            <p>This comprehensive summary covers all major tests in the dbt-expectations package (v0.10.9). 
+            For the most up-to-date information, refer to the 
+            <a href="https://github.com/metaplane/dbt-expectations">official dbt-expectations repository</a>.</p>
+            <p><strong>Package Successfully Installed:</strong> metaplane/dbt_expectations v0.10.9</p>
+            <p><em>Document generated: {{ current_timestamp() }}</em></p>
+        </footer>
+    </div>
+</body>
+</html>
