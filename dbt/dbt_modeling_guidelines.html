@@ -98,14 +98,36 @@
                 <li><strong>Materialization:</strong> <code>view</code> (default) or <code>ephemeral</code></li>
                 <li><strong>Naming:</strong> <code>stg_&lt;source&gt;_&lt;object&gt;.sql</code> (e.g., <code>stg_salesforce_accounts.sql</code>)</li>
                 <li><strong>Location:</strong> <code>models/staging/</code></li>
-                <li><strong>Characteristics:</strong>
+            </ul>
+            
+            <h4>🔧 Actions Performed in Staging:</h4>
+            <ul>
+                <li><strong>Data Type Casting:</strong> Convert columns to appropriate data types (strings to dates, numeric conversions)</li>
+                <li><strong>Column Renaming:</strong> Standardize column names to consistent naming conventions</li>
+                <li><strong>Basic Data Cleaning:</strong>
                     <ul>
-                        <li>1:1 relationship with source tables</li>
-                        <li>Light transformations (renaming, casting, basic cleaning)</li>
-                        <li>No business logic</li>
-                        <li>Column renaming to standard conventions</li>
+                        <li>Trim whitespace from string fields</li>
+                        <li>Handle null values consistently</li>
+                        <li>Standardize case (UPPER/lower) for categorical fields</li>
                     </ul>
                 </li>
+                <li><strong>Simple Calculations:</strong>
+                    <ul>
+                        <li>Generate hash keys for deduplication</li>
+                        <li>Add row creation timestamps</li>
+                        <li>Create surrogate keys</li>
+                    </ul>
+                </li>
+                <li><strong>Source Selection:</strong> Select only required columns from source tables</li>
+            </ul>
+            
+            <h4>📋 Staging Characteristics:</h4>
+            <ul>
+                <li>1:1 relationship with source tables</li>
+                <li>Light transformations only</li>
+                <li>No business logic or complex calculations</li>
+                <li>No joins between different source systems</li>
+                <li>Fast execution (views are computed on-demand)</li>
             </ul>
         </div>
 
@@ -116,13 +138,42 @@
                 <li><strong>Materialization:</strong> <code>ephemeral</code> or <code>view</code></li>
                 <li><strong>Naming:</strong> <code>int_&lt;verb&gt;_&lt;object&gt;.sql</code> (e.g., <code>int_orders_pivoted.sql</code>)</li>
                 <li><strong>Location:</strong> <code>models/intermediate/</code></li>
-                <li><strong>Characteristics:</strong>
+            </ul>
+            
+            <h4>⚙️ Actions Performed in Intermediate:</h4>
+            <ul>
+                <li><strong>Complex Joins:</strong> Join multiple staging tables from different source systems</li>
+                <li><strong>Data Reshaping:</strong>
                     <ul>
-                        <li>Breaking down complex transformations</li>
-                        <li>Reusable components</li>
-                        <li>Not exposed to end users</li>
+                        <li>Pivot/unpivot operations</li>
+                        <li>Aggregations that will be reused</li>
+                        <li>Window functions for ranking, running totals</li>
                     </ul>
                 </li>
+                <li><strong>Advanced Calculations:</strong>
+                    <ul>
+                        <li>Complex business rules that span multiple tables</li>
+                        <li>Derived metrics that don't belong in staging</li>
+                        <li>Data enrichment from lookup tables</li>
+                    </ul>
+                </li>
+                <li><strong>Data Quality Improvements:</strong>
+                    <ul>
+                        <li>Deduplication logic</li>
+                        <li>Data validation and cleansing rules</li>
+                        <li>Handling of edge cases and exceptions</li>
+                    </ul>
+                </li>
+                <li><strong>Reusable Components:</strong> Create building blocks for multiple mart models</li>
+            </ul>
+            
+            <h4>🔄 Intermediate Characteristics:</h4>
+            <ul>
+                <li>Breaking down complex transformations into manageable steps</li>
+                <li>Reusable components across multiple marts</li>
+                <li>Not exposed to end users (internal building blocks)</li>
+                <li>Ephemeral materialization saves storage space</li>
+                <li>Focuses on data preparation rather than final business presentation</li>
             </ul>
         </div>
 
@@ -138,14 +189,131 @@
                     </ul>
                 </li>
                 <li><strong>Location:</strong> <code>models/marts/</code></li>
-                <li><strong>Characteristics:</strong>
+            </ul>
+            
+            <h4>🎯 Actions Performed in Marts:</h4>
+            <ul>
+                <li><strong>Final Business Logic:</strong>
                     <ul>
-                        <li>Final business logic</li>
-                        <li>Optimized for query performance</li>
-                        <li>Well documented and tested</li>
+                        <li>Apply business rules and calculations</li>
+                        <li>Implement KPIs and metrics</li>
+                        <li>Create calculated fields for reporting</li>
+                    </ul>
+                </li>
+                <li><strong>Data Modeling:</strong>
+                    <ul>
+                        <li><strong>Fact Tables:</strong> Store transactional data, events, and measurable business processes</li>
+                        <li><strong>Dimension Tables:</strong> Store descriptive attributes for filtering and grouping</li>
+                        <li>Implement star or snowflake schema designs</li>
+                    </ul>
+                </li>
+                <li><strong>Performance Optimization:</strong>
+                    <ul>
+                        <li>Pre-aggregate frequently used metrics</li>
+                        <li>Denormalize for query performance</li>
+                        <li>Add indexes and partitioning hints</li>
+                    </ul>
+                </li>
+                <li><strong>Business-Friendly Formatting:</strong>
+                    <ul>
+                        <li>Human-readable column names and descriptions</li>
+                        <li>Proper formatting of dates, currencies, percentages</li>
+                        <li>Categorical values with meaningful labels</li>
+                    </ul>
+                </li>
+                <li><strong>Data Governance:</strong>
+                    <ul>
+                        <li>Apply data security and privacy rules</li>
+                        <li>Implement data retention policies</li>
+                        <li>Add comprehensive documentation</li>
                     </ul>
                 </li>
             </ul>
+            
+            <h4>📊 Marts Characteristics:</h4>
+            <ul>
+                <li>Final business logic and calculations</li>
+                <li>Optimized for query performance (materialized as tables)</li>
+                <li>Well documented and comprehensively tested</li>
+                <li>Designed for end-user consumption</li>
+                <li>Follows dimensional modeling principles</li>
+                <li>Includes business-friendly naming and descriptions</li>
+            </ul>
+        </div>
+
+        <h2>Why Layer Separation is Critical</h2>
+        
+        <div class="highlight">
+            <h3>🎯 The Philosophy Behind dbt Layers</h3>
+            <p>The layered approach in dbt follows the principle of <strong>separation of concerns</strong>, where each layer has a specific responsibility and builds upon the previous one. This creates a maintainable, testable, and scalable data transformation pipeline.</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Primary Focus</th>
+                    <th>Key Benefits</th>
+                    <th>Reduces Risk Of</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Staging</strong></td>
+                    <td>Data Standardization</td>
+                    <td>
+                        • Consistent data types across sources<br>
+                        • Centralized source connection point<br>
+                        • Easy to debug data issues
+                    </td>
+                    <td>
+                        • Source schema changes breaking downstream models<br>
+                        • Inconsistent data formatting<br>
+                        • Complex debugging
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Intermediate</strong></td>
+                    <td>Complex Logic Modularization</td>
+                    <td>
+                        • Reusable transformation components<br>
+                        • Easier testing of complex logic<br>
+                        • Faster development iteration
+                    </td>
+                    <td>
+                        • Duplicated transformation logic<br>
+                        • Overly complex mart models<br>
+                        • Difficult maintenance
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Marts</strong></td>
+                    <td>Business Value Delivery</td>
+                    <td>
+                        • Optimized for end-user queries<br>
+                        • Business-friendly interface<br>
+                        • Performance-tuned storage
+                    </td>
+                    <td>
+                        • Poor query performance<br>
+                        • Business logic mixed with technical details<br>
+                        • Difficulty in business rule changes
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="layer-box">
+            <h3>🔄 Data Flow and Transformation Logic</h3>
+            <p><strong>Raw Data → Staging → Intermediate → Marts → Analytics</strong></p>
+            
+            <ul>
+                <li><strong>Stage 1 (Staging):</strong> "Clean the data" - Make raw data usable and consistent</li>
+                <li><strong>Stage 2 (Intermediate):</strong> "Transform the data" - Apply complex business logic and join operations</li>
+                <li><strong>Stage 3 (Marts):</strong> "Present the data" - Create business-ready, performant models for analytics</li>
+            </ul>
+            
+            <p><em>Each layer can only reference models from the same layer or layers before it, creating a clear dependency flow.</em></p>
         </div>
 
         <h2>Materialization Strategy</h2>
@@ -191,21 +359,48 @@
 
         <div class="code-block">
 models/
-├── staging/
-│   ├── &lt;source_name&gt;/
-│   │   ├── _&lt;source_name&gt;__sources.yml
-│   │   ├── _&lt;source_name&gt;__models.yml
-│   │   └── stg_&lt;source_name&gt;__&lt;table&gt;.sql
-│   └── ...
-├── intermediate/
-│   └── int_&lt;description&gt;.sql
-├── marts/
-│   ├── core/
-│   │   ├── dim_&lt;object&gt;.sql
-│   │   └── fct_&lt;object&gt;.sql
-│   ├── marketing/
-│   └── finance/
-└── utilities/
+├── staging/                    # Layer 1: Data Standardization
+│   ├── salesforce/
+│   │   ├── _salesforce__sources.yml
+│   │   ├── _salesforce__models.yml
+│   │   ├── stg_salesforce__accounts.sql
+│   │   ├── stg_salesforce__contacts.sql
+│   │   └── stg_salesforce__opportunities.sql
+│   ├── stripe/
+│   │   ├── _stripe__sources.yml
+│   │   ├── _stripe__models.yml
+│   │   ├── stg_stripe__customers.sql
+│   │   ├── stg_stripe__payments.sql
+│   │   └── stg_stripe__subscriptions.sql
+│   └── google_analytics/
+│       ├── _ga__sources.yml
+│       ├── _ga__models.yml
+│       └── stg_ga__sessions.sql
+├── intermediate/               # Layer 2: Complex Transformations
+│   ├── int_customer_segments.sql
+│   ├── int_orders_enriched.sql
+│   ├── int_revenue_calculations.sql
+│   └── int_user_journey_pivoted.sql
+├── marts/                     # Layer 3: Business-Ready Models
+│   ├── core/                  # Company-wide metrics
+│   │   ├── dim_customers.sql
+│   │   ├── dim_products.sql
+│   │   ├── fct_orders.sql
+│   │   └── fct_payments.sql
+│   ├── marketing/             # Marketing-specific models
+│   │   ├── dim_campaigns.sql
+│   │   ├── fct_website_sessions.sql
+│   │   └── mart_marketing_attribution.sql
+│   ├── finance/               # Finance-specific models
+│   │   ├── fct_revenue.sql
+│   │   ├── mart_monthly_recurring_revenue.sql
+│   │   └── mart_customer_lifetime_value.sql
+│   └── product/               # Product analytics models
+│       ├── fct_user_events.sql
+│       └── mart_feature_adoption.sql
+└── utilities/                 # Helper models and macros
+    ├── all_dates.sql
+    └── fiscal_calendar.sql
         </div>
 
         <h2>Current Setup Analysis</h2>
@@ -223,13 +418,15 @@ models/
         <h3>1. Restructure models directory:</h3>
         <div class="code-block">
 models/
-├── staging/
+├── staging/                    # Layer 1: Data Standardization
 │   └── incoming/
-│       ├── _incoming__sources.yml  # Move sources.yml here
-│       └── stg_incoming__customers.sql  # Rename from stg_customers
-├── marts/
-│   └── core/
-└── intermediate/  # For future complex logic
+│       ├── _incoming__sources.yml      # Move sources.yml here
+│       └── stg_incoming__customers.sql # Rename from stg_customers
+├── intermediate/               # Layer 2: Complex Transformations
+│   └── (future complex logic models)
+└── marts/                     # Layer 3: Business-Ready Models
+    └── core/
+        └── (future business models)
         </div>
 
         <h3>2. Update dbt_project.yml:</h3>
@@ -252,6 +449,163 @@ models:
             <li><strong>Facts:</strong> <code>fct_&lt;business_process&gt;</code></li>
             <li><strong>Dimensions:</strong> <code>dim_&lt;object&gt;</code></li>
         </ul>
+
+        <h2>Practical Examples of Layer Transformations</h2>
+
+        <div class="layer-box">
+            <h3>📝 Staging Layer Examples</h3>
+            
+            <h4>Example 1: Salesforce Accounts Staging</h4>
+            <div class="code-block">
+-- stg_salesforce__accounts.sql
+select
+    id as account_id,
+    name as account_name,
+    type as account_type,
+    industry,
+    cast(annual_revenue as decimal(15,2)) as annual_revenue,
+    cast(created_date as timestamp) as created_at,
+    cast(last_modified_date as timestamp) as updated_at,
+    upper(trim(billing_country)) as billing_country,
+    case 
+        when is_deleted = 'true' then true 
+        else false 
+    end as is_deleted,
+    md5(concat(id, last_modified_date)) as row_hash
+from {{ source('salesforce', 'accounts') }}
+            </div>
+            
+            <h4>Example 2: Stripe Payments Staging</h4>
+            <div class="code-block">
+-- stg_stripe__payments.sql  
+select
+    id as payment_id,
+    customer as customer_id,
+    cast(amount as decimal(10,2)) / 100 as amount_usd,
+    currency,
+    status,
+    cast(created as timestamp) as created_at,
+    payment_method_types[0] as payment_method,
+    lower(trim(description)) as description
+from {{ source('stripe', 'charges') }}
+where status != 'failed'
+            </div>
+        </div>
+
+        <div class="layer-box">
+            <h3>⚙️ Intermediate Layer Examples</h3>
+            
+            <h4>Example 1: Customer Segmentation Logic</h4>
+            <div class="code-block">
+-- int_customer_segments.sql
+with customer_metrics as (
+    select 
+        customer_id,
+        sum(amount_usd) as total_revenue,
+        count(*) as order_count,
+        max(created_at) as last_order_date,
+        min(created_at) as first_order_date
+    from {{ ref('stg_stripe__payments') }}
+    group by customer_id
+),
+
+customer_segments as (
+    select
+        *,
+        case 
+            when total_revenue >= 10000 then 'Enterprise'
+            when total_revenue >= 1000 then 'Growth'  
+            when total_revenue >= 100 then 'Standard'
+            else 'Basic'
+        end as revenue_segment,
+        case
+            when date_diff(current_date, last_order_date, day) <= 30 then 'Active'
+            when date_diff(current_date, last_order_date, day) <= 90 then 'At Risk' 
+            else 'Churned'
+        end as activity_segment
+    from customer_metrics
+)
+
+select * from customer_segments
+            </div>
+            
+            <h4>Example 2: Orders with Enriched Data</h4>
+            <div class="code-block">
+-- int_orders_enriched.sql
+select 
+    p.payment_id,
+    p.customer_id,
+    p.amount_usd,
+    p.created_at as order_date,
+    a.account_name,
+    a.account_type,
+    a.industry,
+    a.billing_country,
+    cs.revenue_segment,
+    cs.activity_segment,
+    row_number() over (
+        partition by p.customer_id 
+        order by p.created_at
+    ) as customer_order_sequence
+from {{ ref('stg_stripe__payments') }} p
+left join {{ ref('stg_salesforce__accounts') }} a 
+    on p.customer_id = a.account_id
+left join {{ ref('int_customer_segments') }} cs
+    on p.customer_id = cs.customer_id
+            </div>
+        </div>
+
+        <div class="layer-box">
+            <h3>🎯 Marts Layer Examples</h3>
+            
+            <h4>Example 1: Customer Dimension Table</h4>
+            <div class="code-block">
+-- dim_customers.sql
+select
+    customer_id,
+    account_name as customer_name,
+    account_type as customer_type,
+    industry,
+    billing_country as country,
+    revenue_segment,
+    activity_segment,
+    first_order_date,
+    last_order_date,
+    total_revenue,
+    order_count,
+    round(total_revenue / order_count, 2) as avg_order_value,
+    case 
+        when activity_segment = 'Active' then 'Healthy'
+        when activity_segment = 'At Risk' and revenue_segment in ('Enterprise', 'Growth') then 'High Priority'
+        when activity_segment = 'Churned' then 'Lost'
+        else 'Monitor'
+    end as customer_health_status,
+    current_timestamp() as last_updated_at
+from {{ ref('int_customer_segments') }} cs
+left join {{ ref('stg_salesforce__accounts') }} a
+    on cs.customer_id = a.account_id
+            </div>
+            
+            <h4>Example 2: Monthly Revenue Fact Table</h4>
+            <div class="code-block">
+-- fct_monthly_revenue.sql
+select
+    date_trunc('month', order_date) as revenue_month,
+    billing_country as country,
+    industry,
+    revenue_segment,
+    count(distinct customer_id) as active_customers,
+    count(*) as total_orders,
+    sum(amount_usd) as total_revenue,
+    round(avg(amount_usd), 2) as avg_order_value,
+    sum(case when customer_order_sequence = 1 then amount_usd else 0 end) as new_customer_revenue,
+    sum(case when customer_order_sequence > 1 then amount_usd else 0 end) as repeat_customer_revenue
+from {{ ref('int_orders_enriched') }}
+where order_date >= '2023-01-01'
+group by 1, 2, 3, 4
+order by 1 desc, 5 desc
+            </div>
+        </div>
 
         <h2>Additional Best Practices</h2>
 
