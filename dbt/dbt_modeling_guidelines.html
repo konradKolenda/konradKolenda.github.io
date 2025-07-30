@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Modeling Guidelines and Best Practices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #2980b9;
+            margin-top: 25px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-left: 4px solid #ffc107;
+            margin: 15px 0;
+        }
+        ul, ol {
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        .layer-box {
+            background-color: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt Modeling Guidelines and Best Practices</h1>
+        
+        <div class="highlight">
+            <strong>Note:</strong> Based on instructions.txt and current project analysis, here are the preferred dbt modeling setup and best practices.
+        </div>
+
+        <h2>dbt Model Layers & Structure</h2>
+
+        <div class="layer-box">
+            <h3>1. Staging Layer (<code>stg_</code>)</h3>
+            <ul>
+                <li><strong>Purpose:</strong> Clean and standardize raw source data</li>
+                <li><strong>Materialization:</strong> <code>view</code> (default) or <code>ephemeral</code></li>
+                <li><strong>Naming:</strong> <code>stg_&lt;source&gt;_&lt;object&gt;.sql</code> (e.g., <code>stg_salesforce_accounts.sql</code>)</li>
+                <li><strong>Location:</strong> <code>models/staging/</code></li>
+                <li><strong>Characteristics:</strong>
+                    <ul>
+                        <li>1:1 relationship with source tables</li>
+                        <li>Light transformations (renaming, casting, basic cleaning)</li>
+                        <li>No business logic</li>
+                        <li>Column renaming to standard conventions</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="layer-box">
+            <h3>2. Intermediate Layer (<code>int_</code>)</h3>
+            <ul>
+                <li><strong>Purpose:</strong> Complex logic that doesn't fit staging or marts</li>
+                <li><strong>Materialization:</strong> <code>ephemeral</code> or <code>view</code></li>
+                <li><strong>Naming:</strong> <code>int_&lt;verb&gt;_&lt;object&gt;.sql</code> (e.g., <code>int_orders_pivoted.sql</code>)</li>
+                <li><strong>Location:</strong> <code>models/intermediate/</code></li>
+                <li><strong>Characteristics:</strong>
+                    <ul>
+                        <li>Breaking down complex transformations</li>
+                        <li>Reusable components</li>
+                        <li>Not exposed to end users</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="layer-box">
+            <h3>3. Marts Layer</h3>
+            <ul>
+                <li><strong>Purpose:</strong> Business-ready models for analytics</li>
+                <li><strong>Materialization:</strong> <code>table</code> or <code>incremental</code></li>
+                <li><strong>Naming:</strong>
+                    <ul>
+                        <li>Fact tables: <code>fct_&lt;object&gt;.sql</code> (e.g., <code>fct_orders.sql</code>)</li>
+                        <li>Dimension tables: <code>dim_&lt;object&gt;.sql</code> (e.g., <code>dim_customers.sql</code>)</li>
+                    </ul>
+                </li>
+                <li><strong>Location:</strong> <code>models/marts/</code></li>
+                <li><strong>Characteristics:</strong>
+                    <ul>
+                        <li>Final business logic</li>
+                        <li>Optimized for query performance</li>
+                        <li>Well documented and tested</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <h2>Materialization Strategy</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Layer</th>
+                    <th>Default Materialization</th>
+                    <th>Alternative</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Sources</strong></td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>Raw data</td>
+                </tr>
+                <tr>
+                    <td><strong>Staging</strong></td>
+                    <td><code>view</code></td>
+                    <td><code>ephemeral</code></td>
+                    <td>Lightweight, 1:1 with sources</td>
+                </tr>
+                <tr>
+                    <td><strong>Intermediate</strong></td>
+                    <td><code>ephemeral</code></td>
+                    <td><code>view</code></td>
+                    <td>Temporary, reusable logic</td>
+                </tr>
+                <tr>
+                    <td><strong>Marts</strong></td>
+                    <td><code>table</code></td>
+                    <td><code>incremental</code></td>
+                    <td>Performance for end users</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Directory Structure (Recommended)</h2>
+
+        <div class="code-block">
+models/
+├── staging/
+│   ├── &lt;source_name&gt;/
+│   │   ├── _&lt;source_name&gt;__sources.yml
+│   │   ├── _&lt;source_name&gt;__models.yml
+│   │   └── stg_&lt;source_name&gt;__&lt;table&gt;.sql
+│   └── ...
+├── intermediate/
+│   └── int_&lt;description&gt;.sql
+├── marts/
+│   ├── core/
+│   │   ├── dim_&lt;object&gt;.sql
+│   │   └── fct_&lt;object&gt;.sql
+│   ├── marketing/
+│   └── finance/
+└── utilities/
+        </div>
+
+        <h2>Current Setup Analysis</h2>
+
+        <p>Your current project shows:</p>
+        <ul>
+            <li><strong>Models directory:</strong> Basic structure with <code>example/</code> and <code>testmodels/</code></li>
+            <li><strong>Current config:</strong> <code>testmodels</code> set to <code>table</code> materialization</li>
+            <li><strong>Sources:</strong> Single source <code>incoming.customers</code> defined</li>
+            <li><strong>Staging model:</strong> <code>stg_customers.sql</code> with hash column generation</li>
+        </ul>
+
+        <h2>Recommended Next Steps</h2>
+
+        <h3>1. Restructure models directory:</h3>
+        <div class="code-block">
+models/
+├── staging/
+│   └── incoming/
+│       ├── _incoming__sources.yml  # Move sources.yml here
+│       └── stg_incoming__customers.sql  # Rename from stg_customers
+├── marts/
+│   └── core/
+└── intermediate/  # For future complex logic
+        </div>
+
+        <h3>2. Update dbt_project.yml:</h3>
+        <div class="code-block">
+models:
+  my_dbt_project:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: ephemeral
+    marts:
+      +materialized: table
+        </div>
+
+        <h3>3. Naming conventions:</h3>
+        <ul>
+            <li><strong>Sources:</strong> <code>source('system', 'table')</code></li>
+            <li><strong>Staging:</strong> <code>stg_&lt;source&gt;__&lt;table&gt;</code></li>
+            <li><strong>Intermediate:</strong> <code>int_&lt;description&gt;</code></li>
+            <li><strong>Facts:</strong> <code>fct_&lt;business_process&gt;</code></li>
+            <li><strong>Dimensions:</strong> <code>dim_&lt;object&gt;</code></li>
+        </ul>
+
+        <h2>Additional Best Practices</h2>
+
+        <h3>Testing Strategy</h3>
+        <ul>
+            <li><strong>Staging:</strong> Basic tests (not_null, unique for primary keys)</li>
+            <li><strong>Marts:</strong> Comprehensive testing (relationships, accepted_values, custom tests)</li>
+        </ul>
+
+        <h3>Documentation</h3>
+        <ul>
+            <li>All models should have descriptions</li>
+            <li>Important columns should be documented</li>
+            <li>Business logic should be explained</li>
+        </ul>
+
+        <h3>Performance Considerations</h3>
+        <ul>
+            <li>Use incremental models for large, append-only datasets</li>
+            <li>Consider partitioning and clustering for very large tables</li>
+            <li>Monitor query performance and optimize accordingly</li>
+        </ul>
+
+        <h3>Code Organization</h3>
+        <ul>
+            <li>One model per file</li>
+            <li>Use consistent formatting and style</li>
+            <li>Leverage macros for reusable logic</li>
+            <li>Keep SQL readable and well-commented</li>
+        </ul>
+    </div>
+</body>
+</html>
