@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Macros Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        h1 {
+            color: #ff6939;
+            text-align: center;
+            border-bottom: 3px solid #ff6939;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-left: 4px solid #ff6939;
+            padding-left: 15px;
+            margin-top: 40px;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #ff6939;
+        }
+        
+        .toc ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            color: #ff6939;
+        }
+        
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .code-block .keyword {
+            color: #ed8936;
+        }
+        
+        .code-block .string {
+            color: #68d391;
+        }
+        
+        .code-block .comment {
+            color: #a0aec0;
+            font-style: italic;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .tip {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .tip strong {
+            color: #0c5460;
+        }
+        
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .best-practice {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .best-practice strong {
+            color: #155724;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 2px solid #ff6939;
+            text-align: center;
+        }
+        
+        .footer a {
+            color: #ff6939;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .syntax-highlight .macro { color: #ed8936; }
+        .syntax-highlight .function { color: #4299e1; }
+        .syntax-highlight .string { color: #68d391; }
+        .syntax-highlight .variable { color: #f687b3; }
+    </style>
+</head>
+<body>
+    <h1>dbt Macros Comprehensive Guide</h1>
+    
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#what-are-macros">What are dbt Macros?</a></li>
+            <li><a href="#when-to-use">When to Use Macros</a></li>
+            <li><a href="#creating-macros">Creating Your First Macro</a></li>
+            <li><a href="#macro-syntax">Macro Syntax and Parameters</a></li>
+            <li><a href="#types-of-macros">Types of Macros</a></li>
+            <li><a href="#jinja-functions">Jinja Functions in Macros</a></li>
+            <li><a href="#best-practices">Best Practices</a></li>
+            <li><a href="#advanced-features">Advanced Features</a></li>
+            <li><a href="#common-patterns">Common Macro Patterns</a></li>
+            <li><a href="#debugging">Debugging Macros</a></li>
+            <li><a href="#examples">Practical Examples</a></li>
+            <li><a href="#resources">Official Documentation Links</a></li>
+        </ul>
+    </div>
+
+    <section id="what-are-macros">
+        <h2>What are dbt Macros?</h2>
+        <p>Macros in dbt are reusable pieces of code that function like "functions" in other programming languages. They use Jinja templating to generate dynamic SQL and help you avoid code repetition across your dbt project.</p>
+        
+        <div class="example">
+            <h4>Key Characteristics:</h4>
+            <ul>
+                <li>Written in SQL files using Jinja syntax</li>
+                <li>Stored in the <code>macros/</code> directory</li>
+                <li>Can accept parameters and return SQL code</li>
+                <li>Available globally across your dbt project</li>
+                <li>Can be shared across projects via packages</li>
+            </ul>
+        </div>
+
+        <p>Think of macros as SQL templates that can be customized with parameters and reused wherever needed in your models, tests, and other macros.</p>
+    </section>
+
+    <section id="when-to-use">
+        <h2>When to Use Macros</h2>
+        
+        <h3>Common Use Cases:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Use Case</th>
+                    <th>Description</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Code Reuse</td>
+                    <td>Eliminate repetitive SQL patterns</td>
+                    <td>Date formatting, string cleaning</td>
+                </tr>
+                <tr>
+                    <td>Dynamic SQL</td>
+                    <td>Generate SQL based on conditions</td>
+                    <td>Conditional column selection</td>
+                </tr>
+                <tr>
+                    <td>Cross-database Logic</td>
+                    <td>Abstract database-specific syntax</td>
+                    <td>Date functions across warehouses</td>
+                </tr>
+                <tr>
+                    <td>Complex Transformations</td>
+                    <td>Encapsulate business logic</td>
+                    <td>Currency conversion, tax calculations</td>
+                </tr>
+                <tr>
+                    <td>Testing Utilities</td>
+                    <td>Create reusable test logic</td>
+                    <td>Custom data quality checks</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Before creating a macro, check if a similar function exists in dbt-utils or other community packages to avoid reinventing the wheel.
+        </div>
+    </section>
+
+    <section id="creating-macros">
+        <h2>Creating Your First Macro</h2>
+        
+        <h3>Basic Macro Structure:</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">macro_name</span>(<span class="variable">parameter1, parameter2=default_value</span>) <span class="keyword">%}</span>
+    <span class="comment">-- SQL code goes here</span>
+    <span class="keyword">{{</span> <span class="variable">parameter1</span> <span class="keyword">}}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Simple Example:</h3>
+        <div class="code-block">
+<span class="comment">-- macros/cents_to_dollars.sql</span>
+<span class="keyword">{% macro</span> <span class="function">cents_to_dollars</span>(<span class="variable">column_name, scale=2</span>) <span class="keyword">%}</span>
+    (<span class="keyword">{{</span> <span class="variable">column_name</span> <span class="keyword">}}</span> / 100)::<span class="string">numeric</span>(16, <span class="keyword">{{</span> <span class="variable">scale</span> <span class="keyword">}}</span>)
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Using the Macro in a Model:</h3>
+        <div class="code-block">
+<span class="comment">-- models/orders.sql</span>
+<span class="keyword">select</span>
+    order_id,
+    <span class="keyword">{{</span> <span class="function">cents_to_dollars</span>(<span class="string">'price_in_cents'</span>) <span class="keyword">}}</span> <span class="keyword">as</span> price_in_dollars,
+    <span class="keyword">{{</span> <span class="function">cents_to_dollars</span>(<span class="string">'tax_in_cents'</span>, <span class="variable">4</span>) <span class="keyword">}}</span> <span class="keyword">as</span> tax_in_dollars
+<span class="keyword">from</span> <span class="keyword">{{</span> <span class="function">source</span>(<span class="string">'raw'</span>, <span class="string">'orders'</span>) <span class="keyword">}}</span>
+        </div>
+    </section>
+
+    <section id="macro-syntax">
+        <h2>Macro Syntax and Parameters</h2>
+        
+        <h3>Parameter Types:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Syntax</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Required</td>
+                    <td><code>parameter_name</code></td>
+                    <td>Must be provided when calling the macro</td>
+                </tr>
+                <tr>
+                    <td>Optional</td>
+                    <td><code>parameter_name=default</code></td>
+                    <td>Has a default value if not provided</td>
+                </tr>
+                <tr>
+                    <td>Keyword Args</td>
+                    <td><code>**kwargs</code></td>
+                    <td>Accepts additional named parameters</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Advanced Parameter Example:</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">generate_alias_name</span>(<span class="variable">custom_alias_name=none, node=none</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- if</span> <span class="variable">custom_alias_name</span> <span class="keyword">is none -%}</span>
+        <span class="keyword">{{</span> <span class="variable">node.name</span> <span class="keyword">}}</span>
+    <span class="keyword">{%- else -%}</span>
+        <span class="keyword">{{</span> <span class="variable">custom_alias_name</span> | <span class="function">trim</span> <span class="keyword">}}</span>
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Important:</strong> When passing string literals to macros, always use quotes: <code>{{ my_macro('string_value') }}</code>
+        </div>
+    </section>
+
+    <section id="types-of-macros">
+        <h2>Types of Macros</h2>
+        
+        <h3>1. Utility Macros</h3>
+        <p>Simple transformations and calculations:</p>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">safe_divide</span>(<span class="variable">numerator, denominator</span>) <span class="keyword">%}</span>
+    <span class="keyword">case</span>
+        <span class="keyword">when</span> <span class="keyword">{{</span> <span class="variable">denominator</span> <span class="keyword">}}</span> = 0 <span class="keyword">then</span> <span class="string">null</span>
+        <span class="keyword">else</span> <span class="keyword">{{</span> <span class="variable">numerator</span> <span class="keyword">}}</span> / <span class="keyword">{{</span> <span class="variable">denominator</span> <span class="keyword">}}</span>
+    <span class="keyword">end</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>2. SQL Generation Macros</h3>
+        <p>Generate complex SQL structures:</p>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">pivot</span>(<span class="variable">column, values, agg='sum', quote_identifiers=true</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- for</span> <span class="variable">value</span> <span class="keyword">in</span> <span class="variable">values</span> <span class="keyword">%}</span>
+        <span class="keyword">{{</span> <span class="variable">agg</span> <span class="keyword">}}</span>(<span class="keyword">case when</span> <span class="keyword">{{</span> <span class="variable">column</span> <span class="keyword">}}</span> = '<span class="keyword">{{</span> <span class="variable">value</span> <span class="keyword">}}</span>' <span class="keyword">then</span> 1 <span class="keyword">else</span> 0 <span class="keyword">end</span>) 
+        <span class="keyword">as</span> <span class="keyword">{{</span> <span class="variable">value</span> | <span class="function">replace</span>(<span class="string">' '</span>, <span class="string">'_'</span>) <span class="keyword">}}</span>
+        <span class="keyword">{%- if not</span> <span class="function">loop.last</span> <span class="keyword">%}</span>,<span class="keyword">{% endif -%}</span>
+    <span class="keyword">{%- endfor %}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>3. Test Macros</h3>
+        <p>Create custom data quality tests:</p>
+        <div class="code-block">
+<span class="keyword">{% test</span> <span class="function">not_null_proportion</span>(<span class="variable">model, column_name, at_least=0.95</span>) <span class="keyword">%}</span>
+    <span class="keyword">select</span> *
+    <span class="keyword">from</span> (
+        <span class="keyword">select</span>
+            <span class="function">avg</span>(<span class="keyword">case when</span> <span class="keyword">{{</span> <span class="variable">column_name</span> <span class="keyword">}}</span> <span class="keyword">is not null then</span> 1.0 <span class="keyword">else</span> 0.0 <span class="keyword">end</span>) <span class="keyword">as</span> not_null_proportion
+        <span class="keyword">from</span> <span class="keyword">{{</span> <span class="variable">model</span> <span class="keyword">}}</span>
+    ) validation
+    <span class="keyword">where</span> not_null_proportion < <span class="keyword">{{</span> <span class="variable">at_least</span> <span class="keyword">}}</span>
+<span class="keyword">{% endtest %}</span>
+        </div>
+    </section>
+
+    <section id="jinja-functions">
+        <h2>Jinja Functions in Macros</h2>
+        
+        <h3>Essential dbt Jinja Functions:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Function</th>
+                    <th>Purpose</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>ref()</code></td>
+                    <td>Reference other models</td>
+                    <td><code>{{ ref('my_model') }}</code></td>
+                </tr>
+                <tr>
+                    <td><code>source()</code></td>
+                    <td>Reference source tables</td>
+                    <td><code>{{ source('raw', 'users') }}</code></td>
+                </tr>
+                <tr>
+                    <td><code>var()</code></td>
+                    <td>Access variables</td>
+                    <td><code>{{ var('start_date') }}</code></td>
+                </tr>
+                <tr>
+                    <td><code>env_var()</code></td>
+                    <td>Access environment variables</td>
+                    <td><code>{{ env_var('DBT_ENV') }}</code></td>
+                </tr>
+                <tr>
+                    <td><code>run_query()</code></td>
+                    <td>Execute queries at compile time</td>
+                    <td><code>{{ run_query('select 1') }}</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Macro with Context Variables:</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">audit_columns</span>() <span class="keyword">%}</span>
+    <span class="string">'{{ target.name }}'</span> <span class="keyword">as</span> target_name,
+    <span class="string">'{{ model.name }}'</span> <span class="keyword">as</span> model_name,
+    <span class="function">current_timestamp</span>() <span class="keyword">as</span> dbt_updated_at,
+    <span class="string">'{{ invocation_id }}'</span> <span class="keyword">as</span> dbt_invocation_id
+<span class="keyword">{% endmacro %}</span>
+        </div>
+    </section>
+
+    <section id="best-practices">
+        <h2>Best Practices</h2>
+        
+        <div class="best-practice">
+            <h3>🎯 Design Principles:</h3>
+            <ul>
+                <li><strong>Favor readability over extreme abstraction</strong> - Don't make macros too complex</li>
+                <li><strong>Single responsibility</strong> - Each macro should do one thing well</li>
+                <li><strong>Consistent naming</strong> - Use clear, descriptive names</li>
+                <li><strong>Document your macros</strong> - Include descriptions and examples</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <h3>📝 Code Organization:</h3>
+            <ul>
+                <li>Store macros in logical subdirectories: <code>macros/utils/</code>, <code>macros/tests/</code></li>
+                <li>Use meaningful file names that describe the macro's purpose</li>
+                <li>Group related macros in the same file</li>
+                <li>Keep macro files focused and modular</li>
+            </ul>
+        </div>
+
+        <h3>Macro Documentation Example:</h3>
+        <div class="code-block">
+<span class="comment">-- macros/utils/schema.yml</span>
+<span class="keyword">version</span>: 2
+<span class="keyword">macros</span>:
+  - <span class="keyword">name</span>: cents_to_dollars
+    <span class="keyword">description</span>: <span class="string">"Converts a column from cents to dollars with specified precision"</span>
+    <span class="keyword">arguments</span>:
+      - <span class="keyword">name</span>: column_name
+        <span class="keyword">type</span>: column
+        <span class="keyword">description</span>: <span class="string">"The column containing cent values to convert"</span>
+      - <span class="keyword">name</span>: scale
+        <span class="keyword">type</span>: int
+        <span class="keyword">description</span>: <span class="string">"Number of decimal places (default: 2)"</span>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Performance Considerations:</strong>
+            <ul>
+                <li>Avoid using <code>run_query()</code> in macros that are called frequently</li>
+                <li>Be careful with loops that generate large amounts of SQL</li>
+                <li>Test compiled SQL output to ensure efficiency</li>
+            </ul>
+        </div>
+    </section>
+
+    <section id="advanced-features">
+        <h2>Advanced Features</h2>
+        
+        <h3>Macro Overriding</h3>
+        <p>Override built-in or package macros by creating a macro with the same name:</p>
+        <div class="code-block">
+<span class="comment">-- Override the generate_schema_name macro</span>
+<span class="keyword">{% macro</span> <span class="function">generate_schema_name</span>(<span class="variable">custom_schema_name, node</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- set</span> <span class="variable">default_schema</span> = <span class="variable">target.schema</span> <span class="keyword">-%}</span>
+    <span class="keyword">{%- if</span> <span class="variable">custom_schema_name</span> <span class="keyword">is none -%}</span>
+        <span class="keyword">{{</span> <span class="variable">default_schema</span> <span class="keyword">}}</span>
+    <span class="keyword">{%- else -%}</span>
+        <span class="keyword">{{</span> <span class="variable">default_schema</span> <span class="keyword">}}</span>_<span class="keyword">{{</span> <span class="variable">custom_schema_name</span> | <span class="function">trim</span> <span class="keyword">}}</span>
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Conditional Logic in Macros</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">date_trunc_by_period</span>(<span class="variable">date_column, period</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- if</span> <span class="variable">period</span> == <span class="string">'day'</span> <span class="keyword">-%}</span>
+        <span class="function">date_trunc</span>(<span class="string">'day'</span>, <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span>)
+    <span class="keyword">{%- elif</span> <span class="variable">period</span> == <span class="string">'week'</span> <span class="keyword">-%}</span>
+        <span class="function">date_trunc</span>(<span class="string">'week'</span>, <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span>)
+    <span class="keyword">{%- elif</span> <span class="variable">period</span> == <span class="string">'month'</span> <span class="keyword">-%}</span>
+        <span class="function">date_trunc</span>(<span class="string">'month'</span>, <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span>)
+    <span class="keyword">{%- else -%}</span>
+        <span class="keyword">{{</span> <span class="string">'Unsupported period: '</span> ~ <span class="variable">period</span> <span class="keyword">}}</span>
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Cross-Database Compatibility</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">current_timestamp_tz</span>() <span class="keyword">%}</span>
+    <span class="keyword">{%- if</span> <span class="variable">target.type</span> == <span class="string">'snowflake'</span> <span class="keyword">-%}</span>
+        <span class="function">current_timestamp</span>()
+    <span class="keyword">{%- elif</span> <span class="variable">target.type</span> == <span class="string">'bigquery'</span> <span class="keyword">-%}</span>
+        <span class="function">current_timestamp</span>()
+    <span class="keyword">{%- elif</span> <span class="variable">target.type</span> == <span class="string">'postgres'</span> <span class="keyword">-%}</span>
+        <span class="function">now</span>()
+    <span class="keyword">{%- else -%}</span>
+        <span class="function">current_timestamp</span>()
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+    </section>
+
+    <section id="common-patterns">
+        <h2>Common Macro Patterns</h2>
+        
+        <h3>1. Column List Generation</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">get_column_values</span>(<span class="variable">table, column</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- call</span> <span class="function">statement</span>(<span class="string">'get_values'</span>, <span class="variable">fetch_result=true</span>) <span class="keyword">-%}</span>
+        <span class="keyword">select distinct</span> <span class="keyword">{{</span> <span class="variable">column</span> <span class="keyword">}}</span>
+        <span class="keyword">from</span> <span class="keyword">{{</span> <span class="variable">table</span> <span class="keyword">}}</span>
+        <span class="keyword">where</span> <span class="keyword">{{</span> <span class="variable">column</span> <span class="keyword">}}</span> <span class="keyword">is not null</span>
+    <span class="keyword">{%- endcall -%}</span>
+    
+    <span class="keyword">{%- set</span> <span class="variable">value_list</span> = <span class="function">load_result</span>(<span class="string">'get_values'</span>) <span class="keyword">-%}</span>
+    <span class="keyword">{%- if</span> <span class="function">execute</span> <span class="keyword">-%}</span>
+        <span class="keyword">{%-</span> <span class="keyword">set</span> <span class="variable">values</span> = <span class="variable">value_list</span>[<span class="string">'data'</span>] | <span class="function">map</span>(<span class="function">attribute</span>=0) | <span class="function">list</span> <span class="keyword">-%}</span>
+        <span class="keyword">{{</span> <span class="function">return</span>(<span class="variable">values</span>) <span class="keyword">}}</span>
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>2. Surrogate Key Generation</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">surrogate_key</span>(<span class="variable">field_list</span>) <span class="keyword">%}</span>
+    <span class="function">md5</span>(<span class="function">concat</span>(
+        <span class="keyword">{%- for</span> <span class="variable">field</span> <span class="keyword">in</span> <span class="variable">field_list</span> <span class="keyword">%}</span>
+            <span class="function">coalesce</span>(<span class="function">cast</span>(<span class="keyword">{{</span> <span class="variable">field</span> <span class="keyword">}}</span> <span class="keyword">as</span> <span class="string">string</span>), <span class="string">''</span>)
+            <span class="keyword">{%- if not</span> <span class="function">loop.last</span> <span class="keyword">%}</span>, <span class="string">'|'</span>, <span class="keyword">{% endif -%}</span>
+        <span class="keyword">{%- endfor %}</span>
+    ))
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>3. Dynamic WHERE Clauses</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">date_filter</span>(<span class="variable">date_column, start_date=none, end_date=none</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- if</span> <span class="variable">start_date</span> <span class="keyword">and</span> <span class="variable">end_date</span> <span class="keyword">-%}</span>
+        <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span> <span class="keyword">between</span> '<span class="keyword">{{</span> <span class="variable">start_date</span> <span class="keyword">}}</span>' <span class="keyword">and</span> '<span class="keyword">{{</span> <span class="variable">end_date</span> <span class="keyword">}}</span>'
+    <span class="keyword">{%- elif</span> <span class="variable">start_date</span> <span class="keyword">-%}</span>
+        <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span> >= '<span class="keyword">{{</span> <span class="variable">start_date</span> <span class="keyword">}}</span>'
+    <span class="keyword">{%- elif</span> <span class="variable">end_date</span> <span class="keyword">-%}</span>
+        <span class="keyword">{{</span> <span class="variable">date_column</span> <span class="keyword">}}</span> <= '<span class="keyword">{{</span> <span class="variable">end_date</span> <span class="keyword">}}</span>'
+    <span class="keyword">{%- else -%}</span>
+        1=1
+    <span class="keyword">{%- endif -%}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+    </section>
+
+    <section id="debugging">
+        <h2>Debugging Macros</h2>
+        
+        <h3>Debugging Techniques:</h3>
+        <div class="example">
+            <h4>1. Check Compiled SQL</h4>
+            <p>Always review the compiled SQL in the <code>target/compiled/</code> directory to ensure your macro generates the expected output.</p>
+            
+            <h4>2. Use the log() Function</h4>
+            <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">debug_macro</span>(<span class="variable">value</span>) <span class="keyword">%}</span>
+    <span class="keyword">{{</span> <span class="function">log</span>(<span class="string">'Debug value: '</span> ~ <span class="variable">value</span>, <span class="variable">info=true</span>) <span class="keyword">}}</span>
+    <span class="keyword">{{</span> <span class="function">return</span>(<span class="variable">value</span>) <span class="keyword">}}</span>
+<span class="keyword">{% endmacro %}</span>
+            </div>
+            
+            <h4>3. Test with Simple Inputs</h4>
+            <p>Start with simple, known inputs to verify macro behavior before using complex parameters.</p>
+        </div>
+
+        <div class="tip">
+            <strong>💡 Pro Tip:</strong> Use <code>dbt compile</code> to generate SQL without running it, perfect for debugging macro output.
+        </div>
+    </section>
+
+    <section id="examples">
+        <h2>Practical Examples</h2>
+        
+        <h3>Example 1: Revenue Recognition Macro</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">calculate_monthly_revenue</span>(<span class="variable">amount_column, start_date_column, end_date_column</span>) <span class="keyword">%}</span>
+    <span class="keyword">case</span>
+        <span class="keyword">when</span> <span class="function">date_trunc</span>(<span class="string">'month'</span>, <span class="keyword">{{</span> <span class="variable">start_date_column</span> <span class="keyword">}}</span>) = 
+             <span class="function">date_trunc</span>(<span class="string">'month'</span>, <span class="keyword">{{</span> <span class="variable">end_date_column</span> <span class="keyword">}}</span>)
+        <span class="keyword">then</span> <span class="keyword">{{</span> <span class="variable">amount_column</span> <span class="keyword">}}</span>
+        <span class="keyword">else</span> <span class="keyword">{{</span> <span class="variable">amount_column</span> <span class="keyword">}}</span> * 
+             <span class="function">extract</span>(<span class="string">day</span> <span class="keyword">from</span> <span class="function">last_day</span>(<span class="keyword">{{</span> <span class="variable">start_date_column</span> <span class="keyword">}}</span>)) /
+             (<span class="function">extract</span>(<span class="string">day</span> <span class="keyword">from</span> <span class="keyword">{{</span> <span class="variable">end_date_column</span> <span class="keyword">}}</span>) - 
+              <span class="function">extract</span>(<span class="string">day</span> <span class="keyword">from</span> <span class="keyword">{{</span> <span class="variable">start_date_column</span> <span class="keyword">}}</span>) + 1)
+    <span class="keyword">end</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Example 2: Data Quality Validation</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">validate_email</span>(<span class="variable">email_column</span>) <span class="keyword">%}</span>
+    <span class="keyword">case</span>
+        <span class="keyword">when</span> <span class="keyword">{{</span> <span class="variable">email_column</span> <span class="keyword">}}</span> <span class="keyword">is null then</span> <span class="string">'missing'</span>
+        <span class="keyword">when</span> <span class="function">length</span>(<span class="keyword">{{</span> <span class="variable">email_column</span> <span class="keyword">}}</span>) = 0 <span class="keyword">then</span> <span class="string">'empty'</span>
+        <span class="keyword">when</span> <span class="keyword">{{</span> <span class="variable">email_column</span> <span class="keyword">}}</span> <span class="keyword">not like</span> <span class="string">'%@%'</span> <span class="keyword">then</span> <span class="string">'no_at_symbol'</span>
+        <span class="keyword">when</span> <span class="keyword">{{</span> <span class="variable">email_column</span> <span class="keyword">}}</span> <span class="keyword">not like</span> <span class="string">'%.%'</span> <span class="keyword">then</span> <span class="string">'no_domain'</span>
+        <span class="keyword">else</span> <span class="string">'valid'</span>
+    <span class="keyword">end</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+
+        <h3>Example 3: Dynamic Table Creation</h3>
+        <div class="code-block">
+<span class="keyword">{% macro</span> <span class="function">create_staging_table</span>(<span class="variable">source_table, columns_to_exclude=[]</span>) <span class="keyword">%}</span>
+    <span class="keyword">{%- set</span> <span class="variable">source_columns</span> = <span class="function">adapter.get_columns_in_relation</span>(<span class="variable">source_table</span>) <span class="keyword">-%}</span>
+    
+    <span class="keyword">select</span>
+    <span class="keyword">{%- for</span> <span class="variable">column</span> <span class="keyword">in</span> <span class="variable">source_columns</span> <span class="keyword">%}</span>
+        <span class="keyword">{%- if</span> <span class="variable">column.name</span> <span class="keyword">not in</span> <span class="variable">columns_to_exclude</span> <span class="keyword">%}</span>
+        <span class="function">trim</span>(<span class="keyword">{{</span> <span class="variable">column.name</span> <span class="keyword">}}</span>) <span class="keyword">as</span> <span class="keyword">{{</span> <span class="variable">column.name</span> <span class="keyword">}}</span>
+        <span class="keyword">{%- if not</span> <span class="function">loop.last</span> <span class="keyword">%}</span>,<span class="keyword">{% endif -%}</span>
+        <span class="keyword">{%- endif %}</span>
+    <span class="keyword">{%- endfor %}</span>
+    <span class="keyword">from</span> <span class="keyword">{{</span> <span class="variable">source_table</span> <span class="keyword">}}</span>
+<span class="keyword">{% endmacro %}</span>
+        </div>
+    </section>
+
+    <div class="footer" id="resources">
+        <h2>Official Documentation Links</h2>
+        <p>For the most up-to-date and comprehensive information about dbt macros, refer to these official resources:</p>
+        <div style="margin: 20px 0;">
+            <a href="https://docs.getdbt.com/docs/build/jinja-macros">dbt Jinja Macros Guide</a> |
+            <a href="https://docs.getdbt.com/reference/dbt-jinja-functions">dbt Jinja Functions Reference</a> |
+            <a href="https://docs.getdbt.com/docs/build/custom-generic-tests">Custom Tests with Macros</a> |
+            <a href="https://docs.getdbt.com/best-practices">dbt Best Practices</a>
+        </div>
+        <p style="color: #666; font-size: 0.9em;">
+            Last updated: <span id="current-date"></span> | 
+            This guide provides comprehensive coverage of dbt macros for data transformation workflows.
+        </p>
+    </div>
+    
+    <script>
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+    </script>
+</body>
+</html>
