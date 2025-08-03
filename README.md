@@ -13,6 +13,7 @@ Comprehensive guides covering dbt best practices, strategies, and implementation
 
 - **[dbt Expectations Guide](https://konradkolenda.github.io/dbt/dbt_expectations_comprehensive_summary.html)** - Complete testing framework with dbt-expectations
 - **[dbt Incremental Strategies](https://konradkolenda.github.io/dbt/dbt_incremental_strategies_guide.html)** - Master all incremental materialization strategies
+- **[dbt Macros Guide](https://konradkolenda.github.io/dbt/dbt_macros_comprehensive_guide.html)** - Comprehensive guide to creating and using dbt macros
 - **[dbt Merge Operations](https://konradkolenda.github.io/dbt/dbt_merge_complete_guide.html)** - Advanced merge patterns and best practices
 - **[dbt Modeling Guidelines](https://konradkolenda.github.io/dbt/dbt_modeling_guidelines.html)** - Structure and organization best practices
 - **[dbt Utils Macros](https://konradkolenda.github.io/dbt/dbt_utils_macros_comprehensive_summary.html)** - Complete macro reference and examples
