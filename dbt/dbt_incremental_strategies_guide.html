@@ -545,8 +545,8 @@
 
                 <h3>How It Works</h3>
                 <p><strong>📋 Code Examples:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/01_delete_insert_basic.sql" target="_blank">Basic Implementation</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/02_delete_insert_advanced.sql" target="_blank">Advanced Configuration</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/01_delete_insert_basic.sql" target="_blank">Basic Implementation</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/02_delete_insert_advanced.sql" target="_blank">Advanced Configuration</a>
                 </p>
                 <div class="code-block">{{
   config(
@@ -663,8 +663,8 @@ from {{ ref('stg_customers') }}
 
                 <h3>Basic Implementation</h3>
                 <p><strong>📋 Code Examples:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/03_merge_basic.sql" target="_blank">Basic Merge</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/04_merge_with_deletes.sql" target="_blank">Advanced with Deletes</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/03_merge_basic.sql" target="_blank">Basic Merge</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/04_merge_with_deletes.sql" target="_blank">Advanced with Deletes</a>
                 </p>
                 <div class="code-block">{{
   config(
@@ -798,9 +798,9 @@ select * from source_with_deletes
 
                 <h3>Basic Implementation</h3>
                 <p><strong>📋 Code Examples:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/05_append_basic.sql" target="_blank">Basic Append</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/06_append_event_logging.sql" target="_blank">Event Logging</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/07_append_safe_patterns.sql" target="_blank">Safe Patterns</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/05_append_basic.sql" target="_blank">Basic Append</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/06_append_event_logging.sql" target="_blank">Event Logging</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/07_append_safe_patterns.sql" target="_blank">Safe Patterns</a>
                 </p>
                 <div class="code-block">{{
   config(
@@ -997,9 +997,9 @@ select * from deduplicated_data where rn = 1</div>
 
                 <h3>Basic Implementation</h3>
                 <p><strong>📋 Code Examples:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/08_insert_overwrite_basic.sql" target="_blank">Basic Implementation</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/09_insert_overwrite_dynamic.sql" target="_blank">Dynamic Partitions</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/10_insert_overwrite_hourly.sql" target="_blank">Hourly Partitioning</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/08_insert_overwrite_basic.sql" target="_blank">Basic Implementation</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/09_insert_overwrite_dynamic.sql" target="_blank">Dynamic Partitions</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/10_insert_overwrite_hourly.sql" target="_blank">Hourly Partitioning</a>
                 </p>
                 <div class="code-block">{{
   config(
@@ -1189,9 +1189,9 @@ where date >= current_date - 30</div>
 
                 <h3>Basic Implementation</h3>
                 <p><strong>📋 Code Examples:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/11_microbatch_basic.sql" target="_blank">Basic Microbatch</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/12_microbatch_advanced.sql" target="_blank">Advanced Configuration</a> | 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/13_microbatch_custom_logic.sql" target="_blank">Custom Logic</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/11_microbatch_basic.sql" target="_blank">Basic Microbatch</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/12_microbatch_advanced.sql" target="_blank">Advanced Configuration</a> | 
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/13_microbatch_custom_logic.sql" target="_blank">Custom Logic</a>
                 </p>
                 <div class="code-block">{{
   config(
@@ -1444,7 +1444,7 @@ from event_metrics
 
                 <h3>Performance Optimization Tips</h3>
                 <p><strong>📋 Code Example:</strong> 
-                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/code_examples/dbt_incremental_strategies_guide/14_performance_optimization.sql" target="_blank">Performance Optimization</a>
+                <a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_incremental_strategies_guide/14_performance_optimization.sql" target="_blank">Performance Optimization</a>
                 </p>
                 <div class="code-block">-- Universal Performance Tips for All Strategies
 
