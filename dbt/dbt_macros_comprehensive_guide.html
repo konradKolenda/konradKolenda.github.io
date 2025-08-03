@@ -596,6 +596,75 @@
     <section id="examples">
         <h2>Practical Examples</h2>
         
+        <div class="tip">
+            <strong>💾 Code Examples:</strong> All example macros are available in the 
+            <a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_macros_comprehensive_guide" target="_blank">code examples directory</a>. 
+            Each file contains ready-to-use macro code with usage instructions.
+        </div>
+
+        <h3>Available Code Examples:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Example</th>
+                    <th>File</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Cents to Dollars</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/01_cents_to_dollars.sql" target="_blank">01_cents_to_dollars.sql</a></td>
+                    <td>Basic utility macro for currency conversion</td>
+                </tr>
+                <tr>
+                    <td>Safe Division</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/02_safe_divide.sql" target="_blank">02_safe_divide.sql</a></td>
+                    <td>Division macro that handles zero denominators</td>
+                </tr>
+                <tr>
+                    <td>Audit Columns</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/03_audit_columns.sql" target="_blank">03_audit_columns.sql</a></td>
+                    <td>Metadata tracking for models</td>
+                </tr>
+                <tr>
+                    <td>Pivot Macro</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/04_pivot_macro.sql" target="_blank">04_pivot_macro.sql</a></td>
+                    <td>Dynamic pivot table generation</td>
+                </tr>
+                <tr>
+                    <td>Surrogate Key</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/05_surrogate_key.sql" target="_blank">05_surrogate_key.sql</a></td>
+                    <td>Generate hash-based surrogate keys</td>
+                </tr>
+                <tr>
+                    <td>Cross-Database Timestamp</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/06_cross_database_timestamp.sql" target="_blank">06_cross_database_timestamp.sql</a></td>
+                    <td>Database-agnostic timestamp functions</td>
+                </tr>
+                <tr>
+                    <td>Custom Test</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/07_custom_test.sql" target="_blank">07_custom_test.sql</a></td>
+                    <td>Data quality test macro</td>
+                </tr>
+                <tr>
+                    <td>Date Filter</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/08_date_filter.sql" target="_blank">08_date_filter.sql</a></td>
+                    <td>Dynamic date filtering logic</td>
+                </tr>
+                <tr>
+                    <td>Email Validation</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/09_email_validation.sql" target="_blank">09_email_validation.sql</a></td>
+                    <td>Email format validation macro</td>
+                </tr>
+                <tr>
+                    <td>Dynamic Schema</td>
+                    <td><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_macros_comprehensive_guide/10_dynamic_schema_name.sql" target="_blank">10_dynamic_schema_name.sql</a></td>
+                    <td>Custom schema naming logic</td>
+                </tr>
+            </tbody>
+        </table>
+        
         <h3>Example 1: Revenue Recognition Macro</h3>
         <div class="code-block">
 <span class="keyword">{% macro</span> <span class="function">calculate_monthly_revenue</span>(<span class="variable">amount_column, start_date_column, end_date_column</span>) <span class="keyword">%}</span>
