@@ -86,7 +86,7 @@
         <h1>dbt Modeling Guidelines and Best Practices</h1>
         
         <div class="highlight">
-            <strong>Note:</strong> Based on instructions.txt and current project analysis, here are the preferred dbt modeling setup and best practices.
+            <strong>Overview:</strong> This guide provides comprehensive dbt modeling guidelines and best practices for building scalable, maintainable data transformation pipelines. Follow these patterns to create robust data models that serve your analytics needs effectively.
         </div>
 
         <h2>dbt Model Layers & Structure</h2>
@@ -403,36 +403,27 @@ models/
     └── fiscal_calendar.sql
         </div>
 
-        <h2>Current Setup Analysis</h2>
+        <h2>Implementation Guidelines</h2>
 
-        <p>Your current project shows:</p>
-        <ul>
-            <li><strong>Models directory:</strong> Basic structure with <code>example/</code> and <code>testmodels/</code></li>
-            <li><strong>Current config:</strong> <code>testmodels</code> set to <code>table</code> materialization</li>
-            <li><strong>Sources:</strong> Single source <code>incoming.customers</code> defined</li>
-            <li><strong>Staging model:</strong> <code>stg_customers.sql</code> with hash column generation</li>
-        </ul>
-
-        <h2>Recommended Next Steps</h2>
-
-        <h3>1. Restructure models directory:</h3>
+        <h3>1. Set up your models directory structure:</h3>
         <div class="code-block">
 models/
 ├── staging/                    # Layer 1: Data Standardization
-│   └── incoming/
-│       ├── _incoming__sources.yml      # Move sources.yml here
-│       └── stg_incoming__customers.sql # Rename from stg_customers
+│   └── [source_system]/
+│       ├── _[source]__sources.yml      # Source definitions
+│       └── stg_[source]__[table].sql   # Staging models
 ├── intermediate/               # Layer 2: Complex Transformations
-│   └── (future complex logic models)
+│   └── int_[description].sql           # Reusable transformation logic
 └── marts/                     # Layer 3: Business-Ready Models
-    └── core/
-        └── (future business models)
+    └── [business_area]/
+        ├── dim_[entity].sql            # Dimension tables
+        └── fct_[process].sql           # Fact tables
         </div>
 
-        <h3>2. Update dbt_project.yml:</h3>
+        <h3>2. Configure dbt_project.yml for layered approach:</h3>
         <div class="code-block">
 models:
-  my_dbt_project:
+  your_project_name:
     staging:
       +materialized: view
     intermediate:
@@ -441,7 +432,7 @@ models:
       +materialized: table
         </div>
 
-        <h3>3. Naming conventions:</h3>
+        <h3>3. Follow consistent naming conventions:</h3>
         <ul>
             <li><strong>Sources:</strong> <code>source('system', 'table')</code></li>
             <li><strong>Staging:</strong> <code>stg_&lt;source&gt;__&lt;table&gt;</code></li>
