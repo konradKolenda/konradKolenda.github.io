@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Lambda Functions and Functional Programming Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        h1 {
+            color: #ff6939;
+            text-align: center;
+            border-bottom: 3px solid #ff6939;
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            border-left: 4px solid #ff6939;
+            padding-left: 15px;
+            margin-top: 40px;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            color: #ff6939;
+        }
+        
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .toc li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #ff6939;
+            font-weight: bold;
+        }
+        
+        .toc a {
+            color: #2c3e50;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            color: #ff6939;
+            text-decoration: underline;
+        }
+        
+        .code-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #ff6939;
+        }
+        
+        .code-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            background: #f1f5f9;
+            color: #e53e3e;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .warning {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .example-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .footer-links {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 40px;
+            text-align: center;
+        }
+        
+        .footer-links h3 {
+            color: #ff6939;
+            margin-top: 0;
+        }
+        
+        .footer-links a {
+            color: #2c3e50;
+            text-decoration: none;
+            margin: 0 15px;
+        }
+        
+        .footer-links a:hover {
+            color: #ff6939;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>dbt Lambda Functions and Functional Programming Comprehensive Guide</h1>
+    
+    <div class="toc">
+        <h3>Table of Contents</h3>
+        <ul>
+            <li><a href="#introduction">Introduction to Functional Programming in dbt</a></li>
+            <li><a href="#lambda-concepts">Lambda Function Concepts in dbt</a></li>
+            <li><a href="#macros-as-functions">Macros as Lambda-like Functions</a></li>
+            <li><a href="#higher-order-functions">Higher-Order Functions and Function Passing</a></li>
+            <li><a href="#dynamic-sql">Dynamic SQL Generation</a></li>
+            <li><a href="#functional-control">Functional Control Structures</a></li>
+            <li><a href="#custom-filters">Custom Filters and Function Composition</a></li>
+            <li><a href="#built-in-functional">Built-in Functional Programming Tools</a></li>
+            <li><a href="#advanced-patterns">Advanced Functional Patterns</a></li>
+            <li><a href="#best-practices">Best Practices and Performance</a></li>
+            <li><a href="#real-world-examples">Real-World Use Cases</a></li>
+        </ul>
+    </div>
+
+    <h2 id="introduction">Introduction to Functional Programming in dbt</h2>
+    
+    <p>While dbt doesn't implement traditional lambda functions like Python or JavaScript, it provides powerful functional programming capabilities through Jinja templating that enable lambda-like behavior, higher-order functions, and advanced SQL generation patterns.</p>
+    
+    <div class="highlight">
+        <strong>Key Concept:</strong> In dbt, functional programming is achieved through Jinja macros that act as reusable functions, combined with dynamic SQL generation capabilities that enable lambda-like behavior patterns.
+    </div>
+
+    <h2 id="lambda-concepts">Lambda Function Concepts in dbt</h2>
+    
+    <p>Lambda functions in traditional programming are anonymous functions that can be defined inline. In dbt, we achieve similar functionality through:</p>
+    
+    <ul>
+        <li><strong>Inline Macros:</strong> Short, reusable code blocks</li>
+        <li><strong>Dynamic SQL Blocks:</strong> SQL generated based on parameters</li>
+        <li><strong>Jinja Expressions:</strong> Inline transformations and calculations</li>
+        <li><strong>Variable Assignments:</strong> Computed values used across models</li>
+    </ul>
+
+    <div class="code-section">
+        <div class="code-title">Basic Lambda-like Pattern in dbt</div>
+        <pre><code>-- Traditional approach
+select 
+    order_id,
+    (amount / 100)::numeric(16, 2) as amount_dollars
+from raw_orders
+
+-- Lambda-like macro approach
+{% macro to_dollars(column_name, scale=2) %}
+    ({{ column_name }} / 100)::numeric(16, {{ scale }})
+{% endmacro %}
+
+select 
+    order_id,
+    {{ to_dollars('amount') }} as amount_dollars
+from raw_orders</code></pre>
+    </div>
+
+    <h2 id="macros-as-functions">Macros as Lambda-like Functions</h2>
+    
+    <p>dbt macros function as first-class citizens that can be passed around, composed, and used to create higher-order abstractions.</p>
+
+    <h3>Simple Function Macros</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Mathematical Operations</div>
+        <pre><code>-- Safe division macro (handles division by zero)
+{% macro safe_divide(numerator, denominator, default_value=0) %}
+    case 
+        when {{ denominator }} = 0 then {{ default_value }}
+        else {{ numerator }} / {{ denominator }}
+    end
+{% endmacro %}
+
+-- Usage
+select 
+    order_id,
+    {{ safe_divide('revenue', 'quantity', 'null') }} as unit_price
+from orders</code></pre>
+    </div>
+
+    <h3>Parameterized Lambda Functions</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Dynamic Column Transformations</div>
+        <pre><code>-- Generic transformation macro
+{% macro transform_column(column_name, transformation_type, params={}) %}
+    {% if transformation_type == 'normalize' %}
+        ({{ column_name }} - {{ params.get('min', 0) }}) / 
+        ({{ params.get('max', 1) }} - {{ params.get('min', 0) }})
+    {% elif transformation_type == 'log' %}
+        log({{ params.get('base', 'e') }}, {{ column_name }})
+    {% elif transformation_type == 'scale' %}
+        {{ column_name }} * {{ params.get('factor', 1) }}
+    {% else %}
+        {{ column_name }}
+    {% endif %}
+{% endmacro %}
+
+-- Usage examples
+select 
+    customer_id,
+    {{ transform_column('revenue', 'scale', {'factor': 1.1}) }} as scaled_revenue,
+    {{ transform_column('score', 'normalize', {'min': 0, 'max': 100}) }} as normalized_score
+from customer_metrics</code></pre>
+    </div>
+
+    <h2 id="higher-order-functions">Higher-Order Functions and Function Passing</h2>
+    
+    <p>Create macros that accept other macros as parameters, enabling true higher-order function behavior.</p>
+
+    <div class="code-section">
+        <div class="code-title">Function Composition and Mapping</div>
+        <pre><code>-- Higher-order macro that applies a function to multiple columns
+{% macro apply_to_columns(columns, transform_macro, params={}) %}
+    {% for column in columns %}
+        {{ transform_macro(column, **params) }} as {{ column }}_transformed
+        {%- if not loop.last -%},{%- endif %}
+    {% endfor %}
+{% endmacro %}
+
+-- Transformation function
+{% macro standardize(column_name, mean=0, std=1) %}
+    ({{ column_name }} - {{ mean }}) / {{ std }}
+{% endmacro %}
+
+-- Usage: Apply standardization to multiple columns
+select 
+    customer_id,
+    {{ apply_to_columns(['revenue', 'orders', 'lifetime_value'], 'standardize') }}
+from customer_stats</code></pre>
+    </div>
+
+    <h3>Functional Pipeline Pattern</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Chaining Transformations</div>
+        <pre><code>-- Pipeline macro for chaining transformations
+{% macro pipeline(column_name, transformations) %}
+    {% set result = column_name %}
+    {% for transform in transformations %}
+        {% set result = transform.macro ~ '(' ~ result ~ ', ' ~ transform.params | join(', ') ~ ')' %}
+    {% endfor %}
+    {{ result }}
+{% endmacro %}
+
+-- Define transformation chain
+{% set price_pipeline = [
+    {'macro': 'coalesce', 'params': ['0']},
+    {'macro': 'round', 'params': ['2']},
+    {'macro': 'greatest', 'params': ['0.01']}
+] %}
+
+select 
+    product_id,
+    {{ pipeline('raw_price', price_pipeline) }} as clean_price
+from products</code></pre>
+    </div>
+
+    <h2 id="dynamic-sql">Dynamic SQL Generation</h2>
+    
+    <p>Use lambda-like patterns to generate SQL dynamically based on runtime conditions and data.</p>
+
+    <h3>Conditional SQL Generation</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Dynamic Column Selection</div>
+        <pre><code>-- Lambda-like conditional column selector
+{% macro conditional_select(table_name, conditions) %}
+    select 
+        {% for condition in conditions %}
+            {% if condition.when %}
+                {{ condition.select }} AS {{ condition.alias }}
+            {% endif %}
+            {%- if not loop.last and condition.when -%},{%- endif %}
+        {% endfor %}
+    from {{ table_name }}
+{% endmacro %}
+
+-- Usage with runtime conditions
+{% set column_conditions = [
+    {'when': var('include_revenue', true), 'select': 'revenue', 'alias': 'total_revenue'},
+    {'when': var('include_costs', false), 'select': 'costs', 'alias': 'total_costs'},
+    {'when': var('include_profit', true), 'select': 'revenue - costs', 'alias': 'profit'}
+] %}
+
+{{ conditional_select('financial_data', column_conditions) }}</code></pre>
+    </div>
+
+    <h3>Query Result-Based Lambda Functions</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Data-Driven SQL Generation</div>
+        <pre><code>-- Get unique values and generate case statements
+{% macro generate_pivot_columns(table_name, pivot_column, value_column) %}
+    {% set pivot_query %}
+        select distinct {{ pivot_column }} 
+        from {{ table_name }} 
+        where {{ pivot_column }} is not null
+        order by {{ pivot_column }}
+    {% endset %}
+    
+    {% if execute %}
+        {% set results = run_query(pivot_query) %}
+        {% set pivot_values = results.columns[0].values() %}
+    {% else %}
+        {% set pivot_values = [] %}
+    {% endif %}
+    
+    {% for value in pivot_values %}
+        sum(case when {{ pivot_column }} = '{{ value }}' 
+            then {{ value_column }} else 0 end) as {{ value | replace(' ', '_') | lower }}
+        {%- if not loop.last -%},{%- endif %}
+    {% endfor %}
+{% endmacro %}
+
+-- Usage: Dynamic pivot based on actual data
+select 
+    customer_id,
+    {{ generate_pivot_columns('order_details', 'product_category', 'amount') }}
+from order_details
+group by customer_id</code></pre>
+    </div>
+
+    <h2 id="functional-control">Functional Control Structures</h2>
+    
+    <p>Implement functional programming control flow patterns using Jinja.</p>
+
+    <h3>Map, Filter, and Reduce Patterns</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Functional Collection Operations</div>
+        <pre><code>-- Map pattern: Apply function to each element
+{% macro map_columns(columns, func_name, params={}) %}
+    {% for col in columns %}
+        {{ func_name }}({{ col }}
+        {%- for key, value in params.items() -%}
+            , {{ key }}={{ value }}
+        {%- endfor -%}
+        ) as {{ col }}_{{ func_name }}
+        {%- if not loop.last -%},{%- endif %}
+    {% endfor %}
+{% endmacro %}
+
+-- Filter pattern: Select columns based on condition
+{% macro filter_columns(columns, condition_func) %}
+    {% set filtered = [] %}
+    {% for col in columns %}
+        {% if condition_func(col) %}
+            {% set _ = filtered.append(col) %}
+        {% endif %}
+    {% endfor %}
+    {{ filtered | join(', ') }}
+{% endmacro %}
+
+-- Reduce pattern: Aggregate columns
+{% macro reduce_columns(columns, operation='sum', separator=' + ') %}
+    {% if operation == 'sum' %}
+        {{ columns | join(separator) }}
+    {% elif operation == 'concat' %}
+        concat({{ columns | join(', ') }})
+    {% elif operation == 'coalesce' %}
+        coalesce({{ columns | join(', ') }})
+    {% endif %}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h2 id="custom-filters">Custom Filters and Function Composition</h2>
+    
+    <p>Create custom Jinja filters that act as composable lambda functions.</p>
+
+    <div class="code-section">
+        <div class="code-title">Custom Filter Implementation</div>
+        <pre><code>-- In macros/filters.sql
+{% macro snake_case(text) %}
+    {{ text | lower | replace(' ', '_') | replace('-', '_') }}
+{% endmacro %}
+
+{% macro clean_column_name(column_name) %}
+    {{ column_name | snake_case | truncate(60, True, '') }}
+{% endmacro %}
+
+-- Function composition with filters
+{% macro process_column_list(columns) %}
+    {% set processed = [] %}
+    {% for col in columns %}
+        {% set clean_name = clean_column_name(col) %}
+        {% set _ = processed.append(clean_name) %}
+    {% endfor %}
+    {{ processed }}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h2 id="built-in-functional">Built-in Functional Programming Tools</h2>
+    
+    <p>Leverage dbt's built-in functions for functional programming patterns.</p>
+
+    <div class="code-section">
+        <div class="code-title">Built-in Functional Utilities</div>
+        <pre><code>-- Using var() for function parameterization
+{% set transformation_rules = var('transformations', {
+    'revenue': {'type': 'currency', 'scale': 2},
+    'quantity': {'type': 'integer', 'min': 0},
+    'rating': {'type': 'range', 'min': 1, 'max': 5}
+}) %}
+
+-- Using env_var() for environment-based functions
+{% macro get_table_suffix() %}
+    {% if env_var('DBT_ENVIRONMENT', 'dev') == 'prod' %}
+        _prod
+    {% else %}
+        _{{ env_var('USER', 'dev') }}
+    {% endif %}
+{% endmacro %}
+
+-- Using run_query() for data-driven functions
+{% macro get_max_date(table_name, date_column) %}
+    {% set query %}
+        select max({{ date_column }}) as max_date from {{ table_name }}
+    {% endset %}
+    
+    {% if execute %}
+        {% set result = run_query(query) %}
+        {% set max_date = result.columns[0].values()[0] %}
+        '{{ max_date }}'
+    {% else %}
+        current_date
+    {% endif %}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h2 id="advanced-patterns">Advanced Functional Patterns</h2>
+    
+    <h3>Currying and Partial Application</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Curried Functions</div>
+        <pre><code>-- Curried function for creating specialized validators
+{% macro create_validator(validation_type) %}
+    {% if validation_type == 'email' %}
+        {% macro validate(column) %}
+            {{ column }} ~ '@' and position('@' in {{ column }}) > 1
+        {% endmacro %}
+    {% elif validation_type == 'phone' %}
+        {% macro validate(column) %}
+            length(regexp_replace({{ column }}, '[^0-9]', '', 'g')) >= 10
+        {% endmacro %}
+    {% elif validation_type == 'url' %}
+        {% macro validate(column) %}
+            {{ column }} like 'http%' and length({{ column }}) > 7
+        {% endmacro %}
+    {% endif %}
+    {{ validate }}
+{% endmacro %}
+
+-- Partial application pattern
+{% macro create_date_filter(comparison_op, reference_date) %}
+    {% macro filter_condition(date_column) %}
+        {{ date_column }} {{ comparison_op }} '{{ reference_date }}'
+    {% endmacro %}
+    {{ filter_condition }}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h3>Memoization Pattern</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Caching Expensive Operations</div>
+        <pre><code>-- Memoization using variables
+{% set _memo_cache = {} %}
+
+{% macro memoized_query(query_key, sql_query) %}
+    {% if query_key in _memo_cache %}
+        {{ log("Cache hit for: " ~ query_key, info=true) }}
+        {{ _memo_cache[query_key] }}
+    {% else %}
+        {% if execute %}
+            {% set result = run_query(sql_query) %}
+            {% set _ = _memo_cache.update({query_key: result}) %}
+            {{ log("Cache miss for: " ~ query_key, info=true) }}
+            {{ result }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h2 id="best-practices">Best Practices and Performance</h2>
+    
+    <div class="tip">
+        <strong>Performance Tips:</strong>
+        <ul>
+            <li>Use <code>execute</code> variable to prevent queries during parsing</li>
+            <li>Cache expensive operations using variables</li>
+            <li>Limit macro complexity for maintainability</li>
+            <li>Use meaningful parameter names and defaults</li>
+        </ul>
+    </div>
+
+    <div class="warning">
+        <strong>Common Pitfalls:</strong>
+        <ul>
+            <li>Over-abstracting simple SQL patterns</li>
+            <li>Creating deeply nested macro calls</li>
+            <li>Ignoring SQL compilation performance</li>
+            <li>Not documenting complex functional patterns</li>
+        </ul>
+    </div>
+
+    <h3>Testing Functional Macros</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Macro Testing Pattern</div>
+        <pre><code>-- Test macro functionality
+{% macro test_safe_divide() %}
+    select 
+        -- Test normal division
+        {{ safe_divide('10', '2') }} as normal_div,
+        -- Test division by zero
+        {{ safe_divide('10', '0', 'null') }} as zero_div,
+        -- Test with variables
+        {{ safe_divide('revenue', 'quantity', '0') }} as dynamic_div
+    from (select 100 as revenue, 0 as quantity) as test_data
+{% endmacro %}
+
+-- Unit test for macro
+select 
+    case 
+        when normal_div = 5 and zero_div is null and dynamic_div = 0 
+        then 'PASS' 
+        else 'FAIL' 
+    end as test_result
+from ({{ test_safe_divide() }}) as test</code></pre>
+    </div>
+
+    <h2 id="real-world-examples">Real-World Use Cases</h2>
+    
+    <h3>Dynamic Data Quality Framework</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Functional Data Quality Checks</div>
+        <pre><code>-- Configuration-driven quality checks
+{% set quality_rules = {
+    'completeness': {
+        'columns': ['customer_id', 'order_date', 'amount'],
+        'threshold': 0.95
+    },
+    'validity': {
+        'email': ['customer_email'],
+        'date_range': {'order_date': {'min': '2020-01-01', 'max': 'current_date'}},
+        'positive_numbers': ['amount', 'quantity']
+    },
+    'consistency': {
+        'referential': [
+            {'child': 'customer_id', 'parent': 'customers.id'},
+            {'child': 'product_id', 'parent': 'products.id'}
+        ]
+    }
+} %}
+
+-- Lambda-like quality check generator
+{% macro generate_quality_checks(table_name, rules) %}
+    {% for rule_type, rule_config in rules.items() %}
+        {% if rule_type == 'completeness' %}
+            {{ completeness_check(table_name, rule_config.columns, rule_config.threshold) }}
+        {% elif rule_type == 'validity' %}
+            {{ validity_checks(table_name, rule_config) }}
+        {% elif rule_type == 'consistency' %}
+            {{ consistency_checks(table_name, rule_config) }}
+        {% endif %}
+        {% if not loop.last %} union all {% endif %}
+    {% endfor %}
+{% endmacro %}</code></pre>
+    </div>
+
+    <h3>ETL Pipeline Orchestration</h3>
+    
+    <div class="code-section">
+        <div class="code-title">Functional Pipeline Definition</div>
+        <pre><code>-- Pipeline stage definition
+{% set etl_pipeline = [
+    {'stage': 'extract', 'func': 'extract_source_data', 'deps': []},
+    {'stage': 'validate', 'func': 'validate_raw_data', 'deps': ['extract']},
+    {'stage': 'transform', 'func': 'apply_transformations', 'deps': ['validate']},
+    {'stage': 'aggregate', 'func': 'create_aggregations', 'deps': ['transform']},
+    {'stage': 'publish', 'func': 'publish_to_marts', 'deps': ['aggregate']}
+] %}
+
+-- Functional pipeline executor
+{% macro execute_pipeline(pipeline_config, current_stage) %}
+    {% set current_stage_config = pipeline_config | selectattr('stage', 'equalto', current_stage) | first %}
+    
+    -- Check dependencies
+    {% for dep in current_stage_config.deps %}
+        {{ log("Checking dependency: " ~ dep, info=true) }}
+    {% endfor %}
+    
+    -- Execute stage function
+    {{ current_stage_config.func }}({{ current_stage }})
+{% endmacro %}</code></pre>
+    </div>
+
+    <div class="footer-links">
+        <h3>Official dbt Documentation</h3>
+        <p>
+            <a href="https://docs.getdbt.com/docs/build/jinja-macros" target="_blank">Jinja and Macros</a> |
+            <a href="https://docs.getdbt.com/reference/dbt-jinja-functions" target="_blank">dbt Jinja Functions</a> |
+            <a href="https://docs.getdbt.com/guides/using-jinja" target="_blank">Using Jinja</a> |
+            <a href="https://docs.getdbt.com/docs/build/custom-data-tests" target="_blank">Custom Tests</a>
+        </p>
+    </div>
+</body>
+</html>
