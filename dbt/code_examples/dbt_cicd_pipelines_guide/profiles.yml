@@ -1,0 +1,56 @@
+# dbt profiles.yml - Multi-environment configuration
+dbt_project:
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: DEVELOPER
+      database: DEV_DATABASE
+      warehouse: DEV_WAREHOUSE
+      schema: "dev_{{ env_var('USER') }}"
+      threads: 4
+      keepalives_idle: 240
+      search_path: "{{ env_var('DBT_SNOWFLAKE_SEARCH_PATH', '') }}"
+      
+    ci:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: CI_ROLE
+      database: CI_DATABASE
+      warehouse: CI_WAREHOUSE
+      schema: "ci_{{ env_var('GITHUB_RUN_ID', 'manual') }}"
+      threads: 8
+      keepalives_idle: 240
+      query_tag: "dbt_ci_{{ env_var('GITHUB_RUN_ID', 'manual') }}"
+      
+    staging:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: STAGING_ROLE
+      database: STAGING_DATABASE
+      warehouse: STAGING_WAREHOUSE
+      schema: staging
+      threads: 8
+      keepalives_idle: 240
+      query_tag: "dbt_staging"
+      
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: PRODUCTION_ROLE
+      database: PRODUCTION_DATABASE
+      warehouse: PRODUCTION_WAREHOUSE
+      schema: analytics
+      threads: 12
+      keepalives_idle: 240
+      query_tag: "dbt_production"
+      
+  target: dev
