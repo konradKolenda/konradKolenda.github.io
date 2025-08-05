@@ -11,6 +11,7 @@ Visit the live documentation at: **[konradkolenda.github.io](https://konradkolen
 ### dbt (Data Build Tool)
 Comprehensive guides covering dbt best practices, strategies, and implementation patterns:
 
+- **[dbt CI/CD Pipelines Guide](https://konradkolenda.github.io/dbt/dbt_cicd_pipelines_guide.html)** - Complete production deployment guide with GitHub Actions workflows
 - **[dbt Expectations Guide](https://konradkolenda.github.io/dbt/dbt_expectations_comprehensive_summary.html)** - Complete testing framework with dbt-expectations
 - **[dbt Incremental Strategies](https://konradkolenda.github.io/dbt/dbt_incremental_strategies_guide.html)** - Master all incremental materialization strategies
 - **[dbt Lambda Functions Guide](https://konradkolenda.github.io/dbt/dbt_lambda_functions_comprehensive_guide.html)** - Functional programming patterns and lambda-like functions in dbt
