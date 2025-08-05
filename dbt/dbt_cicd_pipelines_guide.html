@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt CI/CD Pipelines: Complete Production Deployment Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        ul, ol {
+            padding-left: 30px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc ul li {
+            margin-bottom: 8px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+        }
+        .toc a:hover {
+            color: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .workflow-diagram {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt CI/CD Pipelines: Complete Production Deployment Guide</h1>
+        
+        <div class="info">
+            <strong>Overview:</strong> This comprehensive guide covers implementing robust CI/CD pipelines for dbt projects, from basic automation to advanced production deployment strategies. Essential for scaling dbt in enterprise environments.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#fundamentals">1. CI/CD Fundamentals for dbt</a></li>
+                <li><a href="#github-actions">2. GitHub Actions Implementation</a></li>
+                <li><a href="#testing-strategies">3. Automated Testing Strategies</a></li>
+                <li><a href="#deployment-patterns">4. Deployment Patterns & Environments</a></li>
+                <li><a href="#advanced-workflows">5. Advanced Workflow Patterns</a></li>
+                <li><a href="#monitoring-alerting">6. Monitoring & Alerting</a></li>
+                <li><a href="#security-best-practices">7. Security Best Practices</a></li>
+                <li><a href="#troubleshooting">8. Troubleshooting & Optimization</a></li>
+            </ul>
+        </div>
+
+        <section id="fundamentals">
+            <h2>1. CI/CD Fundamentals for dbt</h2>
+            
+            <h3>What is CI/CD for dbt?</h3>
+            <p>Continuous Integration/Continuous Deployment (CI/CD) for dbt automates the testing, validation, and deployment of your data transformations, ensuring data quality and reducing manual errors in production environments.</p>
+
+            <div class="workflow-diagram">
+                <h4>dbt CI/CD Workflow</h4>
+                <p><strong>Code Commit</strong> → <strong>CI Tests</strong> → <strong>Code Review</strong> → <strong>Deploy to Staging</strong> → <strong>Production Deployment</strong></p>
+            </div>
+
+            <h3>Key Benefits</h3>
+            <ul>
+                <li><strong>Automated Testing:</strong> Run dbt tests on every code change</li>
+                <li><strong>Environment Consistency:</strong> Identical deployments across environments</li>
+                <li><strong>Risk Reduction:</strong> Catch issues before production</li>
+                <li><strong>Faster Deployment:</strong> Automated, repeatable processes</li>
+                <li><strong>Collaboration:</strong> Team-friendly development workflows</li>
+            </ul>
+
+            <h3>Essential Components</h3>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Purpose</th>
+                    <th>Example Tools</th>
+                </tr>
+                <tr>
+                    <td>Version Control</td>
+                    <td>Track changes, manage branches</td>
+                    <td>Git, GitHub, GitLab</td>
+                </tr>
+                <tr>
+                    <td>CI/CD Platform</td>
+                    <td>Automate workflows</td>
+                    <td>GitHub Actions, Jenkins, GitLab CI</td>
+                </tr>
+                <tr>
+                    <td>Testing Framework</td>
+                    <td>Validate data quality</td>
+                    <td>dbt test, custom tests</td>
+                </tr>
+                <tr>
+                    <td>Environment Management</td>
+                    <td>Separate dev/staging/prod</td>
+                    <td>dbt profiles, environment variables</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="github-actions">
+            <h2>2. GitHub Actions Implementation</h2>
+
+            <h3>Basic dbt Workflow</h3>
+            <p>Create <code>.github/workflows/dbt_ci.yml</code> for basic CI/CD:</p>
+
+            <div class="code-block">name: dbt CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  DBT_PROFILES_DIR: ./
+  DBT_PROJECT_DIR: ./
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install dbt-snowflake dbt-core
+        dbt deps
+        
+    - name: Run dbt debug
+      run: dbt debug
+      env:
+        DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+        DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+        DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+        DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+        DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+        DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        DBT_SNOWFLAKE_SCHEMA: ${{ secrets.DBT_SNOWFLAKE_SCHEMA }}
+        
+    - name: Run dbt build
+      run: dbt build --target ci
+      env:
+        DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+        DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+        DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+        DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+        DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+        DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        DBT_SNOWFLAKE_SCHEMA: ci_${{ github.run_id }}</div>
+
+            <h3>Advanced Multi-Environment Workflow</h3>
+            <div class="code-block">name: Advanced dbt Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install sqlfluff
+      run: pip install sqlfluff
+    - name: Lint SQL
+      run: sqlfluff lint models/ --config .sqlfluff
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ci, staging]
+    
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Cache dbt packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.dbt
+        key: ${{ runner.os }}-dbt-${{ hashFiles('**/packages.yml') }}
+        
+    - name: Install dependencies
+      run: |
+        pip install dbt-snowflake
+        dbt deps
+        
+    - name: Run dbt build
+      run: dbt build --target ${{ matrix.target }}
+      env:
+        DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+        DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+        DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+        DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+        DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE }}
+        DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        DBT_SNOWFLAKE_SCHEMA: ${{ matrix.target }}_${{ github.run_id }}
+
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install dbt-snowflake
+        dbt deps
+        
+    - name: Deploy to production
+      run: dbt run --target prod
+      env:
+        DBT_SNOWFLAKE_ACCOUNT: ${{ secrets.DBT_SNOWFLAKE_ACCOUNT }}
+        DBT_SNOWFLAKE_USER: ${{ secrets.DBT_SNOWFLAKE_USER }}
+        DBT_SNOWFLAKE_PASSWORD: ${{ secrets.DBT_SNOWFLAKE_PASSWORD }}
+        DBT_SNOWFLAKE_ROLE: ${{ secrets.DBT_SNOWFLAKE_ROLE }}
+        DBT_SNOWFLAKE_DATABASE: ${{ secrets.DBT_SNOWFLAKE_DATABASE_PROD }}
+        DBT_SNOWFLAKE_WAREHOUSE: ${{ secrets.DBT_SNOWFLAKE_WAREHOUSE }}
+        DBT_SNOWFLAKE_SCHEMA: prod</div>
+        </section>
+
+        <section id="testing-strategies">
+            <h2>3. Automated Testing Strategies</h2>
+
+            <h3>Comprehensive Test Suite</h3>
+            <p>Implement multiple testing layers for robust data quality assurance:</p>
+
+            <h4>1. Schema Tests</h4>
+            <div class="code-block"># schema.yml
+models:
+  - name: customers
+    description: Customer dimension table
+    columns:
+      - name: customer_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: Customer email
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              to: ref('email_domain_whitelist')
+              field: email_domain
+      - name: created_at
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: "'2020-01-01'"
+              max_value: "current_date()"</div>
+
+            <h4>2. Custom Generic Tests</h4>
+            <div class="code-block"># macros/test_email_format.sql
+{% macro test_email_format(model, column_name) %}
+
+  select count(*)
+  from {{ model }}
+  where {{ column_name }} is not null
+    and not regexp_like({{ column_name }}, '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+
+{% endmacro %}</div>
+
+            <h4>3. Data Quality Tests</h4>
+            <div class="code-block"># tests/assert_positive_revenue.sql
+select
+  order_date,
+  sum(revenue) as daily_revenue
+from {{ ref('orders') }}
+group by order_date
+having daily_revenue <= 0</div>
+
+            <h4>4. Cross-Database Consistency Tests</h4>
+            <div class="code-block"># macros/test_row_count_match.sql
+{% macro test_row_count_match(model, compare_model, threshold=0.05) %}
+
+  with model_count as (
+    select count(*) as model_rows from {{ model }}
+  ),
+  compare_count as (
+    select count(*) as compare_rows from {{ compare_model }}
+  ),
+  variance as (
+    select 
+      model_rows,
+      compare_rows,
+      abs(model_rows - compare_rows) / compare_rows as variance_pct
+    from model_count
+    cross join compare_count
+  )
+  
+  select *
+  from variance
+  where variance_pct > {{ threshold }}
+
+{% endmacro %}</div>
+
+            <h3>Test Configuration Strategy</h3>
+            <div class="code-block"># dbt_project.yml
+tests:
+  +severity: error  # Default to error for all tests
+  
+  # Override for specific test types
+  elementary:
+    +severity: warn
+    
+  # Store test failures for analysis  
+  +store_failures: true
+  +store_failures_as: table</div>
+        </section>
+
+        <section id="deployment-patterns">
+            <h2>4. Deployment Patterns & Environments</h2>
+
+            <h3>Environment Configuration</h3>
+            <p>Set up proper environment separation using dbt profiles:</p>
+
+            <div class="code-block"># profiles.yml
+dbt_project:
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: DEVELOPER
+      database: DEV_DATABASE
+      warehouse: DEV_WAREHOUSE
+      schema: "dev_{{ env_var('USER') }}"
+      threads: 4
+      
+    ci:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: CI_ROLE
+      database: CI_DATABASE
+      warehouse: CI_WAREHOUSE
+      schema: "ci_{{ env_var('GITHUB_RUN_ID', 'manual') }}"
+      threads: 8
+      
+    staging:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: STAGING_ROLE
+      database: STAGING_DATABASE
+      warehouse: STAGING_WAREHOUSE
+      schema: staging
+      threads: 8
+      
+    prod:
+      type: snowflake
+      account: "{{ env_var('DBT_SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('DBT_SNOWFLAKE_USER') }}"
+      password: "{{ env_var('DBT_SNOWFLAKE_PASSWORD') }}"
+      role: PRODUCTION_ROLE
+      database: PRODUCTION_DATABASE
+      warehouse: PRODUCTION_WAREHOUSE
+      schema: analytics
+      threads: 12
+      
+  target: dev</div>
+
+            <h3>Blue-Green Deployment Pattern</h3>
+            <div class="code-block"># Blue-Green deployment workflow
+name: Blue-Green Deployment
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Determine deployment slot
+      id: slot
+      run: |
+        # Logic to determine blue or green slot
+        CURRENT_SLOT=$(dbt run-operation get_current_slot --target prod)
+        NEW_SLOT=$([ "$CURRENT_SLOT" = "blue" ] && echo "green" || echo "blue")
+        echo "slot=$NEW_SLOT" >> $GITHUB_OUTPUT
+        
+    - name: Deploy to inactive slot
+      run: |
+        dbt run --target prod_${{ steps.slot.outputs.slot }}
+        dbt test --target prod_${{ steps.slot.outputs.slot }}
+        
+    - name: Switch traffic to new slot
+      run: |
+        dbt run-operation switch_slot --args '{slot: ${{ steps.slot.outputs.slot }}}' --target prod</div>
+
+            <h3>Incremental Deployment Strategy</h3>
+            <div class="code-block"># Incremental deployment with state comparison
+- name: Deploy changed models only
+  uses: actions/checkout@v4
+  with:
+    fetch-depth: 0  # Full history needed for state comparison
+    
+- name: Get production state
+  run: |
+    # Download production manifest
+    aws s3 cp s3://dbt-artifacts/prod/manifest.json ./prod_manifest.json
+    
+- name: Deploy only changed models
+  run: |
+    dbt run --select state:modified --defer --state ./ --target prod
+    dbt test --select state:modified --defer --state ./ --target prod</div>
+        </section>
+
+        <section id="advanced-workflows">
+            <h2>5. Advanced Workflow Patterns</h2>
+
+            <h3>Parallel Job Execution</h3>
+            <div class="code-block">name: Parallel dbt Jobs
+
+jobs:
+  mart-customers:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run customer marts
+      run: dbt run --select +marts.customers --target prod
+      
+  mart-orders:
+    runs-on: ubuntu-latest  
+    steps:
+    - name: Run order marts
+      run: dbt run --select +marts.orders --target prod
+      
+  mart-products:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run product marts
+      run: dbt run --select +marts.products --target prod
+      
+  finalize:
+    needs: [mart-customers, mart-orders, mart-products]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Run downstream models
+      run: dbt run --select marts.customers+ marts.orders+ marts.products+ --target prod</div>
+
+            <h3>Dynamic Branch-Based Environments</h3>
+            <div class="code-block">name: Dynamic Environment Creation
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  create-environment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create branch-specific schema
+      run: |
+        BRANCH_NAME=$(echo ${{ github.head_ref }} | sed 's/[^a-zA-Z0-9]/_/g' | tr '[:upper:]' '[:lower:]')
+        SCHEMA_NAME="pr_${BRANCH_NAME}_${{ github.event.number }}"
+        
+        echo "SCHEMA_NAME=$SCHEMA_NAME" >> $GITHUB_ENV
+        
+    - name: Deploy to branch environment
+      run: |
+        dbt run --target dev --vars '{"schema_override": "${{ env.SCHEMA_NAME }}"}'
+        dbt test --target dev --vars '{"schema_override": "${{ env.SCHEMA_NAME }}"}'
+        
+    - name: Comment PR with environment details
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🚀 Environment Created
+            
+            **Schema:** \`${{ env.SCHEMA_NAME }}\`
+            **Dashboard:** [View Dashboard](https://dashboard.company.com/schema/${{ env.SCHEMA_NAME }})
+            **Data Catalog:** [View Models](https://catalog.company.com/schema/${{ env.SCHEMA_NAME }})`
+          })</div>
+
+            <h3>Conditional Model Deployment</h3>
+            <div class="code-block"># Conditional deployment based on changes
+- name: Check changed files
+  id: changes
+  uses: dorny/paths-filter@v2
+  with:
+    filters: |
+      models:
+        - 'models/**'
+      macros:
+        - 'macros/**'
+      seeds:
+        - 'seeds/**'
+      
+- name: Deploy models
+  if: steps.changes.outputs.models == 'true'
+  run: dbt run --target prod
+  
+- name: Deploy seeds
+  if: steps.changes.outputs.seeds == 'true'
+  run: dbt seed --target prod
+  
+- name: Refresh macros
+  if: steps.changes.outputs.macros == 'true'
+  run: |
+    dbt run --full-refresh --target prod
+    dbt test --target prod</div>
+        </section>
+
+        <section id="monitoring-alerting">
+            <h2>6. Monitoring & Alerting</h2>
+
+            <h3>Deployment Status Monitoring</h3>
+            <div class="code-block"># Slack notification workflow
+- name: Notify deployment status
+  if: always()
+  uses: 8398a7/action-slack@v3
+  with:
+    status: ${{ job.status }}
+    channel: '#data-team'
+    text: |
+      dbt Deployment ${{ job.status }}
+      
+      **Branch:** ${{ github.ref }}
+      **Commit:** ${{ github.sha }}
+      **Run ID:** ${{ github.run_id }}
+      
+      **Models Run:** ${{ steps.dbt-run.outputs.models_run }}
+      **Tests Passed:** ${{ steps.dbt-test.outputs.tests_passed }}
+      **Duration:** ${{ steps.timing.outputs.duration }}
+  env:
+    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}</div>
+
+            <h3>Data Quality Alerting</h3>
+            <div class="code-block"># Custom alerting macro
+{% macro alert_on_test_failure() %}
+  {% if execute %}
+    {% set results = run_query("select * from " ~ ref('dbt_test_results') ~ " where status = 'fail'") %}
+    
+    {% if results.rows %}
+      {% set webhook_url = var('slack_webhook_url') %}
+      {% set message = {
+        'text': 'dbt Test Failures Detected',
+        'attachments': [
+          {
+            'color': 'danger',
+            'fields': [
+              {
+                'title': 'Failed Tests',
+                'value': results.rows | length | string,
+                'short': true
+              }
+            ]
+          }
+        ]
+      } %}
+      
+      {% set response = modules.requests.post(webhook_url, json=message) %}
+    {% endif %}
+  {% endif %}
+{% endmacro %}</div>
+
+            <h3>Performance Monitoring</h3>
+            <div class="code-block"># Performance tracking hooks
+# dbt_project.yml
+on-run-end:
+  - "{{ log_model_performance() }}"
+  
+# macros/log_performance.sql
+{% macro log_model_performance() %}
+  {% if execute %}
+    {% set results = results %}
+    
+    create or replace table {{ target.database }}.{{ target.schema }}.dbt_run_results as
+    select
+      '{{ run_started_at }}' as run_started_at,
+      '{{ invocation_id }}' as invocation_id,
+      '{{ results | map(attribute='node.name') | list | join("', '") }}' as models_run,
+      {{ results | selectattr('timing') | map(attribute='timing') | map('sum') | first | default(0) }} as total_execution_time_seconds
+  {% endif %}
+{% endmacro %}</div>
+        </section>
+
+        <section id="security-best-practices">
+            <h2>7. Security Best Practices</h2>
+
+            <h3>Secrets Management</h3>
+            <div class="warning">
+                <strong>Critical:</strong> Never commit database credentials or API keys to version control. Always use environment variables and GitHub Secrets.
+            </div>
+
+            <div class="code-block"># Required GitHub Secrets
+DBT_SNOWFLAKE_ACCOUNT
+DBT_SNOWFLAKE_USER
+DBT_SNOWFLAKE_PASSWORD
+DBT_SNOWFLAKE_ROLE
+DBT_SNOWFLAKE_DATABASE
+DBT_SNOWFLAKE_WAREHOUSE
+DBT_SNOWFLAKE_SCHEMA
+
+# Optional for enhanced security
+DBT_SNOWFLAKE_PRIVATE_KEY
+DBT_SNOWFLAKE_PRIVATE_KEY_PASSPHRASE</div>
+
+            <h3>Role-Based Access Control</h3>
+            <div class="code-block"># Environment-specific roles
+# Development
+ROLE: DEVELOPER
+GRANTS: 
+  - CREATE SCHEMA ON DATABASE DEV_DB
+  - USAGE ON WAREHOUSE DEV_WH
+
+# CI/CD
+ROLE: CI_RUNNER  
+GRANTS:
+  - CREATE SCHEMA ON DATABASE CI_DB
+  - USAGE ON WAREHOUSE CI_WH
+  - TEMPORARY SCHEMA CREATION
+
+# Production
+ROLE: PRODUCTION_DEPLOYER
+GRANTS:
+  - USAGE ON SCHEMA ANALYTICS
+  - CREATE TABLE IN SCHEMA ANALYTICS
+  - CREATE VIEW IN SCHEMA ANALYTICS</div>
+
+            <h3>Network Security</h3>
+            <div class="code-block"># GitHub Actions IP allowlisting
+- name: Get GitHub Actions IP
+  run: |
+    # Get current runner IP
+    RUNNER_IP=$(curl -s https://ipinfo.io/ip)
+    echo "RUNNER_IP=$RUNNER_IP" >> $GITHUB_ENV
+    
+- name: Allowlist runner IP
+  run: |
+    # Add IP to warehouse allowlist (Snowflake example)
+    snowsql -q "ALTER NETWORK POLICY github_actions_policy ADD ALLOWED_IP_LIST ('${{ env.RUNNER_IP }}/32')"</div>
+
+            <h3>Audit Logging</h3>
+            <div class="code-block"># Comprehensive audit logging
+{% macro log_deployment_audit() %}
+  insert into {{ target.database }}.audit.deployment_log
+  select
+    current_timestamp() as deployment_timestamp,
+    '{{ invocation_id }}' as invocation_id,
+    '{{ target.name }}' as target_environment,
+    '{{ env_var("GITHUB_ACTOR", "unknown") }}' as deployed_by,
+    '{{ env_var("GITHUB_SHA", "unknown") }}' as commit_sha,
+    '{{ env_var("GITHUB_REF", "unknown") }}' as branch_ref,
+    '{{ results | selectattr("status", "equalto", "success") | list | length }}' as successful_models,
+    '{{ results | selectattr("status", "equalto", "error") | list | length }}' as failed_models
+{% endmacro %}</div>
+        </section>
+
+        <section id="troubleshooting">
+            <h2>8. Troubleshooting & Optimization</h2>
+
+            <h3>Common Issues & Solutions</h3>
+            
+            <h4>1. Memory and Resource Issues</h4>
+            <div class="code-block"># Optimize GitHub Actions runner
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest-4-cores  # Use larger runner
+    
+    steps:
+    - name: Configure dbt for CI
+      run: |
+        # Reduce thread count for CI
+        export DBT_THREADS=2
+        
+        # Use smaller warehouse for CI
+        export DBT_WAREHOUSE=CI_SMALL_WH
+        
+        # Limit model selection for faster feedback
+        dbt run --select state:modified+ --defer</div>
+
+            <h4>2. Timeout Issues</h4>
+            <div class="code-block"># Handle long-running models
+- name: Run incremental models first
+  timeout-minutes: 30
+  run: dbt run --select config.materialized:incremental --target prod
+  
+- name: Run remaining models
+  timeout-minutes: 60  
+  run: dbt run --exclude config.materialized:incremental --target prod</div>
+
+            <h4>3. Dependency Management</h4>
+            <div class="code-block"># Cache dbt packages for faster builds
+- name: Cache dbt packages
+  uses: actions/cache@v3
+  with:
+    path: |
+      ~/.dbt
+      dbt_packages/
+    key: ${{ runner.os }}-dbt-${{ hashFiles('**/packages.yml') }}
+    restore-keys: |
+      ${{ runner.os }}-dbt-</div>
+
+            <h3>Performance Optimization</h3>
+            <div class="code-block"># Parallel execution optimization
+- name: Run models in parallel by tag
+  run: |
+    # Run staging models first
+    dbt run --select tag:staging --target prod &
+    
+    # Run marts in parallel after staging
+    wait
+    dbt run --select tag:marts --target prod --threads 8</div>
+
+            <h3>Debugging Workflow</h3>
+            <div class="code-block"># Debug mode for troubleshooting
+- name: Debug dbt configuration
+  if: failure()
+  run: |
+    echo "=== dbt Debug Information ==="
+    dbt debug --target ${{ matrix.target }}
+    
+    echo "=== Environment Variables ==="
+    env | grep DBT_ | sort
+    
+    echo "=== dbt Version ==="
+    dbt --version
+    
+    echo "=== Installed Packages ==="
+    dbt deps --dry-run</div>
+
+            <div class="success">
+                <strong>Pro Tip:</strong> Use matrix strategies to test against multiple database versions or configurations simultaneously, ensuring compatibility across your stack.
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+            <p>Implementing robust CI/CD pipelines for dbt is essential for scaling data transformations in production environments. This guide provides the foundation for building automated, secure, and reliable deployment processes that support team collaboration and maintain data quality.</p>
+
+            <h3>Key Takeaways</h3>
+            <ul>
+                <li>Start with basic automation and gradually add complexity</li>
+                <li>Implement comprehensive testing at every stage</li>
+                <li>Use environment separation for safe deployments</li>
+                <li>Monitor and alert on both deployment and data quality issues</li>
+                <li>Follow security best practices throughout the pipeline</li>
+                <li>Optimize for performance and developer experience</li>
+            </ul>
+
+            <div class="info">
+                <strong>Next Steps:</strong> Consider implementing advanced patterns like feature flags for models, automated rollback mechanisms, and integration with data observability tools for a complete production data platform.
+            </div>
+        </section>
+
+        <section id="resources">
+            <h2>Additional Resources</h2>
+            <ul>
+                <li><a href="https://docs.getdbt.com/docs/deploy/deployments" target="_blank">dbt Official Deployment Documentation</a></li>
+                <li><a href="https://docs.getdbt.com/reference/commands/test" target="_blank">dbt Testing Commands Reference</a></li>
+                <li><a href="https://docs.getdbt.com/docs/deploy/environment-variables" target="_blank">dbt Environment Variables Guide</a></li>
+                <li><a href="https://docs.getdbt.com/reference/dbt-jinja-functions/run_query" target="_blank">dbt Macro Development Guide</a></li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
