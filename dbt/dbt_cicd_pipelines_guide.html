@@ -194,6 +194,8 @@
             <h2>2. GitHub Actions Implementation</h2>
 
             <h3>Basic dbt Workflow</h3>
+            <p><strong>What it is:</strong> A simple GitHub Actions workflow that runs dbt tests automatically when code is pushed.</p>
+            <p><strong>Why you need this:</strong> Prevents broken SQL from reaching production by catching errors early. Essential for any team working with dbt - saves hours of debugging and prevents data quality issues.</p>
             <p>Create <code>.github/workflows/dbt_ci.yml</code> for basic CI/CD:</p>
 
             <div class="code-block">name: dbt CI/CD Pipeline
@@ -249,6 +251,8 @@ jobs:
         DBT_SNOWFLAKE_SCHEMA: ci_${{ github.run_id }}</div>
 
             <h3>Advanced Multi-Environment Workflow</h3>
+            <p><strong>What it is:</strong> A sophisticated pipeline that tests code in multiple environments (CI, staging) before production deployment, with SQL linting and caching optimization.</p>
+            <p><strong>Why you should care:</strong> This is what enterprise teams use. It catches environment-specific issues, ensures code quality with automated linting, and speeds up builds with intelligent caching. If you're serious about production dbt, this is your baseline.</p>
             <div class="code-block">name: Advanced dbt Pipeline
 
 on:
@@ -341,6 +345,8 @@ jobs:
             <p>Implement multiple testing layers for robust data quality assurance:</p>
 
             <h4>1. Schema Tests</h4>
+            <p><strong>What it is:</strong> Built-in dbt tests that check data quality rules like uniqueness, not-null values, and relationships between tables.</p>
+            <p><strong>Why you need this:</strong> Catches data quality issues automatically. If your customer IDs aren't unique or emails are missing, you'll know immediately instead of discovering it weeks later in a dashboard.</p>
             <div class="code-block"># schema.yml
 models:
   - name: customers
@@ -367,6 +373,8 @@ models:
               max_value: "current_date()"</div>
 
             <h4>2. Custom Generic Tests</h4>
+            <p><strong>What it is:</strong> Custom reusable tests you write for business-specific validation rules (like email format, phone number patterns, or business logic).</p>
+            <p><strong>Why you need this:</strong> Built-in tests cover basic cases, but your business has unique rules. This lets you codify "emails must be valid format" or "revenue cannot be negative" as automated checks.</p>
             <div class="code-block"># macros/test_email_format.sql
 {% macro test_email_format(model, column_name) %}
 
@@ -378,6 +386,8 @@ models:
 {% endmacro %}</div>
 
             <h4>3. Data Quality Tests</h4>
+            <p><strong>What it is:</strong> One-off tests for specific business logic that don't fit into generic patterns (like "daily revenue should never be negative").</p>
+            <p><strong>Why you need this:</strong> Some business rules are too specific for generic tests. This catches domain-specific issues that could indicate serious data problems or upstream system failures.</p>
             <div class="code-block"># tests/assert_positive_revenue.sql
 select
   order_date,
@@ -387,6 +397,8 @@ group by order_date
 having daily_revenue <= 0</div>
 
             <h4>4. Cross-Database Consistency Tests</h4>
+            <p><strong>What it is:</strong> Tests that compare data between different sources or environments to ensure consistency (like row counts matching between raw and transformed tables).</p>
+            <p><strong>Why you need this:</strong> Catches data loss during transformations. If your raw table has 1M rows but your cleaned table only has 800K, something went wrong. Essential for data integrity validation.</p>
             <div class="code-block"># macros/test_row_count_match.sql
 {% macro test_row_count_match(model, compare_model, threshold=0.05) %}
 
@@ -481,6 +493,8 @@ dbt_project:
   target: dev</div>
 
             <h3>Blue-Green Deployment Pattern</h3>
+            <p><strong>What it is:</strong> A deployment strategy that maintains two identical production environments (blue/green) and switches traffic between them for zero-downtime deployments.</p>
+            <p><strong>Why you should care:</strong> Your users never experience downtime during deployments. If something breaks, you can instantly switch back to the previous version. Critical for 24/7 data applications and SLA-sensitive environments.</p>
             <div class="code-block"># Blue-Green deployment workflow
 name: Blue-Green Deployment
 
@@ -512,6 +526,8 @@ jobs:
         dbt run-operation switch_slot --args '{slot: ${{ steps.slot.outputs.slot }}}' --target prod</div>
 
             <h3>Incremental Deployment Strategy</h3>
+            <p><strong>What it is:</strong> A smart deployment approach that only runs models that have changed since the last deployment, using dbt's state comparison features.</p>
+            <p><strong>Why you should care:</strong> Massive time savings on large projects. Instead of running 500+ models every time, only run the 5 that actually changed. Reduces deployment time from hours to minutes and saves warehouse costs.</p>
             <div class="code-block"># Incremental deployment with state comparison
 - name: Deploy changed models only
   uses: actions/checkout@v4
@@ -533,6 +549,8 @@ jobs:
             <h2>5. Advanced Workflow Patterns</h2>
 
             <h3>Parallel Job Execution</h3>
+            <p><strong>What it is:</strong> Running independent dbt model groups simultaneously instead of sequentially, then combining results at the end.</p>
+            <p><strong>Why you should care:</strong> Cut deployment time in half or more. If you have customer, order, and product marts that don't depend on each other, why wait for them to run one by one? Perfect for large dbt projects with clear domain separation.</p>
             <div class="code-block">name: Parallel dbt Jobs
 
 jobs:
@@ -562,6 +580,8 @@ jobs:
       run: dbt run --select marts.customers+ marts.orders+ marts.products+ --target prod</div>
 
             <h3>Dynamic Branch-Based Environments</h3>
+            <p><strong>What it is:</strong> Automatically creates a separate database schema for each pull request, so developers can test changes in isolation without affecting each other.</p>
+            <p><strong>Why you should care:</strong> No more "it works on my machine" problems. Every PR gets its own sandbox to test in. Reviewers can actually see the data changes, not just the code. Game-changer for data team collaboration.</p>
             <div class="code-block">name: Dynamic Environment Creation
 
 on:
@@ -600,6 +620,8 @@ jobs:
           })</div>
 
             <h3>Conditional Model Deployment</h3>
+            <p><strong>What it is:</strong> Smart workflow that detects which files changed (models, macros, seeds) and only runs the relevant dbt commands for those changes.</p>
+            <p><strong>Why you should care:</strong> Efficiency and speed. If you only changed a macro, why run all your models? If you only updated seeds, why rebuild everything? Saves time and compute costs while being more targeted.</p>
             <div class="code-block"># Conditional deployment based on changes
 - name: Check changed files
   id: changes
