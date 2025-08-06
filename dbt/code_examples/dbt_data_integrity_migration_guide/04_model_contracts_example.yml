@@ -1,0 +1,249 @@
+# ================================================================
+# Model Contracts - Schema Enforcement at Build Time
+# Equivalent to traditional table schema definitions
+# ================================================================
+
+version: 2
+
+models:
+  # =====================================
+  # CUSTOMERS MODEL WITH CONTRACT
+  # =====================================
+  - name: customers
+    description: "Customer master table with enforced schema contract"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: customer_id
+        description: "Unique customer identifier"
+        data_type: int
+        constraints:
+          - type: not_null
+          - type: primary_key
+          
+      - name: email
+        description: "Customer email address"
+        data_type: varchar(255)
+        constraints:
+          - type: not_null
+          - type: unique
+          
+      - name: first_name
+        description: "Customer first name"
+        data_type: varchar(100)
+        constraints:
+          - type: not_null
+          
+      - name: last_name
+        description: "Customer last name"
+        data_type: varchar(100)
+        constraints:
+          - type: not_null
+          
+      - name: phone
+        description: "Customer phone number"
+        data_type: varchar(20)
+        # Phone is optional, no not_null constraint
+        
+      - name: created_at
+        description: "Account creation timestamp"
+        data_type: timestamp
+        constraints:
+          - type: not_null
+          
+      - name: status
+        description: "Customer account status"
+        data_type: varchar(20)
+        constraints:
+          - type: not_null
+          
+      # Data tests for business rules (beyond schema enforcement)
+        data_tests:
+          - accepted_values:
+              values: ['active', 'inactive', 'suspended']
+
+  # =====================================
+  # ORDERS MODEL WITH CONTRACT
+  # =====================================
+  - name: orders
+    description: "Order master table with enforced schema contract"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: order_id
+        description: "Unique order identifier"
+        data_type: int
+        constraints:
+          - type: not_null
+          - type: primary_key
+          
+      - name: customer_id
+        description: "Reference to customer"
+        data_type: int
+        constraints:
+          - type: not_null
+        # Foreign key relationship tested separately
+        data_tests:
+          - relationships:
+              to: ref('customers')
+              field: customer_id
+              
+      - name: order_date
+        description: "Order placement timestamp"
+        data_type: timestamp
+        constraints:
+          - type: not_null
+          
+      - name: total_amount
+        description: "Order total amount"
+        data_type: decimal(10,2)
+        constraints:
+          - type: not_null
+        # Business rule validation via data tests
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+
+  # =====================================
+  # PRODUCTS MODEL WITH CONTRACT
+  # =====================================
+  - name: products
+    description: "Product master table with enforced schema contract"
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: product_id
+        description: "Unique product identifier"
+        data_type: int
+        constraints:
+          - type: not_null
+          - type: primary_key
+          
+      - name: sku
+        description: "Stock keeping unit"
+        data_type: varchar(50)
+        constraints:
+          - type: not_null
+          - type: unique
+          
+      - name: product_name
+        description: "Product display name"
+        data_type: varchar(200)
+        constraints:
+          - type: not_null
+          
+      - name: category_id
+        description: "Product category reference"
+        data_type: int
+        constraints:
+          - type: not_null
+          
+      - name: price
+        description: "Product base price"
+        data_type: decimal(10,2)
+        constraints:
+          - type: not_null
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              
+      - name: discount_price
+        description: "Product discount price (optional)"
+        data_type: decimal(10,2)
+        # No not_null constraint - discount is optional
+        
+      - name: inventory_quantity
+        description: "Available inventory count"
+        data_type: int
+        constraints:
+          - type: not_null
+        data_tests:
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+              
+      - name: status
+        description: "Product availability status"
+        data_type: varchar(20)
+        constraints:
+          - type: not_null
+        data_tests:
+          - accepted_values:
+              values: ['active', 'discontinued', 'out_of_stock']
+              
+      - name: created_at
+        description: "Product creation timestamp"
+        data_type: timestamp
+        constraints:
+          - type: not_null
+          
+      - name: updated_at
+        description: "Last update timestamp"
+        data_type: timestamp
+        constraints:
+          - type: not_null
+
+# =====================================
+# ADVANCED CONTRACT EXAMPLE
+# Multi-column constraints and custom validations
+# =====================================
+
+  - name: order_items
+    description: "Order line items with composite key contract"
+    config:
+      contract:
+        enforced: true
+    # Composite primary key constraint at model level
+    constraints:
+      - type: primary_key
+        columns: [order_id, product_id]
+    columns:
+      - name: order_id
+        description: "Reference to order"
+        data_type: int
+        constraints:
+          - type: not_null
+        data_tests:
+          - relationships:
+              to: ref('orders')
+              field: order_id
+              
+      - name: product_id
+        description: "Reference to product"
+        data_type: int
+        constraints:
+          - type: not_null
+        data_tests:
+          - relationships:
+              to: ref('products')
+              field: product_id
+              
+      - name: quantity
+        description: "Item quantity ordered"
+        data_type: int
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "quantity > 0"
+            
+      - name: unit_price
+        description: "Price per unit at time of order"
+        data_type: decimal(10,2)
+        constraints:
+          - type: not_null
+          - type: check
+            expression: "unit_price >= 0"
+            
+      - name: line_total
+        description: "Line total (quantity * unit_price)"
+        data_type: decimal(12,2)
+        constraints:
+          - type: not_null
+    # Custom validation for calculated field
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "ABS(line_total - (quantity * unit_price)) < 0.01"
+          config:
+            severity: error
