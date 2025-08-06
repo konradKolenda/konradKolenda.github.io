@@ -1,0 +1,143 @@
+# ================================================================
+# dbt Data Tests Configuration - schema.yml
+# Equivalent to traditional SQL constraints
+# ================================================================
+
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw data from operational systems"
+    tables:
+      - name: raw_customers
+        description: "Raw customer data from CRM"
+      - name: raw_orders
+        description: "Raw order data from e-commerce platform"
+      - name: raw_order_items
+        description: "Raw order line items"
+
+models:
+  # =====================================
+  # CUSTOMERS TABLE CONSTRAINTS
+  # =====================================
+  - name: stg_customers
+    description: "Staging customer data with data quality tests"
+    columns:
+      # PRIMARY KEY equivalent
+      - name: customer_id
+        description: "Unique customer identifier"
+        data_tests:
+          - unique              # PRIMARY KEY constraint
+          - not_null            # PRIMARY KEY constraint
+          
+      # UNIQUE constraint equivalent  
+      - name: email
+        description: "Customer email address"
+        data_tests:
+          - unique              # UNIQUE constraint
+          - not_null            # NOT NULL constraint
+          - dbt_expectations.expect_column_values_to_match_regex:
+              regex: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              
+      # NOT NULL constraints
+      - name: first_name
+        description: "Customer first name"
+        data_tests:
+          - not_null
+          
+      - name: last_name
+        description: "Customer last name" 
+        data_tests:
+          - not_null
+          
+      - name: created_at
+        description: "Account creation timestamp"
+        data_tests:
+          - not_null
+          
+      # CHECK constraint equivalent
+      - name: status
+        description: "Customer account status"
+        data_tests:
+          - accepted_values:    # CHECK constraint equivalent
+              values: ['active', 'inactive', 'suspended']
+
+  # =====================================
+  # ORDERS TABLE CONSTRAINTS  
+  # =====================================
+  - name: stg_orders
+    description: "Staging order data with referential integrity tests"
+    columns:
+      # PRIMARY KEY equivalent
+      - name: order_id
+        description: "Unique order identifier"
+        data_tests:
+          - unique
+          - not_null
+          
+      # FOREIGN KEY constraint equivalent
+      - name: customer_id
+        description: "Reference to customer"
+        data_tests:
+          - not_null
+          - relationships:      # FOREIGN KEY constraint equivalent
+              to: ref('stg_customers')
+              field: customer_id
+              
+      - name: order_date
+        description: "Order placement date"
+        data_tests:
+          - not_null
+          
+      # CHECK constraint equivalent
+      - name: total_amount
+        description: "Order total amount"
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:  # CHECK constraint equivalent
+              expression: "> 0"
+
+  # =====================================
+  # ORDER ITEMS TABLE CONSTRAINTS
+  # =====================================
+  - name: stg_order_items
+    description: "Staging order items with composite key tests"
+    # COMPOSITE PRIMARY KEY equivalent
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - order_id
+            - product_id
+    columns:
+      # Part of composite primary key
+      - name: order_id
+        description: "Reference to order"
+        data_tests:
+          - not_null
+          - relationships:      # FOREIGN KEY constraint
+              to: ref('stg_orders')
+              field: order_id
+              
+      - name: product_id
+        description: "Reference to product"
+        data_tests:
+          - not_null
+          # Note: Assuming products table exists
+          # - relationships:
+          #     to: ref('stg_products')
+          #     field: product_id
+              
+      # CHECK constraints equivalent
+      - name: quantity
+        description: "Item quantity"
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "> 0"
+              
+      - name: unit_price
+        description: "Price per unit"
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"

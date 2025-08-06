@@ -1,0 +1,235 @@
+# ================================================================
+# dbt Project Configuration for Data Integrity Migration
+# Complete dbt_project.yml setup for constraint equivalency
+# ================================================================
+
+name: 'data_integrity_migration'
+version: '1.0.0'
+config-version: 2
+
+# =====================================
+# PROFILE CONFIGURATION
+# =====================================
+profile: 'data_integrity_migration'
+
+# =====================================
+# DIRECTORY STRUCTURE
+# =====================================
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# =====================================
+# GLOBAL TEST CONFIGURATION
+# Equivalent to database constraint behavior
+# =====================================
+data_tests:
+  +severity: warn          # Default severity for all tests
+  +error_if: ">= 1"       # Fail build if any test failures (like constraints)
+  +warn_if: ">= 1"        # Warn if any failures
+  +store_failures: true   # Store failed records for analysis
+  +store_failures_as: "test_failures_{model_name}_{test_name}"
+
+# =====================================
+# MODEL CONFIGURATIONS BY LAYER
+# =====================================
+models:
+  data_integrity_migration:
+    
+    # RAW LAYER - Minimal validation, data ingestion focus
+    raw:
+      +materialized: table
+      +data_tests:
+        +severity: warn      # Lenient for raw data issues
+        +store_failures: true
+        
+    # STAGING LAYER - Primary data validation (like table constraints)
+    staging:
+      +materialized: table
+      +data_tests:
+        +severity: error     # Strict enforcement like database constraints
+        +error_if: ">= 1"    # Any failure stops the build
+        +store_failures: true
+      
+      # Core entity staging (customers, orders, products)
+      core_entities:
+        +data_tests:
+          +severity: error   # Critical entities must pass all tests
+          +error_if: ">= 1"  # Zero tolerance for failures
+          
+    # INTERMEDIATE LAYER - Business rule validation
+    intermediate:
+      +materialized: ephemeral
+      +data_tests:
+        +severity: warn      # More lenient for complex business rules
+        +error_if: ">= 10"   # Allow some failures but limit them
+        
+    # MARTS LAYER - Consumer-facing, high quality standards
+    marts:
+      +materialized: table
+      +data_tests:
+        +severity: error     # Strict quality for end users
+        +error_if: ">= 1"    # Zero tolerance for consumer data issues
+      
+      # Dimensional models
+      dimensions:
+        +materialized: table
+        +data_tests:
+          +severity: error
+          +store_failures: true
+          
+      # Fact models  
+      facts:
+        +materialized: table
+        +data_tests:
+          +severity: error
+          +store_failures: true
+
+# =====================================
+# SEED CONFIGURATIONS
+# Reference data with validation
+# =====================================
+seeds:
+  data_integrity_migration:
+    +data_tests:
+      +severity: error       # Reference data must be perfect
+      +error_if: ">= 1"
+      
+    # Lookup tables and reference data
+    reference:
+      +materialized: table
+      +data_tests:
+        +severity: error
+        
+# =====================================
+# SNAPSHOT CONFIGURATIONS
+# SCD with data quality checks
+# =====================================
+snapshots:
+  data_integrity_migration:
+    +target_schema: snapshots
+    +strategy: timestamp
+    +updated_at: updated_at
+    +data_tests:
+      +severity: warn        # Historical data issues are warnings
+      +store_failures: true
+
+# =====================================
+# SOURCE CONFIGURATIONS
+# External data validation
+# =====================================
+sources:
+  data_integrity_migration:
+    +data_tests:
+      +severity: warn        # External data issues are warnings initially
+      +error_if: ">= 100"    # But too many failures should stop the pipeline
+      +store_failures: true
+
+# =====================================
+# MACRO CONFIGURATIONS
+# Custom test and validation functions
+# =====================================
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['data_integrity_migration', 'dbt_utils']
+  - macro_namespace: dbt_expectations  
+    search_order: ['data_integrity_migration', 'dbt_expectations']
+
+# =====================================
+# VARIABLE DEFINITIONS
+# Control data validation behavior
+# =====================================
+vars:
+  # Data quality thresholds (equivalent to constraint tolerance)
+  max_null_percentage: 5          # Allow up to 5% nulls in optional fields
+  max_duplicate_percentage: 0     # Zero tolerance for duplicates (like UNIQUE constraint)
+  max_orphan_records: 0           # Zero tolerance for orphaned FKs
+  
+  # Date boundaries for validation
+  earliest_valid_date: '1900-01-01'
+  latest_valid_date: '2050-12-31'
+  
+  # Business rule parameters
+  min_order_amount: 0.01
+  max_order_amount: 1000000
+  
+  # Email domain validation
+  allowed_email_domains: ['company.com', 'partner.org']
+  blocked_email_domains: ['tempmail.com', 'guerrillamail.com']
+  
+  # Performance tuning
+  test_sample_size: null          # null = test all records (like constraints)
+  enable_expensive_tests: true    # Control resource-intensive validations
+
+# =====================================
+# ON-RUN-START & ON-RUN-END HOOKS
+# Equivalent to database triggers for validation logging
+# =====================================
+on-run-start:
+  - "{{ log_data_quality_run_start() }}"
+  - "CREATE SCHEMA IF NOT EXISTS {{ target.schema }}_test_results"
+  
+on-run-end:
+  - "{{ log_data_quality_run_end() }}"
+  - "{{ send_data_quality_alert_if_failures() }}"
+
+# =====================================
+# QUERY COMMENTS
+# Track data quality test execution
+# =====================================
+query-comment:
+  comment: "dbt-data-integrity-run"
+  append: true
+
+# =====================================
+# ADVANCED CONFIGURATIONS
+# =====================================
+
+# Require model contracts for critical tables (like schema enforcement)
+require-dbt-version: ">=1.5.0"
+
+# Enable experimental features for enhanced constraint support
+flags:
+  use_experimental_parser: false
+  static_parser: true
+  
+# =====================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# =====================================
+
+# Development environment - more lenient testing
+# profiles.yml should set DBT_ENV=dev for development
+"{{ 'dev' if env_var('DBT_ENV', 'prod') == 'dev' else 'prod' }}":
+  data_tests:
+    +severity: "{{ 'warn' if env_var('DBT_ENV') == 'dev' else 'error' }}"
+    +error_if: "{{ '>= 10' if env_var('DBT_ENV') == 'dev' else '>= 1' }}"
+
+# Production environment - strict enforcement  
+prod:
+  data_tests:
+    +severity: error
+    +error_if: ">= 1"
+    +store_failures: true
+  models:
+    +pre-hook: "{{ validate_model_contract() }}"    # Enforce contracts
+    +post-hook: "{{ log_model_validation_results() }}" # Log results
+
+# =====================================
+# PACKAGES FOR ENHANCED DATA TESTING
+# =====================================
+# This should be in packages.yml, shown here for reference:
+# packages:
+#   - package: dbt-labs/dbt_utils
+#     version: 1.1.1
+#   - package: calogica/dbt_expectations
+#     version: 0.10.1
+#   - package: dbt-labs/codegen
+#     version: 0.12.1
