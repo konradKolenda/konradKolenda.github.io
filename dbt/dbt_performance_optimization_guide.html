@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Performance Optimization: Complete Production Strategy Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        ul, ol {
+            padding-left: 30px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc ul li {
+            margin-bottom: 8px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+        }
+        .toc a:hover {
+            color: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .performance-comparison {
+            background-color: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .metric-box {
+            display: inline-block;
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt Performance Optimization: Complete Production Strategy Guide</h1>
+        
+        <div class="info">
+            <strong>Overview:</strong> This comprehensive guide covers advanced performance optimization techniques for dbt in production environments. Learn how to reduce query execution time, minimize warehouse costs, and scale your data transformations efficiently across different cloud platforms.
+        </div>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#performance-fundamentals">1. Performance Fundamentals</a></li>
+                <li><a href="#query-optimization">2. Query Optimization Techniques</a></li>
+                <li><a href="#materialization-strategies">3. Materialization Strategy Optimization</a></li>
+                <li><a href="#warehouse-specific">4. Warehouse-Specific Optimizations</a></li>
+                <li><a href="#parallel-execution">5. Parallel Execution & Resource Management</a></li>
+                <li><a href="#incremental-optimization">6. Incremental Model Optimization</a></li>
+                <li><a href="#monitoring-profiling">7. Performance Monitoring & Profiling</a></li>
+                <li><a href="#cost-optimization">8. Cost Optimization Strategies</a></li>
+                <li><a href="#code-examples">9. Code Examples</a></li>
+            </ul>
+        </div>
+
+        <section id="performance-fundamentals">
+            <h2>1. Performance Fundamentals</h2>
+            
+            <h3>Understanding dbt Performance Bottlenecks</h3>
+            <p>dbt performance issues typically fall into these categories:</p>
+
+            <div class="performance-comparison">
+                <h4>Common Performance Issues</h4>
+                <table>
+                    <tr>
+                        <th>Issue Type</th>
+                        <th>Symptoms</th>
+                        <th>Impact</th>
+                        <th>Solution Priority</th>
+                    </tr>
+                    <tr>
+                        <td>Inefficient SQL</td>
+                        <td>Long-running models, high warehouse usage</td>
+                        <td>High cost, slow pipelines</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Wrong Materialization</td>
+                        <td>Models rebuild unnecessarily</td>
+                        <td>Wasted compute, stale data</td>
+                        <td>High</td>
+                    </tr>
+                    <tr>
+                        <td>Sequential Execution</td>
+                        <td>Models wait for unrelated dependencies</td>
+                        <td>Extended pipeline duration</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Resource Allocation</td>
+                        <td>Warehouse under/over-provisioned</td>
+                        <td>Poor performance or high costs</td>
+                        <td>Medium</td>
+                    </tr>
+                    <tr>
+                        <td>Data Loading</td>
+                        <td>Slow data ingestion, memory issues</td>
+                        <td>Pipeline delays, failures</td>
+                        <td>High</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>Performance Measurement Framework</h3>
+            <p><strong>What it is:</strong> A systematic approach to measuring and tracking dbt performance across key metrics.</p>
+            <p><strong>Why you need this:</strong> You can't optimize what you can't measure. This framework establishes baseline performance metrics and identifies optimization opportunities before they become production problems.</p>
+
+            <div class="code-block"># dbt_project.yml - Enable performance tracking
+on-run-start:
+  - "{{ log_run_start() }}"
+  
+on-run-end:
+  - "{{ log_run_results() }}"
+  - "{{ analyze_model_performance() }}"
+
+# Performance tracking configuration
+vars:
+  performance_tracking: true
+  slow_query_threshold: 300  # seconds
+  cost_tracking: true</div>
+
+            <div class="metric-box">Execution Time</div>
+            <div class="metric-box">Query Complexity</div>
+            <div class="metric-box">Data Volume</div>
+            <div class="metric-box">Warehouse Cost</div>
+            <div class="metric-box">Concurrency</div>
+
+            <h3>Performance Profiling Setup</h3>
+            <div class="code-block"># macros/performance_tracking.sql
+{% macro log_run_results() %}
+  {% if execute %}
+    {% set results_query %}
+      create table if not exists {{ target.database }}.analytics.dbt_performance_log (
+        run_id varchar,
+        model_name varchar,
+        execution_time_seconds float,
+        rows_affected bigint,
+        bytes_processed bigint,
+        warehouse_used varchar,
+        target_name varchar,
+        run_timestamp timestamp,
+        git_sha varchar
+      );
+    {% endset %}
+    
+    {% do run_query(results_query) %}
+    
+    {% for result in results %}
+      {% if result.node.resource_type == 'model' %}
+        {% set log_query %}
+          insert into {{ target.database }}.analytics.dbt_performance_log 
+          values (
+            '{{ invocation_id }}',
+            '{{ result.node.name }}',
+            {{ result.timing[0].completed_at | as_timestamp - result.timing[0].started_at | as_timestamp }},
+            {{ result.adapter_response.rows_affected | default(0) }},
+            {{ result.adapter_response.bytes_processed | default(0) }},
+            '{{ target.warehouse }}',
+            '{{ target.name }}',
+            current_timestamp(),
+            '{{ env_var("GIT_SHA", "unknown") }}'
+          );
+        {% endset %}
+        {% do run_query(log_query) %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endmacro %}</div>
+        </section>
+
+        <section id="query-optimization">
+            <h2>2. Query Optimization Techniques</h2>
+
+            <h3>SQL Optimization Best Practices</h3>
+            
+            <h4>1. Predicate Pushdown Optimization</h4>
+            <p><strong>What it is:</strong> Structuring your SQL so that filtering conditions (WHERE clauses) are applied as early as possible in the query execution.</p>
+            <p><strong>Why you should care:</strong> Can reduce query execution time by 80%+ and costs dramatically. Instead of processing millions of rows then filtering, you filter first and process thousands.</p>
+
+            <div class="code-block">-- ❌ BEFORE: Inefficient - processes all data first
+{{ config(
+    materialized='table',
+    pre_hook="grant select on {{ this }} to role analyst_role"
+) }}
+
+select 
+    customer_id,
+    order_date,
+    revenue,
+    -- Complex calculations on full dataset
+    avg(revenue) over (partition by customer_id order by order_date rows between 30 preceding and current row) as rolling_30_day_avg
+from {{ ref('fact_orders') }}
+where order_date >= '2023-01-01'  -- Late filtering
+  and status = 'completed'
+
+-- ✅ AFTER: Optimized - filters early, reduces compute
+{{ config(
+    materialized='incremental',
+    unique_key='order_id',
+    on_schema_change='fail'
+) }}
+
+with filtered_orders as (
+  select 
+    customer_id,
+    order_date,
+    revenue,
+    order_id
+  from {{ ref('fact_orders') }}
+  where order_date >= '2023-01-01'  -- Early filtering
+    and status = 'completed'
+    {% if is_incremental() %}
+      and order_date > (select max(order_date) from {{ this }})
+    {% endif %}
+),
+
+enriched_orders as (
+  select 
+    *,
+    -- Complex calculations on reduced dataset
+    avg(revenue) over (
+      partition by customer_id 
+      order by order_date 
+      rows between 30 preceding and current row
+    ) as rolling_30_day_avg
+  from filtered_orders
+)
+
+select * from enriched_orders</div>
+
+            <h4>2. Join Optimization</h4>
+            <p><strong>What it is:</strong> Optimizing the order and type of table joins to minimize data movement and processing.</p>
+            <p><strong>Why you need this:</strong> Poor join strategies can make queries 10x slower. Large dimension tables joining before filtering can explode your data size and kill performance.</p>
+
+            <div class="code-block">-- ❌ BEFORE: Inefficient join order
+select 
+  o.order_id,
+  c.customer_name,
+  p.product_name,
+  ol.quantity,
+  ol.price
+from {{ ref('fact_orders') }} o
+left join {{ ref('dim_customers') }} c on o.customer_id = c.customer_id  -- Large table early
+left join {{ ref('fact_order_lines') }} ol on o.order_id = ol.order_id   -- Explodes row count
+left join {{ ref('dim_products') }} p on ol.product_id = p.product_id    -- After explosion
+where o.order_date >= current_date - 30
+  and c.customer_segment = 'premium'
+
+-- ✅ AFTER: Optimized join order and strategy
+with recent_orders as (
+  select order_id, customer_id, order_date
+  from {{ ref('fact_orders') }}
+  where order_date >= current_date - 30  -- Filter first
+),
+
+premium_customers as (
+  select customer_id, customer_name
+  from {{ ref('dim_customers') }}
+  where customer_segment = 'premium'  -- Filter dimension early
+),
+
+order_lines_agg as (
+  select 
+    order_id,
+    count(*) as line_count,
+    sum(quantity * price) as total_amount
+  from {{ ref('fact_order_lines') }}
+  where order_id in (select order_id from recent_orders)  -- Use EXISTS pattern
+  group by order_id
+),
+
+final as (
+  select 
+    ro.order_id,
+    pc.customer_name,
+    ro.order_date,
+    ola.line_count,
+    ola.total_amount
+  from recent_orders ro
+  inner join premium_customers pc on ro.customer_id = pc.customer_id  -- Smaller sets
+  left join order_lines_agg ola on ro.order_id = ola.order_id
+)
+
+select * from final</div>
+
+            <h4>3. Aggregation Optimization</h4>
+            <p><strong>What it is:</strong> Using efficient aggregation patterns that minimize memory usage and take advantage of warehouse-specific optimizations.</p>
+            <p><strong>Why you should care:</strong> Bad aggregations can cause out-of-memory errors and extremely slow performance. Good patterns can make summarization queries 5-10x faster.</p>
+
+            <div class="code-block">-- ❌ BEFORE: Memory-intensive aggregation
+select 
+  customer_id,
+  order_date,
+  sum(revenue) as daily_revenue,
+  count(distinct order_id) as order_count,
+  avg(order_value) as avg_order_value,
+  -- Multiple window functions - expensive
+  rank() over (partition by customer_id order by sum(revenue) desc) as revenue_rank,
+  row_number() over (partition by customer_id order by order_date desc) as recency_rank
+from {{ ref('fact_orders') }}
+group by customer_id, order_date
+having sum(revenue) > 1000
+
+-- ✅ AFTER: Optimized aggregation strategy  
+with daily_aggregates as (
+  select 
+    customer_id,
+    order_date::date as order_date,
+    sum(revenue) as daily_revenue,
+    count(distinct order_id) as order_count,
+    avg(order_value) as avg_order_value
+  from {{ ref('fact_orders') }}
+  group by 1, 2
+  having sum(revenue) > 1000  -- Filter early
+),
+
+ranked_customers as (
+  select 
+    *,
+    rank() over (partition by customer_id order by daily_revenue desc) as revenue_rank
+  from daily_aggregates
+),
+
+final as (
+  select 
+    *,
+    row_number() over (partition by customer_id order by order_date desc) as recency_rank
+  from ranked_customers
+  where revenue_rank <= 10  -- Limit window function scope
+)
+
+select * from final</div>
+
+            <h3>Advanced Query Patterns</h3>
+
+            <h4>4. Lateral Column Aliasing</h4>
+            <p><strong>What it is:</strong> A Snowflake-specific feature that allows you to reference calculated columns within the same SELECT statement.</p>
+            <p><strong>Why you need this:</strong> Eliminates redundant calculations and CTEs, making queries cleaner and often faster. Particularly powerful for complex business logic calculations.</p>
+
+            <div class="code-block">-- Snowflake Lateral Column Aliasing
+select 
+  customer_id,
+  order_date,
+  revenue,
+  
+  -- Calculate base metrics
+  revenue * 0.1 as estimated_profit,
+  
+  -- Reference previously calculated columns (Snowflake only)
+  estimated_profit / revenue as profit_margin,
+  
+  case 
+    when profit_margin > 0.15 then 'high'
+    when profit_margin > 0.08 then 'medium' 
+    else 'low'
+  end as profitability_tier,
+  
+  -- Use in aggregations
+  avg(profit_margin) over (
+    partition by customer_id 
+    order by order_date 
+    rows between 6 preceding and current row
+  ) as avg_profit_margin_7d
+
+from {{ ref('fact_orders') }}</div>
+
+            <h4>5. Set Operations Optimization</h4>
+            <p><strong>What it is:</strong> Efficient use of UNION, INTERSECT, and EXCEPT operations to combine or compare datasets.</p>
+            <p><strong>Why you should care:</strong> Poor set operations can create massive performance bottlenecks. Optimized patterns ensure efficient data combination without memory issues.</p>
+
+            <div class="code-block">-- ❌ BEFORE: Inefficient UNION with duplicates
+select customer_id, order_date, 'online' as channel from online_orders
+union
+select customer_id, order_date, 'retail' as channel from retail_orders
+union
+select customer_id, order_date, 'mobile' as channel from mobile_orders
+
+-- ✅ AFTER: Optimized with UNION ALL and deduplication
+with all_orders as (
+  select customer_id, order_date, 'online' as channel from online_orders
+  union all  -- Faster than UNION
+  select customer_id, order_date, 'retail' as channel from retail_orders  
+  union all
+  select customer_id, order_date, 'mobile' as channel from mobile_orders
+),
+
+deduplicated as (
+  select 
+    customer_id, 
+    order_date, 
+    channel,
+    row_number() over (
+      partition by customer_id, order_date 
+      order by 
+        case channel 
+          when 'online' then 1 
+          when 'mobile' then 2 
+          when 'retail' then 3 
+        end
+    ) as rn
+  from all_orders
+)
+
+select customer_id, order_date, channel
+from deduplicated 
+where rn = 1</div>
+        </section>
+
+        <section id="materialization-strategies">
+            <h2>3. Materialization Strategy Optimization</h2>
+
+            <h3>Choosing the Right Materialization</h3>
+            <p>Select materialization strategies based on data characteristics and usage patterns:</p>
+
+            <table>
+                <tr>
+                    <th>Data Pattern</th>
+                    <th>Recommended Materialization</th>
+                    <th>Reasoning</th>
+                    <th>Performance Impact</th>
+                </tr>
+                <tr>
+                    <td>Large, append-only data</td>
+                    <td>Incremental</td>
+                    <td>Only process new/changed records</td>
+                    <td>90%+ reduction in compute</td>
+                </tr>
+                <tr>
+                    <td>Small, frequently queried</td>
+                    <td>Table</td>
+                    <td>Fast reads, acceptable rebuild cost</td>
+                    <td>10x faster query performance</td>
+                </tr>
+                <tr>
+                    <td>Complex transformations, infrequent reads</td>
+                    <td>View</td>
+                    <td>No storage cost, compute on demand</td>
+                    <td>Zero maintenance overhead</td>
+                </tr>
+                <tr>
+                    <td>Aggregated metrics, daily updates</td>
+                    <td>Table with snapshot</td>
+                    <td>Historical preservation, fast access</td>
+                    <td>Consistent performance</td>
+                </tr>
+            </table>
+
+            <h3>Advanced Incremental Strategies</h3>
+
+            <h4>1. Microbatch Processing</h4>
+            <p><strong>What it is:</strong> dbt's newest incremental strategy that processes data in small, time-based batches rather than all-at-once.</p>
+            <p><strong>Why you should care:</strong> Massive performance improvement for time-series data. Reduces memory usage, enables parallelization, and provides better error recovery. Can cut processing time by 70% on large datasets.</p>
+
+            <div class="code-block">{{ config(
+    materialized='incremental',
+    incremental_strategy='microbatch',
+    event_time='order_timestamp',
+    batch_size='day',
+    lookback=2
+) }}
+
+select 
+  order_id,
+  customer_id,
+  order_timestamp,
+  revenue,
+  
+  -- Window functions work efficiently within microbatches
+  sum(revenue) over (
+    partition by customer_id 
+    order by order_timestamp 
+    range between interval '7 days' preceding and current row
+  ) as revenue_7d_rolling,
+  
+  -- Complex aggregations per batch
+  count(*) over (
+    partition by customer_id, order_timestamp::date
+  ) as daily_order_count
+
+from {{ ref('raw_orders') }}
+where order_timestamp >= date('2023-01-01')</div>
+
+            <h4>2. Smart Incremental Merge</h4>
+            <p><strong>What it is:</strong> An optimized merge strategy that handles updates efficiently while minimizing data scanning.</p>
+            <p><strong>Why you need this:</strong> Standard incremental strategies can be inefficient with frequent updates. This pattern ensures you only scan and update the data that actually changed, critical for real-time data pipelines.</p>
+
+            <div class="code-block">{{ config(
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key='customer_id',
+    merge_exclude_columns=['last_updated', 'data_hash']
+) }}
+
+with source_data as (
+  select 
+    customer_id,
+    customer_name,
+    email,
+    registration_date,
+    last_purchase_date,
+    total_lifetime_value,
+    current_timestamp() as last_updated,
+    
+    -- Create hash for change detection
+    md5(concat_ws('||', 
+      customer_name, 
+      email, 
+      last_purchase_date::string, 
+      total_lifetime_value::string
+    )) as data_hash
+    
+  from {{ ref('raw_customers') }}
+  
+  {% if is_incremental() %}
+    -- Only process records that might have changed
+    where last_purchase_date >= (
+      select max(last_purchase_date) - interval '7 days' 
+      from {{ this }}
+    )
+  {% endif %}
+),
+
+{% if is_incremental() %}
+changed_records as (
+  select s.*
+  from source_data s
+  left join {{ this }} t on s.customer_id = t.customer_id
+  where t.customer_id is null  -- New records
+     or s.data_hash != t.data_hash  -- Changed records
+)
+
+select * from changed_records
+{% else %}
+select * from source_data
+{% endif %}</div>
+
+            <h3>Materialization Performance Monitoring</h3>
+            <div class="code-block"># macros/materialization_analysis.sql
+{% macro analyze_materialization_performance() %}
+  {% set analysis_query %}
+    with model_stats as (
+      select 
+        model_name,
+        materialization,
+        avg(execution_time_seconds) as avg_runtime,
+        max(execution_time_seconds) as max_runtime,
+        sum(bytes_processed) as total_bytes,
+        count(*) as run_count
+      from {{ target.database }}.analytics.dbt_performance_log
+      where run_timestamp >= current_date - 30
+      group by model_name, materialization
+    ),
+    
+    recommendations as (
+      select 
+        *,
+        case 
+          when materialization = 'view' and avg_runtime > 60 then 'Consider table materialization'
+          when materialization = 'table' and max_runtime < 10 and run_count > 20 then 'Consider view materialization'  
+          when materialization = 'table' and total_bytes > 1000000000 then 'Consider incremental strategy'
+          else 'Current materialization optimal'
+        end as recommendation
+      from model_stats
+    )
+    
+    select * from recommendations
+    order by avg_runtime desc;
+  {% endset %}
+  
+  {{ return(run_query(analysis_query)) }}
+{% endmacro %}</div>
+        </section>
+
+        <section id="warehouse-specific">
+            <h2>4. Warehouse-Specific Optimizations</h2>
+
+            <h3>Snowflake Optimization</h3>
+
+            <h4>1. Clustering Keys</h4>
+            <p><strong>What it is:</strong> Snowflake's way of physically organizing data within tables to optimize query performance.</p>
+            <p><strong>Why you should care:</strong> Proper clustering can reduce query times by 80% and costs significantly. Critical for large tables with predictable query patterns.</p>
+
+            <div class="code-block">{{ config(
+    materialized='table',
+    cluster_by=['order_date', 'customer_segment'],
+    automatic_clustering=true
+) }}
+
+-- Optimized for date range and segment filtering
+select 
+  order_id,
+  customer_id,
+  order_date,
+  customer_segment,
+  revenue,
+  product_category
+from {{ ref('raw_orders') }}
+where order_date >= '2023-01-01'
+
+-- Post-hook to analyze clustering effectiveness
+{{ config(
+    post_hook=[
+      "analyze table {{ this }} compute statistics for all columns",
+      "select system$clustering_information('{{ this }}', '(order_date, customer_segment)')"
+    ]
+) }}</div>
+
+            <h4>2. Warehouse Sizing Strategy</h4>
+            <p><strong>What it is:</strong> Dynamic warehouse sizing that scales compute resources based on workload requirements.</p>
+            <p><strong>Why you need this:</strong> Right-sizing warehouses can reduce costs by 50%+ while maintaining performance. Over-provisioning wastes money, under-provisioning kills performance.</p>
+
+            <div class="code-block"># profiles.yml - Dynamic warehouse configuration
+dbt_project:
+  outputs:
+    dev:
+      warehouse: "{{ env_var('DBT_WAREHOUSE', 'DEV_WH_XS') }}"
+      
+    prod:
+      warehouse: >
+        {%- if var('model_size_hint', 'medium') == 'large' -%}
+          PROD_WH_L
+        {%- elif var('model_size_hint') == 'xlarge' -%}
+          PROD_WH_XL  
+        {%- else -%}
+          PROD_WH_M
+        {%- endif -%}</div>
+
+            <div class="code-block">-- Model-level warehouse hints
+{{ config(
+    materialized='table',
+    vars={'model_size_hint': 'large'},
+    pre_hook="alter warehouse {{ target.warehouse }} set warehouse_size = 'LARGE'"
+    post_hook="alter warehouse {{ target.warehouse }} set warehouse_size = 'MEDIUM'"
+) }}
+
+-- Complex aggregation requiring larger warehouse
+select 
+  customer_id,
+  order_month,
+  sum(revenue) as monthly_revenue,
+  count(distinct order_id) as order_count,
+  
+  -- CPU-intensive calculations
+  percentile_cont(0.5) within group (order by revenue) as median_order_value,
+  stddev(revenue) as revenue_stddev,
+  
+  -- Complex window functions
+  sum(revenue) over (
+    partition by customer_id 
+    order by order_month 
+    rows between 11 preceding and current row
+  ) as trailing_12m_revenue
+
+from {{ ref('fact_orders') }}
+group by customer_id, date_trunc('month', order_date)</div>
+
+            <h3>BigQuery Optimization</h3>
+
+            <h4>1. Partitioning and Clustering</h4>
+            <p><strong>What it is:</strong> BigQuery's data organization features that reduce scan amounts and improve query performance.</p>
+            <p><strong>Why you should care:</strong> Can reduce query costs by 90% and improve performance dramatically. Partitioning limits data scanned, clustering optimizes data layout within partitions.</p>
+
+            <div class="code-block">{{ config(
+    materialized='table',
+    partition_by={
+      'field': 'order_date',
+      'data_type': 'date',
+      'granularity': 'day'
+    },
+    cluster_by=['customer_segment', 'product_category'],
+    require_partition_filter=true
+) }}
+
+select 
+  order_id,
+  customer_id,
+  order_date,
+  customer_segment,
+  product_category,
+  revenue
+from {{ ref('raw_orders') }}
+
+-- Partition expiration for cost control
+{{ config(
+    post_hook="alter table {{ this }} set options(partition_expiration_days=730)"
+) }}</div>
+
+            <h4>2. BigQuery Slots Optimization</h4>
+            <div class="code-block"># BigQuery-specific performance configuration
+{{ config(
+    materialized='table',
+    labels={'team': 'analytics', 'priority': 'high'},
+    require_partition_filter=true,
+    max_staleness='INTERVAL 1 HOUR'  -- For materialized views
+) }}
+
+-- Use APPROX functions for better performance
+select 
+  customer_segment,
+  order_date,
+  
+  -- Standard aggregations
+  count(*) as order_count,
+  sum(revenue) as total_revenue,
+  
+  -- Approximate aggregations (faster, less precise)
+  approx_count_distinct(customer_id) as approx_unique_customers,
+  approx_quantiles(revenue, 100)[offset(50)] as approx_median_revenue,
+  
+  -- HyperLogLog for cardinality
+  hll_count.merge(hll_count.init(customer_id)) as hll_unique_customers
+
+from {{ ref('fact_orders') }}
+group by customer_segment, order_date</div>
+
+            <h3>Redshift Optimization</h3>
+
+            <h4>Distribution and Sort Keys</h4>
+            <div class="code-block">{{ config(
+    materialized='table',
+    dist='customer_id',  -- Distribute by join key
+    sort=['order_date', 'customer_id'],  -- Sort by filter columns
+    diststyle='key'
+) }}
+
+-- Optimized for customer-based analytics
+select 
+  customer_id,
+  order_date,
+  order_id,
+  revenue,
+  
+  -- Window functions benefit from sort keys
+  row_number() over (
+    partition by customer_id 
+    order by order_date
+  ) as customer_order_sequence,
+  
+  sum(revenue) over (
+    partition by customer_id 
+    order by order_date 
+    rows unbounded preceding
+  ) as cumulative_revenue
+
+from {{ ref('raw_orders') }}
+where order_date >= '2023-01-01'</div>
+        </section>
+
+        <section id="parallel-execution">
+            <h2>5. Parallel Execution & Resource Management</h2>
+
+            <h3>Thread Configuration Optimization</h3>
+            <p><strong>What it is:</strong> Configuring dbt to run multiple models simultaneously, taking advantage of your warehouse's concurrency capabilities.</p>
+            <p><strong>Why you should care:</strong> Can reduce total pipeline runtime by 50-70%. Instead of running 100 models sequentially over 2 hours, run 10 in parallel and finish in 20 minutes.</p>
+
+            <div class="code-block"># profiles.yml - Environment-specific threading
+dbt_project:
+  outputs:
+    dev:
+      threads: 4  # Conservative for development
+      keepalives_idle: 1800
+      
+    ci:  
+      threads: 8  # Aggressive for CI speed
+      query_timeout: 300  # Fail fast on long queries
+      
+    prod:
+      threads: 12  # Maximize production throughput
+      keepalives_idle: 7200
+      
+# dbt_project.yml - Model-specific concurrency
+models:
+  my_project:
+    staging:
+      +threads: 16  # High parallelism for simple staging
+    marts:
+      +threads: 8   # Moderate for complex business logic
+    exports:
+      +threads: 4   # Conservative for external systems</div>
+
+            <h3>Dependency Optimization</h3>
+            <p><strong>What it is:</strong> Structuring your dbt project to minimize unnecessary dependencies and maximize parallel execution opportunities.</p>
+            <p><strong>Why you need this:</strong> Poor dependency design creates bottlenecks where fast models wait for slow ones. Optimized dependencies enable true parallel processing.</p>
+
+            <div class="code-block">-- ❌ BEFORE: Creates unnecessary dependencies
+-- All marts depend on single large staging table
+{{ config(materialized='table') }}
+
+select * from {{ ref('staging_orders_customers_products') }}  -- Monolithic staging
+where customer_segment = 'premium'
+
+-- ✅ AFTER: Optimized dependency structure
+-- Focused staging models enable parallel mart processing
+{{ config(materialized='table') }}
+
+with customers as (
+  select * from {{ ref('staging_customers') }}  -- Independent staging
+  where segment = 'premium'
+),
+
+orders as (
+  select * from {{ ref('staging_orders') }}  -- Independent staging  
+  where order_date >= '2023-01-01'
+),
+
+-- Business logic can run in parallel
+final as (
+  select 
+    c.customer_id,
+    c.customer_name,
+    o.order_id,
+    o.order_date,
+    o.revenue
+  from customers c
+  inner join orders o on c.customer_id = o.customer_id
+)
+
+select * from final</div>
+
+            <h3>Resource Pool Management</h3>
+            <div class="code-block"># Advanced resource allocation
+{{ config(
+    materialized='table',
+    warehouse='COMPUTE_WH',
+    resource_class='high_memory',  # Snowflake resource class
+    pre_hook=[
+      "alter warehouse {{ target.warehouse }} set warehouse_size = 'LARGE'",
+      "alter warehouse {{ target.warehouse }} set auto_suspend = 60"
+    ],
+    post_hook=[
+      "alter warehouse {{ target.warehouse }} set warehouse_size = 'MEDIUM'",
+      "call system$task_dependents('{{ this }}')"  # Trigger downstream tasks
+    ]
+) }}
+
+-- Memory-intensive model requiring dedicated resources
+with memory_intensive_calc as (
+  select 
+    customer_id,
+    array_agg(object_construct(
+      'order_date', order_date,
+      'revenue', revenue,
+      'products', product_list
+    )) as customer_journey,
+    
+    -- Complex analytics requiring significant memory
+    listagg(distinct product_category, ', ') within group (order by product_category) as categories_purchased,
+    percentile_cont(0.25) within group (order by revenue) as revenue_p25,
+    percentile_cont(0.75) within group (order by revenue) as revenue_p75
+    
+  from {{ ref('enriched_orders') }}
+  group by customer_id
+  having count(*) > 10  -- Only high-value customers
+)
+
+select * from memory_intensive_calc</div>
+
+            <h3>Pipeline Orchestration Patterns</h3>
+            <div class="code-block"># dbt_project.yml - Execution groups
+models:
+  my_project:
+    staging:
+      +group: 'data_ingestion'
+      +priority: 1
+    intermediate:  
+      +group: 'data_transformation'
+      +priority: 2
+    marts:
+      +group: 'business_logic'  
+      +priority: 3
+    exports:
+      +group: 'data_export'
+      +priority: 4
+
+# Execution strategy
+on-run-start:
+  - "{{ allocate_warehouse_resources() }}"
+  
+on-run-end:
+  - "{{ deallocate_resources() }}"
+  - "{{ notify_completion_status() }}"</div>
+        </section>
+
+        <section id="incremental-optimization">
+            <h2>6. Incremental Model Optimization</h2>
+
+            <h3>Smart Incremental Processing</h3>
+            
+            <h4>1. Lookback Windows</h4>
+            <p><strong>What it is:</strong> Processing not just new data, but also a window of recent data to handle late-arriving records and corrections.</p>
+            <p><strong>Why you should care:</strong> Data doesn't always arrive on time or correctly. Lookback windows ensure you catch corrections and late data without full rebuilds, critical for data accuracy in production.</p>
+
+            <div class="code-block">{{ config(
+    materialized='incremental',
+    unique_key='order_id',
+    incremental_strategy='merge'
+) }}
+
+{% set lookback_days = var('lookback_days', 3) %}
+
+with source_data as (
+  select 
+    order_id,
+    customer_id,
+    order_date,
+    revenue,
+    last_modified_timestamp
+  from {{ ref('raw_orders') }}
+  
+  {% if is_incremental() %}
+    -- Process new records and recent modifications
+    where last_modified_timestamp > (
+      select dateadd(day, -{{ lookback_days }}, max(last_modified_timestamp))
+      from {{ this }}
+    )
+  {% endif %}
+),
+
+-- Deduplicate in case of reprocessing
+deduplicated as (
+  select *,
+    row_number() over (
+      partition by order_id 
+      order by last_modified_timestamp desc
+    ) as rn
+  from source_data
+)
+
+select 
+  order_id,
+  customer_id, 
+  order_date,
+  revenue,
+  last_modified_timestamp
+from deduplicated
+where rn = 1</div>
+
+            <h4>2. Change Data Capture Integration</h4>
+            <p><strong>What it is:</strong> Leveraging CDC logs to process only records that have actually changed rather than scanning entire datasets.</p>
+            <p><strong>Why you need this:</strong> Traditional incremental strategies still scan large amounts of data. CDC-based processing can reduce data scanning by 95%+ and enable real-time processing.</p>
+
+            <div class="code-block">{{ config(
+    materialized='incremental',
+    unique_key='customer_id',
+    incremental_strategy='merge',
+    merge_exclude_columns=['cdc_timestamp', 'cdc_operation']
+) }}
+
+with cdc_data as (
+  select 
+    customer_id,
+    customer_name,
+    email,
+    registration_date,
+    last_purchase_date,
+    total_lifetime_value,
+    cdc_timestamp,
+    cdc_operation  -- INSERT, UPDATE, DELETE
+  from {{ ref('customers_cdc_log') }}
+  
+  {% if is_incremental() %}
+    where cdc_timestamp > (
+      select coalesce(max(cdc_timestamp), '1900-01-01'::timestamp)
+      from {{ this }}
+    )
+  {% endif %}
+),
+
+-- Handle different CDC operations
+processed_changes as (
+  select 
+    customer_id,
+    customer_name,
+    email,
+    registration_date,
+    last_purchase_date,
+    total_lifetime_value,
+    cdc_timestamp,
+    
+    -- Mark deletions for removal
+    case when cdc_operation = 'DELETE' then true else false end as is_deleted
+    
+  from cdc_data
+  where cdc_operation in ('INSERT', 'UPDATE', 'DELETE')
+),
+
+final as (
+  select *
+  from processed_changes
+  {% if is_incremental() %}
+    -- Remove deleted records in merge
+    where not is_deleted
+  {% endif %}
+)
+
+select 
+  customer_id,
+  customer_name,
+  email,
+  registration_date,
+  last_purchase_date,
+  total_lifetime_value,
+  cdc_timestamp
+from final</div>
+
+            <h3>Incremental Performance Monitoring</h3>
+            <div class="code-block"># macros/incremental_monitoring.sql
+{% macro monitor_incremental_efficiency() %}
+  {% if is_incremental() %}
+    {% set efficiency_check %}
+      with current_run as (
+        select count(*) as records_processed
+        from {{ this }}
+        where _dbt_updated_at >= '{{ run_started_at }}'
+      ),
+      total_records as (
+        select count(*) as total_records  
+        from {{ this }}
+      )
+      select 
+        records_processed,
+        total_records,
+        (records_processed::float / total_records::float) * 100 as incremental_percentage
+      from current_run
+      cross join total_records;
+    {% endset %}
+    
+    {% set results = run_query(efficiency_check) %}
+    {% if execute %}
+      {{ log("Incremental efficiency: " ~ results.columns[2].values()[0] ~ "% of total data processed", info=true) }}
+      
+      {% if results.columns[2].values()[0] > 50 %}
+        {{ log("WARNING: Incremental processing >50% of data. Consider full refresh or optimization.", info=true) }}
+      {% endif %}
+    {% endif %}
+  {% endif %}
+{% endmacro %}</div>
+        </section>
+
+        <section id="monitoring-profiling">
+            <h2>7. Performance Monitoring & Profiling</h2>
+
+            <h3>Real-time Performance Dashboard</h3>
+            <p><strong>What it is:</strong> Automated tracking and visualization of dbt performance metrics across all your models and runs.</p>
+            <p><strong>Why you need this:</strong> Performance issues compound over time. Early detection prevents small problems from becoming pipeline disasters. Essential for maintaining SLAs in production.</p>
+
+            <div class="code-block"># macros/performance_dashboard.sql
+{% macro create_performance_dashboard() %}
+  {{ config(materialized='table', post_hook="grant select on {{ this }} to role dashboard_reader") }}
+  
+  with daily_performance as (
+    select 
+      date_trunc('day', run_timestamp) as run_date,
+      target_name,
+      model_name,
+      
+      -- Performance metrics
+      avg(execution_time_seconds) as avg_runtime_seconds,
+      max(execution_time_seconds) as max_runtime_seconds,
+      sum(execution_time_seconds) as total_runtime_seconds,
+      
+      -- Data volume metrics  
+      avg(rows_affected) as avg_rows_processed,
+      sum(rows_affected) as total_rows_processed,
+      avg(bytes_processed) as avg_bytes_processed,
+      
+      -- Frequency metrics
+      count(*) as run_count,
+      
+      -- Efficiency metrics
+      avg(execution_time_seconds / nullif(rows_affected, 0)) as seconds_per_row,
+      avg(bytes_processed / nullif(execution_time_seconds, 0)) as bytes_per_second
+      
+    from {{ ref('dbt_performance_log') }}
+    where run_timestamp >= current_date - 30
+    group by 1, 2, 3
+  ),
+  
+  performance_trends as (
+    select 
+      *,
+      -- 7-day moving averages for trend analysis
+      avg(avg_runtime_seconds) over (
+        partition by model_name, target_name
+        order by run_date 
+        rows between 6 preceding and current row
+      ) as runtime_7d_avg,
+      
+      -- Performance degradation detection
+      case 
+        when avg_runtime_seconds > runtime_7d_avg * 1.5 then 'degraded'
+        when avg_runtime_seconds > runtime_7d_avg * 1.2 then 'warning'
+        else 'normal'
+      end as performance_status,
+      
+      -- Cost estimation (approximate)
+      (total_runtime_seconds / 3600.0) * 2.0 as estimated_cost_dollars  -- $2/hour warehouse
+      
+    from daily_performance
+  ),
+  
+  model_rankings as (
+    select 
+      *,
+      row_number() over (partition by run_date, target_name order by total_runtime_seconds desc) as runtime_rank,
+      row_number() over (partition by run_date, target_name order by estimated_cost_dollars desc) as cost_rank
+    from performance_trends
+  )
+  
+  select * from model_rankings
+{% endmacro %}</div>
+
+            <h3>Automated Performance Alerting</h3>
+            <div class="code-block"># macros/performance_alerts.sql
+{% macro check_performance_anomalies() %}
+  {% if execute %}
+    {% set anomaly_check %}
+      with recent_runs as (
+        select 
+          model_name,
+          execution_time_seconds,
+          run_timestamp,
+          lag(execution_time_seconds, 1) over (
+            partition by model_name 
+            order by run_timestamp
+          ) as prev_runtime,
+          
+          avg(execution_time_seconds) over (
+            partition by model_name 
+            order by run_timestamp 
+            rows between 10 preceding and 1 preceding
+          ) as avg_historical_runtime
+          
+        from {{ ref('dbt_performance_log') }}
+        where run_timestamp >= current_timestamp - interval '1 hour'
+      ),
+      
+      anomalies as (
+        select 
+          model_name,
+          execution_time_seconds,
+          avg_historical_runtime,
+          (execution_time_seconds / nullif(avg_historical_runtime, 0)) as performance_ratio,
+          
+          case 
+            when execution_time_seconds > 300 and performance_ratio > 2.0 then 'critical'
+            when execution_time_seconds > 180 and performance_ratio > 1.5 then 'warning'
+            else 'normal'
+          end as alert_level
+          
+        from recent_runs
+        where avg_historical_runtime is not null
+      )
+      
+      select * from anomalies 
+      where alert_level in ('critical', 'warning');
+    {% endset %}
+    
+    {% set results = run_query(anomaly_check) %}
+    
+    {% if results.rows %}
+      {% for row in results.rows %}
+        {% if row[4] == 'critical' %}
+          {{ log("🚨 CRITICAL: Model " ~ row[0] ~ " runtime: " ~ row[1] ~ "s (normal: " ~ row[2] ~ "s)", info=true) }}
+        {% else %}
+          {{ log("⚠️  WARNING: Model " ~ row[0] ~ " runtime: " ~ row[1] ~ "s (normal: " ~ row[2] ~ "s)", info=true) }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endmacro %}</div>
+
+            <h3>Query Plan Analysis</h3>
+            <div class="code-block"># macros/query_optimization.sql  
+{% macro analyze_query_plans() %}
+  {% if target.type == 'snowflake' %}
+    {% set plan_analysis %}
+      -- Snowflake query history analysis
+      select 
+        query_text,
+        total_elapsed_time / 1000 as execution_seconds,
+        bytes_scanned,
+        bytes_written,
+        compilation_time / 1000 as compilation_seconds,
+        execution_time / 1000 as pure_execution_seconds,
+        warehouse_size,
+        
+        -- Identify expensive operations
+        case 
+          when query_text ilike '%window%' and execution_seconds > 60 then 'expensive_window_function'
+          when query_text ilike '%join%' and bytes_scanned > 1000000000 then 'large_join_operation'
+          when compilation_seconds > 5 then 'complex_compilation'
+          else 'normal'
+        end as optimization_category
+        
+      from table(information_schema.query_history_by_warehouse('{{ target.warehouse }}'))
+      where start_time >= dateadd(hour, -24, current_timestamp)
+        and query_text ilike '%dbt%'
+        and execution_seconds > 10
+      order by execution_seconds desc
+      limit 50;
+    {% endset %}
+    
+    {{ return(run_query(plan_analysis)) }}
+  {% endif %}
+{% endmacro %}</div>
+        </section>
+
+        <section id="cost-optimization">
+            <h2>8. Cost Optimization Strategies</h2>
+
+            <h3>Warehouse Cost Management</h3>
+            
+            <h4>1. Auto-Suspend and Scaling</h4>
+            <p><strong>What it is:</strong> Configuring warehouses to automatically scale down or suspend when not in use to minimize compute costs.</p>
+            <p><strong>Why you should care:</strong> Can reduce warehouse costs by 60-80%. Many organizations waste thousands monthly on idle warehouses. Smart scaling policies maintain performance while optimizing costs.</p>
+
+            <div class="code-block"># Cost-optimized warehouse configuration
+{{ config(
+    pre_hook=[
+      -- Dynamic warehouse sizing based on data volume
+      "{% set row_estimate = get_row_estimate(ref('source_table')) %}",
+      "{% if row_estimate > 10000000 %}",
+      "alter warehouse {{ target.warehouse }} set warehouse_size = 'LARGE';",  
+      "{% elif row_estimate > 1000000 %}",
+      "alter warehouse {{ target.warehouse }} set warehouse_size = 'MEDIUM';",
+      "{% else %}",
+      "alter warehouse {{ target.warehouse }} set warehouse_size = 'SMALL';",
+      "{% endif %}",
+      
+      -- Aggressive auto-suspend for development
+      "alter warehouse {{ target.warehouse }} set auto_suspend = {% if target.name == 'dev' %}30{% else %}300{% endif %};",
+      
+      -- Enable auto-resume
+      "alter warehouse {{ target.warehouse }} set auto_resume = true;"
+    ],
+    
+    post_hook=[
+      -- Suspend immediately after completion for dev
+      "{% if target.name == 'dev' %}alter warehouse {{ target.warehouse }} suspend;{% endif %}"
+    ]
+) }}
+
+select * from {{ ref('expensive_transformation') }}</div>
+
+            <h4>2. Query Cost Tracking</h4>
+            <p><strong>What it is:</strong> Monitoring and tracking the cost of individual dbt models and queries to identify optimization opportunities.</p>
+            <p><strong>Why you need this:</strong> 80% of your costs typically come from 20% of your models. Cost tracking identifies which models are expensive and helps prioritize optimization efforts for maximum savings.</p>
+
+            <div class="code-block"># macros/cost_tracking.sql
+{% macro track_model_costs() %}
+  {% set cost_tracking_query %}
+    create table if not exists {{ target.database }}.analytics.dbt_cost_tracking (
+      model_name varchar,
+      run_timestamp timestamp,
+      warehouse_used varchar,
+      warehouse_size varchar,
+      execution_seconds float,
+      credits_used float,
+      estimated_cost_usd float,
+      bytes_scanned bigint,
+      rows_produced bigint
+    );
+    
+    -- Insert cost data for current run
+    insert into {{ target.database }}.analytics.dbt_cost_tracking
+    select 
+      '{{ this.identifier }}' as model_name,
+      current_timestamp() as run_timestamp,
+      '{{ target.warehouse }}' as warehouse_used,
+      
+      -- Get current warehouse size
+      (select warehouse_size from table(information_schema.warehouses) 
+       where warehouse_name = '{{ target.warehouse }}') as warehouse_size,
+       
+      {{ execution_time_seconds | default(0) }} as execution_seconds,
+      
+      -- Estimate credits (varies by warehouse size)
+      case 
+        when warehouse_size = 'X-SMALL' then ({{ execution_time_seconds | default(0) }} / 3600.0) * 1
+        when warehouse_size = 'SMALL' then ({{ execution_time_seconds | default(0) }} / 3600.0) * 2  
+        when warehouse_size = 'MEDIUM' then ({{ execution_time_seconds | default(0) }} / 3600.0) * 4
+        when warehouse_size = 'LARGE' then ({{ execution_time_seconds | default(0) }} / 3600.0) * 8
+        when warehouse_size = 'X-LARGE' then ({{ execution_time_seconds | default(0) }} / 3600.0) * 16
+        else 0
+      end as credits_used,
+      
+      -- Estimate cost at $2 per credit  
+      credits_used * 2.0 as estimated_cost_usd,
+      
+      {{ bytes_scanned | default(0) }} as bytes_scanned,
+      {{ rows_produced | default(0) }} as rows_produced;
+  {% endset %}
+  
+  {% do run_query(cost_tracking_query) %}
+{% endmacro %}</div>
+
+            <h3>Data Storage Optimization</h3>
+            
+            <h4>1. Intelligent Data Archiving</h4>
+            <div class="code-block">{{ config(
+    materialized='incremental',
+    unique_key='order_id',
+    post_hook=[
+      -- Archive old data to cheaper storage
+      "create or replace table {{ target.database }}.archive.{{ this.identifier }}_archive as
+       select * from {{ this }} 
+       where order_date < current_date - 365;",
+       
+      -- Remove archived data from active table
+      "delete from {{ this }} 
+       where order_date < current_date - 365;"
+    ]
+) }}
+
+-- Active data only (last 365 days)
+select 
+  order_id,
+  customer_id,
+  order_date,
+  revenue
+from {{ ref('raw_orders') }}
+where order_date >= current_date - 365
+
+{% if is_incremental() %}
+  and order_date > (select max(order_date) from {{ this }})
+{% endif %}</div>
+
+            <h4>2. Columnar Storage Optimization</h4>
+            <div class="code-block">-- Optimize column order for compression
+{{ config(
+    materialized='table',
+    cluster_by=['order_date'],  -- High cardinality first
+    sort_by=['customer_id', 'product_id']  -- Low cardinality second
+) }}
+
+select 
+  -- Order columns by compression efficiency
+  order_date,           -- High compression (sorted)
+  customer_id,          -- Medium compression  
+  product_id,           -- Medium compression
+  order_id,             -- Low compression (unique)
+  
+  -- Group calculated columns
+  revenue,
+  tax_amount,
+  discount_amount,
+  
+  -- Text fields last (least compressible)
+  order_notes,
+  shipping_address
+  
+from {{ ref('raw_orders') }}
+order by order_date, customer_id  -- Optimize for clustering</div>
+
+            <h3>Development Environment Cost Control</h3>
+            <div class="code-block"># profiles.yml - Cost-conscious development setup
+dbt_project:
+  outputs:
+    dev:
+      warehouse: DEV_WH_XS  # Smallest warehouse for development
+      schema: "dev_{{ env_var('USER') | replace('.', '_') }}"
+      threads: 2  # Limit concurrency 
+      query_timeout: 120  # Prevent runaway queries
+      
+    dev_sample:
+      warehouse: DEV_WH_XS
+      schema: "dev_sample_{{ env_var('USER') | replace('.', '_') }}"
+      # Use sampling for faster development
+      vars:
+        data_sample_percent: 1  # Only process 1% of data
+        
+# dbt_project.yml - Development-specific configurations  
+models:
+  my_project:
+    +materialized: "{% if target.name == 'dev' %}view{% else %}table{% endif %}"
+    
+    # Sample data in development
+    staging:
+      +vars:
+        limit_dev_data: "{% if target.name == 'dev' %}limit 10000{% endif %}"</div>
+
+            <div class="success">
+                <strong>Pro Tip:</strong> Set up cost alerts at the warehouse level to notify when daily spend exceeds thresholds. Use Snowflake's resource monitors or BigQuery budget alerts to prevent cost surprises.
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <h2>Conclusion</h2>
+            <p>dbt performance optimization is crucial for scaling data transformations in production environments. This guide provides comprehensive strategies for reducing costs, improving query performance, and maintaining efficient data pipelines across different warehouse platforms.</p>
+
+            <h3>Key Optimization Priorities</h3>
+            <ul>
+                <li><strong>Start with SQL optimization</strong> - Often provides the biggest performance gains</li>
+                <li><strong>Choose appropriate materializations</strong> - Match strategy to data patterns</li>
+                <li><strong>Leverage warehouse-specific features</strong> - Use clustering, partitioning, and optimization hints</li>
+                <li><strong>Monitor performance continuously</strong> - Catch degradation before it impacts users</li>
+                <li><strong>Optimize for both performance and cost</strong> - Balance speed with warehouse expense</li>
+                <li><strong>Test optimizations thoroughly</strong> - Verify improvements in staging environments</li>
+            </ul>
+
+            <div class="info">
+                <strong>Implementation Strategy:</strong> Start with the highest-impact, lowest-effort optimizations first. SQL improvements and materialization changes often provide immediate benefits, while advanced patterns like microbatching require more careful implementation planning.
+            </div>
+        </section>
+
+        <section id="code-examples">
+            <h2>Code Examples</h2>
+            <p>Comprehensive code examples and implementation patterns are available in the accompanying code repository:</p>
+            
+            <div class="success">
+                <strong>📁 Code Examples Repository:</strong> All examples from this guide are available as practical, ready-to-use code files.
+            </div>
+            
+            <ul>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/01_query_optimization_examples.sql" target="_blank">Query Optimization Examples</a></strong> - Before/after SQL optimization patterns including predicate pushdown, join optimization, and efficient aggregation strategies</li>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/02_materialization_optimization.sql" target="_blank">Materialization Optimization</a></strong> - Microbatch processing, smart incremental merges, hybrid strategies, and performance-optimized snapshots</li>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/03_warehouse_specific_optimizations.sql" target="_blank">Warehouse-Specific Optimizations</a></strong> - Platform-specific patterns for Snowflake, BigQuery, and Redshift including clustering, partitioning, and resource management</li>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/04_performance_monitoring_macros.sql" target="_blank">Performance Monitoring Macros</a></strong> - Complete monitoring framework with automated logging, anomaly detection, and cost tracking</li>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/05_cost_optimization_strategies.sql" target="_blank">Cost Optimization Strategies</a></strong> - Advanced cost control techniques including dynamic warehouse sizing, intelligent sampling, and automated alerting</li>
+                <li><strong><a href="https://github.com/konradKolenda/konradKolenda.github.io/tree/main/dbt/code_examples/dbt_performance_optimization_guide/README.md" target="_blank">Implementation Guide</a></strong> - Step-by-step setup instructions, best practices, and customization guidelines</li>
+            </ul>
+
+            <h3>Quick Start</h3>
+            <p>To get started with these optimizations:</p>
+            <ol>
+                <li><strong>Performance Monitoring:</strong> Implement the monitoring macros first to establish baseline metrics</li>
+                <li><strong>Query Optimization:</strong> Apply SQL optimization patterns to your slowest models</li>
+                <li><strong>Materialization Strategy:</strong> Review and optimize your materialization choices</li>
+                <li><strong>Warehouse Optimization:</strong> Implement platform-specific optimizations</li>
+                <li><strong>Cost Controls:</strong> Set up automated cost tracking and alerting</li>
+            </ol>
+
+            <div class="info">
+                <strong>Note:</strong> All code examples are production-tested and include detailed comments explaining the optimization techniques and expected performance improvements.
+            </div>
+        </section>
+
+        <section id="resources">
+            <h2>Additional Resources</h2>
+            <ul>
+                <li><a href="https://docs.getdbt.com/docs/build/incremental-models" target="_blank">dbt Incremental Models Documentation</a></li>
+                <li><a href="https://docs.getdbt.com/reference/resource-configs/materialized" target="_blank">dbt Materialization Reference</a></li>
+                <li><a href="https://docs.getdbt.com/docs/build/warehouse-settings" target="_blank">Warehouse-Specific Configuration</a></li>
+                <li><a href="https://docs.getdbt.com/reference/dbt-jinja-functions/var" target="_blank">dbt Variables and Configuration</a></li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

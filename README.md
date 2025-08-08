@@ -15,6 +15,7 @@ Comprehensive guides covering dbt best practices, strategies, and implementation
 - **[Data Integrity Migration Guide](https://konradkolenda.github.io/dbt/dbt_data_integrity_migration_guide.html)** - Migration from traditional SQL constraints to dbt data testing approach
 - **[dbt Expectations Guide](https://konradkolenda.github.io/dbt/dbt_expectations_comprehensive_summary.html)** - Complete testing framework with dbt-expectations
 - **[dbt Incremental Strategies](https://konradkolenda.github.io/dbt/dbt_incremental_strategies_guide.html)** - Master all incremental materialization strategies
+- **[dbt Performance Optimization](https://konradkolenda.github.io/dbt/dbt_performance_optimization_guide.html)** - Advanced performance tuning and cost optimization for production environments
 - **[dbt Lambda Functions Guide](https://konradkolenda.github.io/dbt/dbt_lambda_functions_comprehensive_guide.html)** - Functional programming patterns and lambda-like functions in dbt
 - **[dbt Macros Guide](https://konradkolenda.github.io/dbt/dbt_macros_comprehensive_guide.html)** - Comprehensive guide to creating and using dbt macros
 - **[dbt Merge Operations](https://konradkolenda.github.io/dbt/dbt_merge_complete_guide.html)** - Advanced merge patterns and best practices
