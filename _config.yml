@@ -1,0 +1,20 @@
+# GitHub Pages Jekyll configuration
+theme: jekyll-theme-primer
+
+# Exclude code example files from Jekyll processing
+exclude:
+  - "dbt/code_examples/**/*.sql"
+  - "dbt/code_examples/**/*.yml" 
+  - "dbt/code_examples/**/*.yaml"
+  - "dbt/code_examples/**/*.py"
+
+# Markdown processor
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Enable plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-seo-tag
