@@ -1,0 +1,510 @@
+# Comprehensive Metrics Definition for dbt Semantic Layer
+# This example demonstrates all metric types with real-world business applications
+
+# =============================================================================
+# SIMPLE METRICS - Direct aggregations on measures
+# =============================================================================
+
+metrics:
+  # Core Revenue Metrics
+  - name: total_revenue
+    description: |
+      Total revenue across all orders and channels.
+      Includes all completed transactions with net amount after returns.
+    type: simple
+    label: "Total Revenue"
+    type_params:
+      measure: order_total
+    meta:
+      domain: "finance"
+      tier: "tier_1"
+      owner: "finance-team@company.com"
+  
+  - name: gross_revenue
+    description: "Gross revenue before returns and discounts"
+    type: simple
+    label: "Gross Revenue"
+    type_params:
+      measure: gross_order_amount
+  
+  # Order Volume Metrics
+  - name: order_count
+    description: "Total number of orders placed"
+    type: simple
+    label: "Order Count"
+    type_params:
+      measure: order_count
+  
+  - name: unique_customers
+    description: "Number of unique customers who placed orders"
+    type: simple
+    label: "Unique Customers"
+    type_params:
+      measure: unique_customers
+  
+  # Product Performance Metrics
+  - name: units_sold
+    description: "Total number of product units sold"
+    type: simple
+    label: "Units Sold"
+    type_params:
+      measure: quantity_sold
+  
+  - name: active_products
+    description: "Number of products with at least one sale"
+    type: simple
+    label: "Active Products"
+    type_params:
+      measure: active_products
+
+  # Subscription Metrics (SaaS)
+  - name: monthly_recurring_revenue
+    description: |
+      Monthly Recurring Revenue (MRR) normalized across all billing frequencies.
+      Critical metric for SaaS business health and growth tracking.
+    type: simple
+    label: "Monthly Recurring Revenue (MRR)"
+    type_params:
+      measure: monthly_recurring_revenue
+    meta:
+      domain: "saas_analytics"
+      tier: "tier_1"
+      board_metric: true
+  
+  - name: active_subscriptions
+    description: "Count of currently active subscriptions"
+    type: simple
+    label: "Active Subscriptions"
+    type_params:
+      measure: active_subscriptions
+
+# =============================================================================
+# RATIO METRICS - Relationships between two measures
+# =============================================================================
+
+  # Financial Efficiency Metrics
+  - name: average_order_value
+    description: |
+      Average order value (AOV) - key metric for pricing strategy
+      and customer behavior analysis.
+    type: ratio
+    label: "Average Order Value"
+    type_params:
+      numerator: total_revenue
+      denominator: order_count
+    format: currency
+  
+  - name: revenue_per_customer
+    description: "Average revenue generated per unique customer"
+    type: ratio
+    label: "Revenue per Customer"
+    type_params:
+      numerator: total_revenue
+      denominator: unique_customers
+    format: currency
+  
+  - name: units_per_order
+    description: "Average number of units per order (basket size indicator)"
+    type: ratio
+    label: "Units per Order"
+    type_params:
+      numerator: units_sold
+      denominator: order_count
+    format: decimal_2
+  
+  # Conversion and Performance Ratios
+  - name: customer_conversion_rate
+    description: |
+      Percentage of website visitors who become customers.
+      Key metric for marketing and UX optimization.
+    type: ratio
+    label: "Customer Conversion Rate (%)"
+    type_params:
+      numerator: unique_customers
+      denominator: total_website_visitors
+    format: percentage_1
+  
+  - name: product_attach_rate
+    description: "Percentage of orders containing multiple products"
+    type: ratio
+    label: "Product Attach Rate (%)"
+    type_params:
+      numerator: multi_product_orders
+      denominator: order_count
+    format: percentage_1
+  
+  # SaaS-Specific Ratios
+  - name: customer_acquisition_cost
+    description: |
+      Cost to acquire a new customer (CAC).
+      Critical for understanding marketing efficiency and unit economics.
+    type: ratio
+    label: "Customer Acquisition Cost (CAC)"
+    type_params:
+      numerator: total_marketing_spend
+      denominator: new_customers_acquired
+    format: currency
+  
+  - name: ltv_cac_ratio
+    description: |
+      Ratio of Customer Lifetime Value to Customer Acquisition Cost.
+      Should typically be 3:1 or higher for healthy unit economics.
+    type: ratio
+    label: "LTV:CAC Ratio"
+    type_params:
+      numerator: average_customer_lifetime_value
+      denominator: customer_acquisition_cost
+    format: decimal_1
+
+# =============================================================================
+# CUMULATIVE METRICS - Time-window aggregations
+# =============================================================================
+
+  # Running Totals
+  - name: cumulative_revenue
+    description: |
+      Running total of revenue since business inception.
+      Used for growth trajectory analysis and milestone tracking.
+    type: cumulative
+    label: "Cumulative Revenue"
+    type_params:
+      measure: order_total
+    format: currency
+  
+  - name: cumulative_customers
+    description: "Running count of total customers acquired"
+    type: cumulative
+    label: "Cumulative Customers"
+    type_params:
+      measure: unique_customers
+  
+  # Rolling Window Metrics
+  - name: revenue_l30d
+    description: |
+      Rolling 30-day revenue window.
+      Smooths daily volatility for trend analysis.
+    type: cumulative
+    label: "Revenue (Last 30 Days)"
+    type_params:
+      measure: order_total
+      window: 30 days
+    format: currency
+  
+  - name: revenue_l90d
+    description: "Rolling 90-day revenue window"
+    type: cumulative
+    label: "Revenue (Last 90 Days)"
+    type_params:
+      measure: order_total
+      window: 90 days
+    format: currency
+  
+  - name: monthly_active_customers
+    description: |
+      Customers who made purchases in the last 30 days.
+      Key engagement metric for subscription businesses.
+    type: cumulative
+    label: "Monthly Active Customers (MAC)"
+    type_params:
+      measure: unique_customers
+      window: 30 days
+  
+  - name: quarterly_active_customers
+    description: "Customers who made purchases in the last 90 days"
+    type: cumulative
+    label: "Quarterly Active Customers (QAC)"
+    type_params:
+      measure: unique_customers
+      window: 90 days
+  
+  # SaaS Cumulative Metrics
+  - name: mrr_l12m
+    description: |
+      MRR over the last 12 months for annual trend analysis.
+      Critical for board reporting and investor updates.
+    type: cumulative
+    label: "MRR (Last 12 Months)"
+    type_params:
+      measure: monthly_recurring_revenue
+      window: 12 months
+    format: currency
+  
+  - name: net_revenue_retention_l12m
+    description: |
+      Net Revenue Retention rate over 12 months.
+      Measures expansion revenue from existing customers.
+    type: cumulative
+    label: "Net Revenue Retention (12M)"
+    type_params:
+      measure: net_revenue_retention_rate
+      window: 12 months
+    format: percentage_1
+
+# =============================================================================
+# DERIVED METRICS - Mathematical combinations of other metrics
+# =============================================================================
+
+  # Growth Metrics
+  - name: revenue_growth_rate
+    description: |
+      Month-over-month revenue growth rate.
+      Primary metric for tracking business momentum.
+      
+      Formula: (Current Month Revenue - Previous Month Revenue) / Previous Month Revenue * 100
+    type: derived
+    label: "Revenue Growth Rate (%)"
+    type_params:
+      expr: |
+        case 
+          when previous_month_revenue > 0 
+          then (current_month_revenue - previous_month_revenue) / previous_month_revenue * 100
+          else null
+        end
+      metrics:
+        - name: total_revenue
+          alias: current_month_revenue
+          offset_window: 0 months
+        - name: total_revenue
+          alias: previous_month_revenue
+          offset_window: -1 month
+    format: percentage_1
+  
+  - name: customer_growth_rate
+    description: "Month-over-month customer growth rate"
+    type: derived
+    label: "Customer Growth Rate (%)"
+    type_params:
+      expr: |
+        case 
+          when previous_month_customers > 0 
+          then (current_month_customers - previous_month_customers) / previous_month_customers * 100
+          else null
+        end
+      metrics:
+        - name: unique_customers
+          alias: current_month_customers
+          offset_window: 0 months
+        - name: unique_customers
+          alias: previous_month_customers
+          offset_window: -1 month
+    format: percentage_1
+  
+  # Advanced Unit Economics
+  - name: customer_lifetime_value
+    description: |
+      Estimated Customer Lifetime Value using the formula:
+      CLV = (Average Order Value × Purchase Frequency × Gross Margin) × Customer Lifespan
+    type: derived
+    label: "Customer Lifetime Value (CLV)"
+    type_params:
+      expr: |
+        (average_order_value * average_purchase_frequency * gross_margin_rate) * average_customer_lifespan_months
+      metrics:
+        - name: average_order_value
+        - name: average_purchase_frequency
+        - name: gross_margin_rate
+        - name: average_customer_lifespan_months
+    format: currency
+  
+  - name: payback_period_months
+    description: |
+      Customer acquisition payback period in months.
+      Time required to recover customer acquisition cost.
+    type: derived
+    label: "CAC Payback Period (Months)"
+    type_params:
+      expr: |
+        case 
+          when monthly_revenue_per_customer > 0 
+          then customer_acquisition_cost / monthly_revenue_per_customer
+          else null
+        end
+      metrics:
+        - name: customer_acquisition_cost
+        - name: monthly_revenue_per_customer
+    format: decimal_1
+  
+  # Efficiency and Productivity Metrics
+  - name: sales_efficiency
+    description: |
+      Sales efficiency ratio measuring revenue generated per dollar of sales expense.
+      Higher ratios indicate more efficient sales operations.
+    type: derived
+    label: "Sales Efficiency Ratio"
+    type_params:
+      expr: total_revenue / total_sales_expense
+      metrics:
+        - name: total_revenue
+        - name: total_sales_expense
+    format: decimal_2
+  
+  - name: marketing_roi
+    description: |
+      Marketing Return on Investment.
+      Measures revenue generated per dollar of marketing spend.
+    type: derived
+    label: "Marketing ROI"
+    type_params:
+      expr: |
+        case 
+          when total_marketing_spend > 0 
+          then (total_revenue - total_marketing_spend) / total_marketing_spend * 100
+          else null
+        end
+      metrics:
+        - name: total_revenue
+        - name: total_marketing_spend
+    format: percentage_1
+
+  # Market and Competitive Metrics
+  - name: market_share_estimate
+    description: |
+      Estimated market share based on total addressable market.
+      Requires external market size data.
+    type: derived
+    label: "Market Share Estimate (%)"
+    type_params:
+      expr: |
+        case 
+          when total_addressable_market > 0 
+          then total_revenue / total_addressable_market * 100
+          else null
+        end
+      metrics:
+        - name: total_revenue
+        - name: total_addressable_market
+    format: percentage_2
+
+# =============================================================================
+# TIME-BASED ADVANCED METRICS
+# =============================================================================
+
+  # Seasonal Analysis Metrics
+  - name: seasonality_adjusted_revenue
+    description: |
+      Revenue adjusted for seasonal patterns.
+      Removes seasonal variations to show underlying trends.
+    type: derived
+    label: "Seasonally Adjusted Revenue"
+    type_params:
+      expr: |
+        case 
+          when extract(month from metric_time) in (11, 12) 
+          then total_revenue / 1.25  -- Holiday season adjustment
+          when extract(month from metric_time) in (1, 2) 
+          then total_revenue / 0.85  -- Post-holiday adjustment
+          when extract(month from metric_time) in (6, 7, 8) 
+          then total_revenue / 0.95  -- Summer adjustment
+          else total_revenue 
+        end
+      metrics:
+        - name: total_revenue
+    format: currency
+  
+  # Cohort-Based Metrics
+  - name: new_customer_revenue
+    description: |
+      Revenue from customers acquired in the current analysis period.
+      Key metric for measuring acquisition quality.
+    type: simple
+    label: "New Customer Revenue"
+    type_params:
+      measure: order_total
+    filter: |
+      {{ Dimension('customer_acquisition_date') }} >= {{ start_date }}
+    format: currency
+  
+  - name: returning_customer_revenue
+    description: |
+      Revenue from existing customers (acquired before analysis period).
+      Measures customer retention and expansion.
+    type: simple
+    label: "Returning Customer Revenue"
+    type_params:
+      measure: order_total
+    filter: |
+      {{ Dimension('customer_acquisition_date') }} < {{ start_date }}
+    format: currency
+
+# =============================================================================
+# CHANNEL AND SEGMENT SPECIFIC METRICS
+# =============================================================================
+
+  # Channel Performance
+  - name: online_revenue
+    description: "Revenue from online sales channel"
+    type: simple
+    label: "Online Revenue"
+    type_params:
+      measure: order_total
+    filter: |
+      {{ Dimension('sales_channel') }} = 'online'
+    format: currency
+  
+  - name: mobile_revenue
+    description: "Revenue from mobile app sales"
+    type: simple
+    label: "Mobile Revenue"
+    type_params:
+      measure: order_total
+    filter: |
+      {{ Dimension('sales_channel') }} = 'mobile_app'
+    format: currency
+  
+  - name: cross_channel_customer_rate
+    description: |
+      Percentage of customers who purchase through multiple channels.
+      Indicates omnichannel engagement success.
+    type: ratio
+    label: "Cross-Channel Customer Rate (%)"
+    type_params:
+      numerator: cross_channel_customers
+      denominator: unique_customers
+    format: percentage_1
+
+# =============================================================================
+# QUALITY AND OPERATIONAL METRICS
+# =============================================================================
+
+  # Customer Experience Metrics
+  - name: return_rate
+    description: |
+      Percentage of orders that are returned.
+      Key indicator of product quality and customer satisfaction.
+    type: ratio
+    label: "Return Rate (%)"
+    type_params:
+      numerator: returned_orders
+      denominator: order_count
+    format: percentage_2
+  
+  - name: customer_satisfaction_score
+    description: |
+      Average customer satisfaction score from surveys.
+      Critical metric for customer experience management.
+    type: simple
+    label: "Customer Satisfaction Score"
+    type_params:
+      measure: avg_satisfaction_score
+    format: decimal_1
+
+  # Inventory and Operations
+  - name: inventory_turnover_rate
+    description: |
+      Rate at which inventory is sold and replaced.
+      Key metric for inventory management efficiency.
+    type: ratio
+    label: "Inventory Turnover Rate"
+    type_params:
+      numerator: cost_of_goods_sold
+      denominator: average_inventory_value
+    format: decimal_2
+  
+  - name: fulfillment_cost_per_order
+    description: "Average cost to fulfill each order"
+    type: ratio
+    label: "Fulfillment Cost per Order"
+    type_params:
+      numerator: total_fulfillment_costs
+      denominator: order_count
+    format: currency

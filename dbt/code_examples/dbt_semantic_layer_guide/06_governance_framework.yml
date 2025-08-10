@@ -1,0 +1,623 @@
+# Governance Framework for dbt Semantic Layer
+# Enterprise-grade governance patterns for metrics management
+
+# =============================================================================
+# METRIC GOVERNANCE CONFIGURATION
+# =============================================================================
+
+# Global governance settings for all semantic models and metrics
+governance:
+  default_settings:
+    # Approval workflow requirements
+    approval_required: true
+    review_frequency: "quarterly" 
+    documentation_required: true
+    testing_required: true
+    
+    # Data quality standards
+    quality_checks:
+      - type: "not_null"
+        severity: "error"
+      - type: "reasonable_range" 
+        severity: "warn"
+      - type: "trend_anomaly"
+        severity: "warn"
+    
+    # Access control defaults
+    access_control:
+      default_access: "deny"
+      require_justification: true
+      
+  # Tier classification system
+  metric_tiers:
+    tier_1:
+      description: "Critical business metrics for executive reporting"
+      sla_hours: 4
+      approval_required: true
+      approver_roles: ["cfo", "cto", "head_of_data"]
+      testing_frequency: "daily"
+      
+    tier_2:
+      description: "Important operational metrics"
+      sla_hours: 24
+      approval_required: true
+      approver_roles: ["data_team_lead", "business_owner"]
+      testing_frequency: "weekly"
+      
+    tier_3:
+      description: "Exploratory and ad-hoc metrics"
+      sla_hours: 72
+      approval_required: false
+      testing_frequency: "monthly"
+
+# =============================================================================
+# ROLE-BASED ACCESS CONTROL (RBAC)
+# =============================================================================
+
+access_control:
+  roles:
+    # Executive roles with full access
+    - name: "executives"
+      permissions: ["read", "query", "export"]
+      description: "C-suite executives with full data access"
+      members:
+        - "ceo@company.com"
+        - "cfo@company.com"
+        - "cto@company.com"
+      data_restrictions: []  # No restrictions
+      
+    # Finance team with financial data focus
+    - name: "finance_team"
+      permissions: ["read", "query", "export"]
+      description: "Finance team members"
+      members:
+        - "finance-team@company.com"
+        - "fp&a@company.com"
+      data_restrictions:
+        - "customer_segment not in ('internal', 'test')"
+        - "order_status != 'draft'"
+        
+    # Sales team with customer-focused access
+    - name: "sales_team" 
+      permissions: ["read", "query"]
+      description: "Sales and revenue operations"
+      members:
+        - "sales@company.com"
+        - "revops@company.com"
+      data_restrictions:
+        - "sales_rep = current_user_email() OR sales_team = current_user_team()"
+        - "customer_tier in ('prospect', 'customer')"
+        
+    # Marketing team with attribution access
+    - name: "marketing_team"
+      permissions: ["read", "query"]
+      description: "Marketing and growth teams"
+      members:
+        - "marketing@company.com"
+        - "growth@company.com" 
+      data_restrictions:
+        - "opt_in_marketing = true"
+        - "customer_region != 'EU' OR gdpr_consent = true"
+        
+    # Product team with usage data access
+    - name: "product_team"
+      permissions: ["read", "query"]
+      description: "Product management and analytics"
+      members:
+        - "product@company.com"
+        - "product-analytics@company.com"
+      data_restrictions:
+        - "product_access_level >= user_access_level()"
+        
+    # Data team with administrative access
+    - name: "data_team"
+      permissions: ["read", "query", "export", "admin"]
+      description: "Data engineering and analytics teams"
+      members:
+        - "data-team@company.com"
+        - "analytics@company.com"
+      data_restrictions: []  # Full access for data stewards
+
+  # Data masking rules for sensitive information
+  data_masking:
+    - field_pattern: "email"
+      masking_function: "mask_email"
+      allowed_roles: ["executives", "data_team"]
+      
+    - field_pattern: "*_pii"
+      masking_function: "hash_pii" 
+      allowed_roles: ["executives", "data_team", "legal_team"]
+      
+    - field_pattern: "customer_name"
+      masking_function: "anonymize_name"
+      allowed_roles: ["executives", "data_team"]
+
+# =============================================================================
+# SEMANTIC MODEL GOVERNANCE
+# =============================================================================
+
+semantic_models:
+  # Governance-aware orders semantic model
+  - name: orders_governed
+    description: |
+      Enterprise orders semantic model with comprehensive governance controls.
+      
+      Governance Notes:
+      - Tier 1 metrics derived from this model require CFO approval
+      - Customer PII is masked for non-executive roles
+      - Regional data restrictions apply based on compliance requirements
+      
+      Data Lineage:
+      - Source: fact_orders (dbt model)
+      - Upstream: raw_orders (Fivetran sync)
+      - Quality: Daily freshness and volume checks
+    
+    model: ref('fact_orders')
+    
+    # Governance metadata
+    governance:
+      owner: "finance-team@company.com"
+      domain: "revenue_analytics"
+      tier: "tier_1"
+      approval_status: "approved"
+      approved_by: "cfo@company.com"
+      approved_date: "2024-01-15"
+      review_date: "2024-04-15"
+      
+      # Change management
+      version: "2.1"
+      change_log:
+        - version: "2.1"
+          date: "2024-01-15"
+          changes: ["Added tax_amount measure", "Updated customer_region logic"]
+          approved_by: "cfo@company.com"
+        - version: "2.0"
+          date: "2023-10-01"
+          changes: ["Major refactoring for multi-currency support"]
+          approved_by: "cfo@company.com"
+      
+      # Quality constraints
+      quality_tests:
+        - name: "freshness_check"
+          description: "Data must be less than 24 hours old"
+          query: "SELECT MAX(order_date) FROM {{ ref('fact_orders') }}"
+          threshold: "< 24 hours"
+          severity: "error"
+          
+        - name: "volume_check" 
+          description: "Daily order volume should be within expected range"
+          query: "SELECT COUNT(*) FROM {{ ref('fact_orders') }} WHERE order_date = CURRENT_DATE - 1"
+          threshold: "BETWEEN 100 AND 10000"
+          severity: "warn"
+          
+        - name: "revenue_consistency"
+          description: "Revenue totals should match financial system"
+          external_source: "finance_system_api"
+          tolerance: "0.5%"
+          severity: "error"
+    
+    # Access-controlled entities
+    entities:
+      - name: order_id
+        type: primary
+        expr: order_id
+        access_control:
+          sensitive: false
+          
+      - name: customer_id
+        type: foreign
+        expr: customer_id
+        access_control:
+          sensitive: true
+          masking_rules: ["hash_customer_id"]
+          allowed_roles: ["executives", "data_team", "finance_team"]
+    
+    # Governed dimensions with access controls
+    dimensions:
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: order_date
+        access_control:
+          sensitive: false
+          
+      - name: customer_email
+        type: categorical
+        expr: |
+          CASE 
+            WHEN {{ user_has_role('executives') }} OR {{ user_has_role('data_team') }}
+            THEN customer_email
+            ELSE {{ mask_email('customer_email') }}
+          END
+        access_control:
+          sensitive: true
+          pii: true
+          gdpr_relevant: true
+          
+      - name: customer_region
+        type: categorical
+        expr: |
+          CASE 
+            WHEN customer_region = 'EU' AND NOT {{ user_has_role('eu_data_access') }}
+            THEN 'RESTRICTED'
+            ELSE customer_region
+          END
+        access_control:
+          regional_restrictions: true
+          gdpr_relevant: true
+          
+      - name: sales_channel
+        type: categorical
+        expr: sales_channel
+        access_control:
+          sensitive: false
+    
+    # Governed measures with quality controls
+    measures:
+      - name: order_total
+        description: |
+          Total order amount including tax and shipping.
+          
+          Quality Controls:
+          - Values must be positive (automated test)
+          - Daily reconciliation with payment processor
+          - Monthly audit trail review
+          
+          Business Rules:
+          - Excludes cancelled orders
+          - Includes partial refunds as negative amounts
+          - Multi-currency converted to USD using daily rates
+        agg: sum
+        expr: order_total_amount
+        
+        # Governance configuration for this measure
+        governance:
+          tier: "tier_1"
+          owner: "finance-team@company.com"
+          business_definition: "Total customer payment amount for completed orders"
+          calculation_logic: "SUM(order_subtotal + tax_amount + shipping_amount - discount_amount)"
+          
+        # Quality constraints
+        constraints:
+          - type: "not_null"
+            error_message: "Order total cannot be null"
+          - type: "positive"
+            error_message: "Order total must be positive for non-refund transactions"
+            condition: "transaction_type != 'refund'"
+          - type: "reasonable_range"
+            min_value: 0.01
+            max_value: 100000.00
+            error_message: "Order total outside reasonable range"
+            
+        # Audit and compliance
+        audit:
+          retention_period: "7 years"
+          encryption_required: false
+          pii_contains: false
+
+# =============================================================================
+# METRICS GOVERNANCE DEFINITIONS
+# =============================================================================
+
+metrics:
+  # Tier 1 - Critical Business Metrics
+  - name: monthly_recurring_revenue
+    description: |
+      Monthly Recurring Revenue (MRR) - Primary SaaS growth metric.
+      
+      Business Context:
+      - Used for board reporting and investor updates  
+      - Primary metric for financial planning and forecasting
+      - Tracked daily with 4-hour SLA for executive dashboard
+      
+      Calculation Methodology:
+      - Normalizes all subscription revenue to monthly amounts
+      - Includes expansion revenue from existing customers
+      - Excludes one-time fees and setup charges
+      - Accounts for mid-month plan changes using daily proration
+      
+      Quality Assurance:
+      - Daily reconciliation with billing system
+      - Monthly audit by finance team
+      - Automated anomaly detection for >10% day-over-day changes
+    
+    type: simple
+    label: "Monthly Recurring Revenue (MRR)"
+    type_params:
+      measure: monthly_recurring_revenue
+    
+    # Comprehensive governance configuration
+    governance:
+      tier: "tier_1"
+      domain: "saas_metrics"
+      owner: "cfo@company.com"
+      business_owner: "head-of-finance@company.com"
+      technical_owner: "data-team@company.com"
+      
+      # Approval and review process
+      approval_status: "approved"
+      approved_by: "board-of-directors"
+      approved_date: "2024-01-01"
+      next_review_date: "2024-07-01"
+      review_frequency: "semi_annual"
+      
+      # Business criticality
+      board_metric: true
+      investor_metric: true
+      sla_hours: 4
+      escalation_contacts: ["cfo@company.com", "head-of-data@company.com"]
+      
+      # Documentation requirements
+      business_definition_url: "https://docs.company.com/metrics/mrr"
+      calculation_documentation: "https://docs.company.com/metrics/mrr-calculation"
+      testing_procedures: "https://docs.company.com/metrics/mrr-testing"
+      
+    # Quality and monitoring controls
+    quality_controls:
+      - name: "daily_reconciliation"
+        description: "Compare with billing system totals"
+        frequency: "daily"
+        tolerance: "1.0%"
+        escalation_threshold: "2.5%"
+        
+      - name: "anomaly_detection"
+        description: "Flag unusual day-over-day changes"
+        frequency: "hourly"
+        threshold: "10%"
+        
+      - name: "month_end_certification"
+        description: "Finance team manual review and sign-off"
+        frequency: "monthly"
+        required_approver: "finance-team@company.com"
+    
+    # Access control
+    access_control:
+      public: false
+      allowed_roles: ["executives", "finance_team", "data_team", "board_members"]
+      export_restrictions:
+        - "requires_business_justification"
+        - "audit_trail_required"
+        
+  # Tier 2 - Important Operational Metrics
+  - name: customer_acquisition_cost
+    description: |
+      Customer Acquisition Cost (CAC) - Cost efficiency metric for sales and marketing.
+      
+      Calculation includes:
+      - All sales and marketing expenses (personnel, tools, advertising)
+      - Allocated overhead costs for sales and marketing teams
+      - Excludes customer success and support costs (post-acquisition)
+      
+      Used for:
+      - Marketing channel optimization
+      - Sales team performance evaluation
+      - Unit economics analysis and planning
+    
+    type: ratio
+    label: "Customer Acquisition Cost (CAC)"
+    type_params:
+      numerator: total_acquisition_costs
+      denominator: new_customers_acquired
+    
+    governance:
+      tier: "tier_2"
+      domain: "growth_metrics"
+      owner: "head-of-marketing@company.com"
+      business_owner: "vp-sales@company.com"
+      technical_owner: "growth-analytics@company.com"
+      
+      approval_status: "approved"
+      approved_by: "cmo@company.com"
+      approved_date: "2024-01-15"
+      next_review_date: "2024-04-15"
+      review_frequency: "quarterly"
+      
+      # Business usage
+      dashboard_usage: ["executive", "marketing", "sales"]
+      report_usage: ["monthly_board_deck", "marketing_performance"]
+      
+    # Monitoring and alerting
+    monitoring:
+      - name: "cac_trend_alert"
+        description: "Alert if CAC increases >20% month-over-month"
+        threshold: "20%"
+        notification_channels: ["slack_marketing", "email_growth_team"]
+        
+      - name: "cac_payback_alert" 
+        description: "Alert if payback period exceeds 18 months"
+        threshold: "18 months"
+        calculation: "cac / average_monthly_revenue_per_customer"
+        
+  # Tier 3 - Exploratory Metrics
+  - name: feature_adoption_rate
+    description: |
+      Percentage of active users who have adopted key product features.
+      Exploratory metric for product team analysis.
+    
+    type: ratio
+    label: "Feature Adoption Rate (%)"
+    type_params:
+      numerator: users_with_feature_usage
+      denominator: total_active_users
+    
+    governance:
+      tier: "tier_3"
+      domain: "product_analytics"
+      owner: "product-team@company.com"
+      
+      approval_status: "experimental"
+      created_by: "product-analyst@company.com"
+      created_date: "2024-02-01"
+      experimental_period: "3 months"
+      
+      # Lightweight governance for experimental metrics
+      usage_tracking: true
+      feedback_collection: true
+      sunset_criteria: "Low usage after 3 months"
+
+# =============================================================================
+# CHANGE MANAGEMENT FRAMEWORK
+# =============================================================================
+
+change_management:
+  workflow:
+    # New metric proposal
+    new_metric:
+      - step: "business_justification"
+        owner: "metric_requestor"
+        deliverable: "business_case_document"
+        
+      - step: "technical_review"
+        owner: "data_team"
+        deliverable: "technical_feasibility_assessment"
+        
+      - step: "data_quality_assessment"
+        owner: "data_quality_team"
+        deliverable: "data_lineage_and_quality_report"
+        
+      - step: "stakeholder_review"
+        owner: "business_owner"
+        deliverable: "stakeholder_sign_off"
+        
+      - step: "implementation"
+        owner: "data_team"
+        deliverable: "metric_implementation_with_tests"
+        
+      - step: "validation"
+        owner: "business_owner"
+        deliverable: "business_validation_sign_off"
+        
+      - step: "deployment"
+        owner: "data_team"
+        deliverable: "production_deployment"
+        
+    # Metric modification
+    metric_change:
+      - step: "impact_assessment"
+        description: "Assess downstream impact of metric changes"
+        owner: "data_team"
+        
+      - step: "stakeholder_notification"
+        description: "Notify all metric consumers 30 days in advance"
+        owner: "metric_owner"
+        
+      - step: "parallel_testing"
+        description: "Run old and new versions in parallel"
+        duration: "14 days"
+        
+      - step: "validation_and_cutover"
+        description: "Validate results and switch to new version"
+        owner: "business_owner"
+        
+    # Metric deprecation
+    metric_sunset:
+      - step: "deprecation_notice"
+        description: "Announce deprecation with 90-day timeline"
+        owner: "metric_owner"
+        
+      - step: "migration_support"
+        description: "Help users migrate to replacement metrics"
+        owner: "data_team"
+        duration: "60 days"
+        
+      - step: "final_sunset"
+        description: "Remove metric from production"
+        owner: "data_team"
+
+# =============================================================================
+# COMPLIANCE AND AUDIT FRAMEWORK
+# =============================================================================
+
+compliance:
+  # Data privacy regulations
+  gdpr:
+    applicable_metrics: 
+      - "customer_based_metrics"
+      - "behavioral_analytics"
+    
+    requirements:
+      - "consent_tracking"
+      - "right_to_erasure"
+      - "data_portability"
+      - "purpose_limitation"
+    
+    controls:
+      - name: "consent_verification"
+        description: "Verify consent before including EU customers in metrics"
+        implementation: "WHERE gdpr_consent = true OR customer_region != 'EU'"
+        
+      - name: "anonymization"
+        description: "Anonymize personal identifiers in aggregated metrics"
+        implementation: "Hash customer_id in metric calculations"
+        
+  # Financial regulations (SOX, etc.)
+  financial_compliance:
+    applicable_metrics:
+      - "revenue_metrics"
+      - "financial_ratios"
+    
+    requirements:
+      - "audit_trail"
+      - "change_control"
+      - "segregation_of_duties"
+      - "data_retention"
+    
+    controls:
+      - name: "change_approval"
+        description: "All financial metric changes require CFO approval"
+        implementation: "Governance approval workflow"
+        
+      - name: "calculation_documentation"
+        description: "Detailed documentation of all financial calculations"
+        implementation: "Metric governance metadata"
+        
+      - name: "external_validation"
+        description: "Quarterly external auditor review"
+        frequency: "quarterly"
+
+# =============================================================================
+# MONITORING AND ALERTING
+# =============================================================================
+
+monitoring:
+  # Data quality monitoring
+  data_quality:
+    - metric_pattern: "tier_1_*"
+      checks:
+        - "freshness < 4 hours"
+        - "completeness > 99%"
+        - "consistency_with_source_system < 1%"
+      alert_channels: ["pager_duty", "slack_data_team"]
+      
+    - metric_pattern: "tier_2_*"
+      checks:
+        - "freshness < 24 hours" 
+        - "completeness > 95%"
+        - "trend_anomaly_detection"
+      alert_channels: ["slack_data_team"]
+  
+  # Usage monitoring
+  usage_tracking:
+    - track: "metric_query_frequency"
+      purpose: "Identify unused metrics for deprecation"
+      
+    - track: "user_access_patterns"
+      purpose: "Optimize access controls and permissions"
+      
+    - track: "dashboard_performance"
+      purpose: "Identify performance optimization opportunities"
+  
+  # Governance compliance monitoring
+  compliance_monitoring:
+    - check: "approval_status_current"
+      description: "Ensure all metrics have current approvals"
+      frequency: "weekly"
+      
+    - check: "review_dates_upcoming"
+      description: "Alert for metrics requiring review"
+      frequency: "monthly"
+      
+    - check: "access_control_violations"
+      description: "Monitor for unauthorized data access attempts"
+      frequency: "real_time"

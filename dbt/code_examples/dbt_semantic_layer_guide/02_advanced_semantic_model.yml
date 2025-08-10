@@ -1,0 +1,531 @@
+# Advanced Semantic Model Patterns for Enterprise Implementation
+# This example demonstrates sophisticated semantic modeling techniques
+
+semantic_models:
+  - name: subscription_analytics
+    description: |
+      Advanced SaaS subscription semantic model with complex business logic,
+      multi-dimensional analysis capabilities, and sophisticated measure calculations.
+      
+      Enterprise Features:
+      - Multi-tenant architecture support
+      - Complex calculated measures with business rules
+      - Advanced entity relationships
+      - Custom data quality constraints
+      
+      Business Context:
+      - Supports MRR, ARR, churn, and growth metrics
+      - Enables cohort and retention analysis
+      - Powers executive and investor reporting
+    
+    model: ref('fact_subscriptions')
+    
+    defaults:
+      agg_time_dimension: subscription_start_date
+    
+    # Complex entity relationships
+    entities:
+      - name: subscription_id
+        type: primary
+        expr: subscription_id
+        description: "Unique subscription identifier"
+      
+      - name: customer_id
+        type: foreign
+        expr: customer_id
+        description: "Customer owning the subscription"
+      
+      - name: plan_id
+        type: foreign
+        expr: subscription_plan_id
+        description: "Subscription plan identifier"
+      
+      # Multi-tenant entity with conditional logic
+      - name: tenant_id
+        type: foreign
+        expr: |
+          case 
+            when deployment_type = 'multi_tenant' then tenant_id
+            when deployment_type = 'dedicated' then customer_id
+            else 'shared_tenant'
+          end
+        description: "Tenant identifier for multi-tenant SaaS architecture"
+      
+      # Derived entity for organizational hierarchy
+      - name: account_id
+        type: foreign
+        expr: |
+          coalesce(
+            parent_account_id, 
+            customer_id
+          )
+        description: "Account identifier supporting organizational hierarchies"
+    
+    dimensions:
+      # Advanced time dimensions with business logic
+      - name: subscription_start_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: subscription_start_date
+        description: "Subscription start date"
+      
+      - name: subscription_end_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: |
+          case 
+            when subscription_status = 'cancelled' then cancellation_date
+            when subscription_status = 'expired' then end_date
+            else null
+          end
+        description: "Subscription end date (null for active subscriptions)"
+      
+      # Calculated time dimensions
+      - name: subscription_age_days
+        type: categorical
+        expr: |
+          case 
+            when current_date - subscription_start_date < 30 then '0-30 days'
+            when current_date - subscription_start_date < 90 then '30-90 days'  
+            when current_date - subscription_start_date < 180 then '3-6 months'
+            when current_date - subscription_start_date < 365 then '6-12 months'
+            else '12+ months'
+          end
+        description: "Subscription age classification"
+      
+      # Complex business status dimensions
+      - name: subscription_health
+        type: categorical
+        expr: |
+          case 
+            when subscription_status = 'cancelled' then 'churned'
+            when days_since_last_payment > 30 then 'at_risk'
+            when usage_score < 0.3 then 'low_engagement'
+            when billing_issues > 0 then 'billing_risk'
+            else 'healthy'
+          end
+        description: "Subscription health classification based on multiple factors"
+      
+      - name: subscription_tier
+        type: categorical
+        expr: subscription_tier
+        description: "Subscription tier (starter, professional, enterprise)"
+      
+      - name: billing_frequency
+        type: categorical
+        expr: billing_frequency
+        description: "Billing frequency (monthly, quarterly, annually)"
+      
+      - name: deployment_type
+        type: categorical
+        expr: deployment_type
+        description: "Deployment type (cloud, on_premise, hybrid)"
+      
+      # Geographic and demographic dimensions
+      - name: customer_segment
+        type: categorical
+        expr: |
+          case 
+            when monthly_recurring_revenue >= 10000 then 'enterprise'
+            when monthly_recurring_revenue >= 1000 then 'mid_market'
+            when monthly_recurring_revenue >= 100 then 'smb'
+            else 'micro'
+          end
+        description: "Customer segment based on MRR"
+      
+      - name: industry_vertical
+        type: categorical
+        expr: customer_industry
+        description: "Customer industry vertical"
+      
+      # Acquisition and attribution dimensions
+      - name: acquisition_channel
+        type: categorical
+        expr: acquisition_channel
+        description: "Channel through which customer was acquired"
+      
+      - name: sales_rep
+        type: categorical
+        expr: assigned_sales_rep
+        description: "Assigned sales representative"
+    
+    # Advanced measures with complex business logic
+    measures:
+      # Core revenue measures
+      - name: monthly_recurring_revenue
+        description: |
+          Monthly Recurring Revenue (MRR) with normalization for different billing frequencies.
+          Annual subscriptions are divided by 12, quarterly by 3.
+        agg: sum
+        expr: |
+          case 
+            when billing_frequency = 'annual' then subscription_amount / 12.0
+            when billing_frequency = 'quarterly' then subscription_amount / 3.0
+            when billing_frequency = 'monthly' then subscription_amount
+            else 0
+          end
+      
+      - name: annual_recurring_revenue
+        description: "Annual Recurring Revenue (ARR) normalized to yearly amounts"
+        agg: sum
+        expr: |
+          case 
+            when billing_frequency = 'annual' then subscription_amount
+            when billing_frequency = 'quarterly' then subscription_amount * 4.0
+            when billing_frequency = 'monthly' then subscription_amount * 12.0
+            else 0
+          end
+      
+      # Advanced subscription metrics
+      - name: subscription_count
+        description: "Total number of subscriptions"
+        agg: count
+        expr: subscription_id
+      
+      - name: active_subscriptions
+        description: "Count of currently active subscriptions"
+        agg: count
+        expr: |
+          case 
+            when subscription_status = 'active' 
+            then subscription_id 
+            else null 
+          end
+      
+      - name: new_subscriptions
+        description: "Count of new subscriptions (started in analysis period)"
+        agg: count
+        expr: |
+          case 
+            when subscription_start_date >= '{{ var("analysis_start_date") }}'
+            then subscription_id
+            else null
+          end
+      
+      - name: churned_subscriptions
+        description: "Count of subscriptions that churned in analysis period"
+        agg: count
+        expr: |
+          case 
+            when subscription_status = 'cancelled' 
+            and cancellation_date >= '{{ var("analysis_start_date") }}'
+            then subscription_id
+            else null
+          end
+      
+      # Revenue quality measures
+      - name: committed_revenue
+        description: "Revenue from annual contracts (higher predictability)"
+        agg: sum
+        expr: |
+          case 
+            when billing_frequency = 'annual' 
+            then subscription_amount 
+            else 0 
+          end
+      
+      - name: expansion_revenue
+        description: "Additional revenue from subscription upgrades"
+        agg: sum
+        expr: |
+          case 
+            when subscription_change_type = 'upgrade' 
+            then subscription_amount_change 
+            else 0 
+          end
+      
+      - name: contraction_revenue
+        description: "Lost revenue from subscription downgrades"
+        agg: sum
+        expr: |
+          case 
+            when subscription_change_type = 'downgrade' 
+            then abs(subscription_amount_change)
+            else 0 
+          end
+      
+      # Customer value measures
+      - name: customer_lifetime_value
+        description: |
+          Estimated Customer Lifetime Value based on current MRR and churn rates.
+          CLV = (Average MRR * Gross Margin) / Monthly Churn Rate
+        agg: sum
+        expr: |
+          case 
+            when monthly_churn_rate > 0 
+            then (monthly_recurring_revenue * 0.75) / monthly_churn_rate
+            else monthly_recurring_revenue * 36  -- Default 3-year assumption
+          end
+      
+      # Usage and engagement measures
+      - name: usage_score
+        description: "Normalized usage score (0-1) indicating product engagement"
+        agg: average
+        expr: |
+          least(1.0, greatest(0.0, 
+            (daily_active_users * 1.0) / licensed_users
+          ))
+      
+      - name: feature_adoption_score
+        description: "Percentage of premium features being used"
+        agg: average
+        expr: |
+          case 
+            when total_premium_features > 0 
+            then (adopted_premium_features * 1.0) / total_premium_features
+            else 0
+          end
+      
+      # Risk and health measures
+      - name: at_risk_revenue
+        description: "MRR from subscriptions identified as at-risk of churning"
+        agg: sum
+        expr: |
+          case 
+            when subscription_health = 'at_risk' 
+            then monthly_recurring_revenue 
+            else 0 
+          end
+      
+      - name: healthy_revenue
+        description: "MRR from healthy, engaged subscriptions"
+        agg: sum
+        expr: |
+          case 
+            when subscription_health = 'healthy' 
+            then monthly_recurring_revenue 
+            else 0 
+          end
+
+---
+
+# Multi-Channel E-commerce Semantic Model
+# Demonstrates complex cross-channel analysis capabilities
+
+semantic_models:
+  - name: omnichannel_sales
+    description: |
+      Advanced omnichannel e-commerce semantic model supporting unified
+      customer journey analysis across online, mobile, and physical channels.
+      
+      Advanced Capabilities:
+      - Cross-channel attribution modeling
+      - Customer journey stage tracking
+      - Advanced profitability calculations
+      - Inventory allocation across channels
+      
+      Business Use Cases:
+      - Unified customer experience metrics
+      - Channel performance optimization
+      - Cross-channel marketing attribution
+      - Inventory planning and allocation
+    
+    model: ref('fact_omnichannel_transactions')
+    
+    defaults:
+      agg_time_dimension: transaction_timestamp
+    
+    entities:
+      - name: transaction_id
+        type: primary
+        expr: transaction_id
+        description: "Unique transaction identifier across all channels"
+      
+      - name: customer_id
+        type: foreign
+        expr: unified_customer_id
+        description: "Unified customer ID linking all channels"
+      
+      - name: product_id
+        type: foreign
+        expr: product_id
+      
+      - name: store_id
+        type: foreign
+        expr: |
+          case 
+            when sales_channel = 'online' then 'ONLINE_STORE'
+            when sales_channel = 'mobile_app' then 'MOBILE_APP'
+            else physical_store_id
+          end
+        description: "Store identifier (physical or virtual)"
+      
+      # Customer journey entity for attribution
+      - name: customer_journey_id
+        type: foreign
+        expr: customer_journey_id
+        description: "Customer journey session identifier"
+    
+    dimensions:
+      # Advanced time dimensions
+      - name: transaction_timestamp
+        type: time
+        type_params:
+          time_granularity: hour
+        expr: transaction_timestamp
+      
+      - name: transaction_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: date(transaction_timestamp)
+      
+      # Channel and touchpoint dimensions
+      - name: sales_channel
+        type: categorical
+        expr: sales_channel
+        description: "Sales channel (online, mobile_app, in_store, phone)"
+      
+      - name: channel_category
+        type: categorical
+        expr: |
+          case 
+            when sales_channel in ('online', 'mobile_app') then 'digital'
+            when sales_channel = 'in_store' then 'physical'
+            else 'other'
+          end
+        description: "High-level channel categorization"
+      
+      - name: touchpoint_sequence
+        type: categorical
+        expr: touchpoint_sequence_number
+        description: "Sequence number in customer journey"
+      
+      # Attribution dimensions
+      - name: attribution_channel
+        type: categorical
+        expr: first_touch_channel
+        description: "First-touch attribution channel"
+      
+      - name: last_touch_channel
+        type: categorical
+        expr: last_touch_channel
+        description: "Last-touch attribution channel"
+      
+      # Customer experience dimensions
+      - name: customer_type
+        type: categorical
+        expr: |
+          case 
+            when first_purchase_date = transaction_date then 'new_customer'
+            when days_since_last_purchase <= 90 then 'returning_customer'
+            else 'reactivated_customer'
+          end
+        description: "Customer type based on purchase history"
+      
+      - name: transaction_type
+        type: categorical
+        expr: transaction_type
+        description: "Type of transaction (purchase, return, exchange)"
+      
+      # Geographic dimensions with hierarchy
+      - name: customer_region
+        type: categorical
+        expr: customer_region
+        description: "Customer's geographic region"
+      
+      - name: fulfillment_location
+        type: categorical
+        expr: |
+          case 
+            when sales_channel = 'in_store' then store_location
+            when fulfillment_method = 'pickup' then pickup_location
+            else warehouse_location
+          end
+        description: "Location where order was fulfilled"
+    
+    # Sophisticated measures for omnichannel analysis
+    measures:
+      # Revenue measures with channel attribution
+      - name: gross_revenue
+        description: "Total gross revenue before returns and discounts"
+        agg: sum
+        expr: gross_transaction_amount
+      
+      - name: net_revenue
+        description: "Net revenue after returns, discounts, and refunds"
+        agg: sum
+        expr: net_transaction_amount
+      
+      - name: digital_revenue
+        description: "Revenue from digital channels (online, mobile)"
+        agg: sum
+        expr: |
+          case 
+            when sales_channel in ('online', 'mobile_app') 
+            then net_transaction_amount 
+            else 0 
+          end
+      
+      - name: physical_revenue
+        description: "Revenue from physical store transactions"
+        agg: sum
+        expr: |
+          case 
+            when sales_channel = 'in_store' 
+            then net_transaction_amount 
+            else 0 
+          end
+      
+      # Advanced profitability measures
+      - name: contribution_margin
+        description: "Contribution margin after variable costs"
+        agg: sum
+        expr: net_transaction_amount - product_cost - fulfillment_cost
+      
+      - name: channel_profitability
+        description: "Channel-specific profitability including channel costs"
+        agg: sum
+        expr: |
+          net_transaction_amount - product_cost - fulfillment_cost - 
+          (allocated_channel_costs * transaction_count)
+      
+      # Customer journey measures
+      - name: first_touch_revenue
+        description: "Revenue attributed to first-touch interactions"
+        agg: sum
+        expr: |
+          case 
+            when touchpoint_sequence_number = 1 
+            then net_transaction_amount 
+            else 0 
+          end
+      
+      - name: cross_channel_transactions
+        description: "Transactions involving multiple channels in customer journey"
+        agg: count
+        expr: |
+          case 
+            when unique_channels_in_journey > 1 
+            then transaction_id 
+            else null 
+          end
+      
+      # Transaction and customer counts
+      - name: transaction_count
+        description: "Total number of transactions"
+        agg: count
+        expr: transaction_id
+      
+      - name: unique_customers
+        description: "Count of unique customers"
+        agg: count_distinct
+        expr: unified_customer_id
+      
+      # Advanced metrics for customer experience
+      - name: average_basket_size
+        description: "Average transaction value"
+        agg: average
+        expr: net_transaction_amount
+      
+      - name: customer_acquisition_cost
+        description: "Marketing cost per new customer acquired"
+        agg: sum
+        expr: |
+          case 
+            when customer_type = 'new_customer' 
+            then allocated_marketing_cost 
+            else 0 
+          end
