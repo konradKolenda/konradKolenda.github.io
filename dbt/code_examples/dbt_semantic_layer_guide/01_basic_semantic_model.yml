@@ -1,0 +1,314 @@
+# Basic Semantic Model for dbt Semantic Layer
+# This example demonstrates the foundational patterns for semantic model definition
+
+semantic_models:
+  - name: orders
+    description: |
+      Core orders semantic model representing the foundation of our revenue metrics.
+      This model defines the essential entities, dimensions, and measures for order analysis.
+      
+      Key Business Concepts:
+      - Order: A single transaction with associated products and customer
+      - Customer: The entity making the purchase
+      - Product: Items being purchased
+      
+      Data Grain: One row per order
+    
+    # Reference to the underlying dbt model
+    model: ref('fact_orders')
+    
+    # Default time dimension for time-based queries
+    defaults:
+      agg_time_dimension: order_date
+    
+    # Entities define the business objects and their relationships
+    entities:
+      # Primary entity - the main identifier for this semantic model
+      - name: order_id
+        type: primary
+        expr: order_id
+        description: "Unique identifier for each order"
+      
+      # Foreign entities - connections to other semantic models
+      - name: customer_id
+        type: foreign
+        expr: customer_id
+        description: "Foreign key to customer dimension"
+      
+      - name: product_id
+        type: foreign  
+        expr: product_id
+        description: "Foreign key to product dimension"
+    
+    # Dimensions provide categorical and time-based grouping capabilities
+    dimensions:
+      # Time dimension - essential for temporal analysis
+      - name: order_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: order_date
+        description: "Date when the order was placed"
+      
+      # Categorical dimensions for grouping and filtering
+      - name: order_status
+        type: categorical
+        expr: order_status
+        description: "Current status of the order (pending, shipped, delivered, cancelled)"
+      
+      - name: sales_channel
+        type: categorical
+        expr: sales_channel
+        description: "Channel through which the order was placed (online, in-store, phone)"
+      
+      - name: customer_region
+        type: categorical
+        expr: customer_region
+        description: "Geographic region of the customer"
+        
+      - name: payment_method
+        type: categorical
+        expr: payment_method
+        description: "Method used for payment (credit_card, debit_card, paypal, cash)"
+    
+    # Measures define the quantitative values that can be aggregated
+    measures:
+      # Revenue measures
+      - name: order_total
+        description: "Total order amount including tax and shipping"
+        agg: sum
+        expr: order_total_amount
+      
+      - name: order_subtotal
+        description: "Order subtotal before tax and shipping"
+        agg: sum
+        expr: order_subtotal_amount
+      
+      - name: tax_amount
+        description: "Total tax amount for the order"
+        agg: sum
+        expr: tax_amount
+      
+      - name: shipping_amount
+        description: "Shipping cost for the order"
+        agg: sum
+        expr: shipping_amount
+      
+      # Count measures
+      - name: order_count
+        description: "Total number of orders"
+        agg: count
+        expr: order_id
+      
+      - name: unique_customers
+        description: "Number of unique customers who placed orders"
+        agg: count_distinct
+        expr: customer_id
+      
+      # Average measures  
+      - name: avg_order_value
+        description: "Average order value"
+        agg: average
+        expr: order_total_amount
+
+---
+
+# Customer Semantic Model
+# Represents customer dimension with demographic and behavioral attributes
+
+semantic_models:
+  - name: customers
+    description: |
+      Customer dimension semantic model providing customer demographics,
+      acquisition information, and behavioral segments.
+      
+      Business Context:
+      - Used for customer segmentation and cohort analysis
+      - Links to orders through customer_id entity
+      - Includes customer lifecycle and value indicators
+      
+      Data Grain: One row per unique customer
+    
+    model: ref('dim_customers')
+    
+    # Primary entity
+    entities:
+      - name: customer_id
+        type: primary
+        expr: customer_id
+        description: "Unique identifier for each customer"
+    
+    # Customer dimensions
+    dimensions:
+      # Temporal dimensions
+      - name: customer_since_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: created_at
+        description: "Date when customer first registered"
+      
+      - name: last_order_date
+        type: time
+        type_params:
+          time_granularity: day  
+        expr: last_order_date
+        description: "Date of customer's most recent order"
+      
+      # Demographic dimensions
+      - name: customer_segment
+        type: categorical
+        expr: customer_segment
+        description: "Customer value segment (high_value, medium_value, low_value)"
+      
+      - name: acquisition_channel
+        type: categorical
+        expr: acquisition_channel
+        description: "Channel through which customer was acquired"
+      
+      - name: customer_status
+        type: categorical
+        expr: customer_status
+        description: "Current customer status (active, inactive, churned)"
+      
+      - name: geographic_region
+        type: categorical
+        expr: geographic_region
+        description: "Customer's geographic region"
+      
+      - name: age_group
+        type: categorical
+        expr: |
+          case 
+            when age < 25 then '18-24'
+            when age < 35 then '25-34'
+            when age < 45 then '35-44'
+            when age < 55 then '45-54'
+            when age < 65 then '55-64'
+            else '65+'
+          end
+        description: "Customer age group classification"
+    
+    # Customer measures
+    measures:
+      - name: customer_count
+        description: "Total number of customers"
+        agg: count
+        expr: customer_id
+      
+      - name: active_customers
+        description: "Number of customers with orders in the last 90 days"
+        agg: count
+        expr: |
+          case 
+            when last_order_date >= current_date - 90 
+            then customer_id 
+            else null 
+          end
+      
+      - name: lifetime_value
+        description: "Total customer lifetime value"
+        agg: sum
+        expr: total_lifetime_value
+      
+      - name: avg_lifetime_value
+        description: "Average customer lifetime value"
+        agg: average
+        expr: total_lifetime_value
+
+---
+
+# Product Semantic Model
+# Represents product catalog with hierarchical categories and attributes
+
+semantic_models:
+  - name: products
+    description: |
+      Product catalog semantic model with hierarchical categories,
+      pricing information, and product attributes.
+      
+      Business Context:
+      - Used for product performance analysis
+      - Supports product hierarchy reporting (category, subcategory, product)
+      - Includes pricing and inventory metrics
+      
+      Data Grain: One row per unique product SKU
+    
+    model: ref('dim_products')
+    
+    # Primary entity
+    entities:
+      - name: product_id
+        type: primary
+        expr: product_id
+        description: "Unique identifier for each product"
+    
+    # Product dimensions
+    dimensions:
+      # Product hierarchy
+      - name: product_category
+        type: categorical
+        expr: product_category
+        description: "Top-level product category"
+      
+      - name: product_subcategory
+        type: categorical
+        expr: product_subcategory
+        description: "Secondary product category"
+      
+      - name: brand
+        type: categorical
+        expr: brand_name
+        description: "Product brand name"
+      
+      # Product attributes
+      - name: product_status
+        type: categorical
+        expr: product_status
+        description: "Current product status (active, discontinued, seasonal)"
+      
+      - name: price_tier
+        type: categorical
+        expr: |
+          case 
+            when current_price < 25 then 'budget'
+            when current_price < 100 then 'mid_tier'
+            when current_price < 500 then 'premium'
+            else 'luxury'
+          end
+        description: "Product price tier classification"
+      
+      # Temporal dimensions
+      - name: launch_date
+        type: time
+        type_params:
+          time_granularity: day
+        expr: launch_date
+        description: "Date when product was launched"
+    
+    # Product measures
+    measures:
+      - name: product_count
+        description: "Total number of products"
+        agg: count
+        expr: product_id
+      
+      - name: active_products
+        description: "Number of active products"
+        agg: count
+        expr: |
+          case 
+            when product_status = 'active' 
+            then product_id 
+            else null 
+          end
+      
+      - name: avg_product_price
+        description: "Average product price"
+        agg: average
+        expr: current_price
+      
+      - name: total_inventory_value
+        description: "Total value of current inventory"
+        agg: sum
+        expr: current_price * inventory_quantity
