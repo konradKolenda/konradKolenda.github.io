@@ -121,12 +121,14 @@ CREATE TABLE IF NOT EXISTS analytics.dbt_performance_log (
 ```
 
 **Cost-Optimized Development Model:**
+{% raw %}
 ```sql
 {{ config(
-    materialized={% raw %}{% if target.name == 'dev' %}{% endraw %}'view'{% raw %}{% else %}{% endraw %}'table'{% raw %}{% endif %}{% endraw %},
+    materialized={% if target.name == 'dev' %}'view'{% else %}'table'{% endif %},
     pre_hook="{{ enforce_dev_limits() }}"
 ) }}
 ```
+{% endraw %}
 
 ## 📊 Performance Metrics
 
