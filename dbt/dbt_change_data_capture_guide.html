@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dbt Change Data Capture (CDC): Complete Implementation Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        ul, ol {
+            padding-left: 30px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc ul li {
+            margin-bottom: 8px;
+        }
+        .toc a {
+            text-decoration: none;
+            color: #495057;
+        }
+        .toc a:hover {
+            color: #007bff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .comparison-table {
+            margin: 20px 0;
+        }
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>dbt Change Data Capture (CDC): Complete Implementation Guide</h1>
+        
+        <p>This comprehensive guide covers implementing Change Data Capture (CDC) patterns in dbt for tracking and processing data changes over time. Learn to build robust, efficient CDC solutions for real-time data synchronization and historical tracking.</p>
+
+        <div class="toc">
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#introduction">1. Introduction to CDC in dbt</a></li>
+                <li><a href="#cdc-vs-materialization">2. CDC vs dbt Materialization Strategies</a></li>
+                <li><a href="#fundamentals">3. CDC Fundamentals</a></li>
+                <li><a href="#cdc-patterns">4. CDC Implementation Patterns</a></li>
+                <li><a href="#timestamp-based">5. Timestamp-Based CDC</a></li>
+                <li><a href="#log-based">6. Log-Based CDC</a></li>
+                <li><a href="#trigger-based">7. Trigger-Based CDC</a></li>
+                <li><a href="#snapshot-comparison">8. Snapshot Comparison CDC</a></li>
+                <li><a href="#scd-integration">9. SCD Integration with CDC</a></li>
+                <li><a href="#real-time">10. Real-Time CDC Processing</a></li>
+                <li><a href="#performance">11. Performance Optimization</a></li>
+                <li><a href="#monitoring">12. Monitoring and Alerting</a></li>
+                <li><a href="#troubleshooting">13. Troubleshooting Guide</a></li>
+                <li><a href="#code-examples">14. Code Examples</a></li>
+                <li><a href="#best-practices">15. Best Practices</a></li>
+                <li><a href="#advanced-patterns">16. Advanced Patterns</a></li>
+            </ul>
+        </div>
+
+        <h2 id="introduction">1. Introduction to CDC in dbt</h2>
+        
+        <p>Change Data Capture (CDC) is a pattern used to identify and track changes in data over time. In dbt, CDC enables efficient data synchronization, historical tracking, and real-time analytics by processing only changed records rather than entire datasets.</p>
+
+        <div class="info">
+            <strong>Key Benefits:</strong>
+            <ul>
+                <li><strong>Efficiency:</strong> Process only changed data, reducing compute costs</li>
+                <li><strong>Real-time Analytics:</strong> Enable near-real-time data processing</li>
+                <li><strong>Data Lineage:</strong> Maintain complete audit trails</li>
+                <li><strong>Conflict Resolution:</strong> Handle concurrent updates gracefully</li>
+            </ul>
+        </div>
+
+        <h2 id="cdc-vs-materialization">2. CDC vs dbt Materialization Strategies</h2>
+        
+        <p>It's crucial to understand the distinction between <strong>Change Data Capture (CDC)</strong> as a data integration pattern and <strong>dbt's incremental materialization strategies</strong> like "merge". While they work together, they serve different purposes:</p>
+
+        <h3>2.1 Change Data Capture (CDC) - Data Integration Pattern</h3>
+        <div class="info">
+            <p><strong>CDC is a data integration pattern</strong> focused on identifying, capturing, and processing data changes from source systems:</p>
+            <ul>
+                <li><strong>Purpose:</strong> Capture and identify what data has changed in source systems</li>
+                <li><strong>Scope:</strong> Handles change detection, ordering, and metadata enrichment</li>
+                <li><strong>Methods:</strong> Timestamp-based, log-based, trigger-based, snapshot comparison</li>
+                <li><strong>Output:</strong> Enriched change records with operation types (INSERT, UPDATE, DELETE)</li>
+                <li><strong>Business Value:</strong> Enables real-time data synchronization and audit trails</li>
+            </ul>
+        </div>
+
+        <h3>2.2 dbt Materialization Strategies - Data Processing Method</h3>
+        <div class="warning">
+            <p><strong>dbt materialization strategies</strong> determine how dbt physically applies changes to target tables:</p>
+            <ul>
+                <li><strong>Purpose:</strong> Define how dbt writes data to the data warehouse</li>
+                <li><strong>Scope:</strong> Controls SQL operations for building/updating tables</li>
+                <li><strong>Strategies:</strong> append, merge, delete+insert, insert_overwrite</li>
+                <li><strong>Output:</strong> Updated target tables in the data warehouse</li>
+                <li><strong>Technical Focus:</strong> Optimizes warehouse operations and performance</li>
+            </ul>
+        </div>
+
+        <h3>2.3 How They Work Together</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>CDC Pattern</th>
+                    <th>dbt Materialization</th>
+                    <th>Combined Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Data Source</strong></td>
+                    <td>Captures changes from OLTP systems</td>
+                    <td>Processes data from staging tables</td>
+                    <td>CDC captures database logs → dbt processes with merge strategy</td>
+                </tr>
+                <tr>
+                    <td><strong>Change Detection</strong></td>
+                    <td>Identifies what changed and when</td>
+                    <td>Uses CDC output to determine actions</td>
+                    <td>CDC identifies updated orders → merge strategy updates dimension table</td>
+                </tr>
+                <tr>
+                    <td><strong>Metadata Handling</strong></td>
+                    <td>Adds operation types, timestamps, sequences</td>
+                    <td>Uses metadata for conditional logic</td>
+                    <td>CDC adds _operation_type → merge uses it for INSERT/UPDATE/DELETE</td>
+                </tr>
+                <tr>
+                    <td><strong>Performance</strong></td>
+                    <td>Reduces data volume by filtering changes</td>
+                    <td>Optimizes warehouse operations</td>
+                    <td>CDC processes 1000 changed records → merge updates only those rows</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>2.4 Practical Example: CDC + Merge Strategy</h3>
+        <div class="code-block">
+-- Step 1: CDC Pattern captures changes from source
+-- models/staging/stg_customers_cdc.sql
+WITH cdc_changes AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        email,
+        updated_at,
+        _operation_type, -- CDC metadata: INSERT, UPDATE, DELETE
+        _sequence_number -- CDC ordering
+    FROM {{ source('cdc_logs', 'customer_changes') }}
+    WHERE updated_at > '{{ var("last_processed_timestamp") }}'
+),
+
+-- Step 2: dbt Merge Strategy applies changes to target
+-- models/marts/dim_customers.sql
+{{
+    config(
+        materialized='incremental',
+        incremental_strategy='merge',  -- dbt materialization strategy
+        unique_key='customer_id'
+    )
+}}
+
+SELECT 
+    customer_id,
+    customer_name,
+    email,
+    updated_at,
+    CASE 
+        WHEN _operation_type = 'DELETE' THEN TRUE 
+        ELSE FALSE 
+    END as is_deleted
+FROM {{ ref('stg_customers_cdc') }}
+
+-- The merge strategy will:
+-- - INSERT new customer_ids
+-- - UPDATE existing customer_ids  
+-- - Handle DELETEs based on CDC metadata
+        </div>
+
+        <h3>2.5 Key Distinctions Summary</h3>
+        <div class="success">
+            <p><strong>Think of it this way:</strong></p>
+            <ul>
+                <li><strong>CDC answers:</strong> "What changed in my source systems and when?"</li>
+                <li><strong>Materialization strategies answer:</strong> "How should dbt apply these changes to my warehouse?"</li>
+                <li><strong>CDC is the input pattern</strong> that identifies and enriches change data</li>
+                <li><strong>Materialization is the output method</strong> that applies changes efficiently</li>
+                <li><strong>You use both together:</strong> CDC to capture changes + appropriate materialization strategy to apply them</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h4>Common Misconception:</h4>
+            <p>The "merge" incremental strategy is <strong>not</strong> CDC itself. It's a SQL operation (MERGE statement) that dbt uses to apply changes. CDC is the broader pattern of identifying and processing those changes in the first place.</p>
+        </div>
+
+        <h2 id="fundamentals">3. CDC Fundamentals</h2>
+
+        <h3>3.1 CDC Types</h3>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>CDC Type</th>
+                    <th>Description</th>
+                    <th>Use Case</th>
+                    <th>Complexity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Timestamp-Based</td>
+                    <td>Uses modification timestamps</td>
+                    <td>Simple incremental loads</td>
+                    <td>Low</td>
+                </tr>
+                <tr>
+                    <td>Log-Based</td>
+                    <td>Reads database transaction logs</td>
+                    <td>Real-time replication</td>
+                    <td>High</td>
+                </tr>
+                <tr>
+                    <td>Trigger-Based</td>
+                    <td>Database triggers capture changes</td>
+                    <td>Detailed audit trails</td>
+                    <td>Medium</td>
+                </tr>
+                <tr>
+                    <td>Snapshot Comparison</td>
+                    <td>Compares full snapshots</td>
+                    <td>Batch processing</td>
+                    <td>Medium</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>3.2 CDC Architecture in dbt</h3>
+        <div class="code-block">
+-- CDC Architecture Components
+Source System → CDC Capture → Staging Area → dbt Processing → Target Tables
+     ↓              ↓             ↓              ↓              ↓
+  Operational   Change Log    Raw Changes   Transformed    Final Data
+   Database     Extraction     Staging       Changes        Warehouse
+        </div>
+
+        <h2 id="cdc-patterns">4. CDC Implementation Patterns</h2>
+
+        <h3>4.1 Incremental Model Pattern</h3>
+        <div class="code-block">
+-- models/staging/stg_orders_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='order_id',
+        on_schema_change='sync_all_columns'
+    )
+}}
+
+WITH source_data AS (
+    SELECT 
+        order_id,
+        customer_id,
+        order_status,
+        order_date,
+        updated_at,
+        _operation_type,
+        _sequence_number
+    FROM {{ ref('raw_orders_cdc') }}
+    
+    {% if is_incremental() %}
+        WHERE updated_at > (SELECT MAX(updated_at) FROM {{ this }})
+    {% endif %}
+),
+
+-- Deduplicate based on sequence number (latest change wins)
+deduplicated AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY order_id 
+            ORDER BY _sequence_number DESC
+        ) as rn
+    FROM source_data
+)
+
+SELECT *
+FROM deduplicated
+WHERE rn = 1
+        </div>
+
+        <h3>4.2 SCD Type 2 with CDC</h3>
+        <div class="code-block">
+-- models/marts/dim_customer_scd2.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='surrogate_key'
+    )
+}}
+
+WITH source_changes AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        email,
+        address,
+        phone,
+        updated_at,
+        _operation_type,
+        _sequence_number
+    FROM {{ ref('stg_customers_cdc') }}
+    
+    {% if is_incremental() %}
+        WHERE updated_at > (SELECT MAX(effective_end_date) FROM {{ this }} WHERE effective_end_date IS NOT NULL)
+           OR updated_at > (SELECT MAX(effective_start_date) FROM {{ this }} WHERE effective_end_date IS NULL)
+    {% endif %}
+),
+
+-- Generate surrogate keys and validity periods
+scd_logic AS (
+    SELECT 
+        {{ dbt_utils.generate_surrogate_key(['customer_id', 'updated_at']) }} as surrogate_key,
+        customer_id,
+        customer_name,
+        email,
+        address,
+        phone,
+        updated_at as effective_start_date,
+        CASE 
+            WHEN _operation_type = 'DELETE' THEN updated_at
+            ELSE NULL 
+        END as effective_end_date,
+        _operation_type,
+        CASE WHEN _operation_type = 'DELETE' THEN FALSE ELSE TRUE END as is_current
+    FROM source_changes
+)
+
+SELECT * FROM scd_logic
+        </div>
+
+        <h2 id="timestamp-based">5. Timestamp-Based CDC</h2>
+
+        <h3>5.1 Basic Timestamp CDC</h3>
+        <div class="code-block">
+-- models/staging/stg_products_timestamp_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='product_id'
+    )
+}}
+
+SELECT 
+    product_id,
+    product_name,
+    category_id,
+    price,
+    created_at,
+    updated_at,
+    -- Add CDC metadata
+    CURRENT_TIMESTAMP as processed_at,
+    'UPSERT' as cdc_operation
+FROM {{ source('ecommerce', 'products') }}
+
+{% if is_incremental() %}
+    -- Only process records updated since last run
+    WHERE updated_at > (
+        SELECT COALESCE(MAX(updated_at), '1900-01-01'::timestamp) 
+        FROM {{ this }}
+    )
+{% endif %}
+        </div>
+
+        <h3>5.2 Advanced Timestamp CDC with Deletes</h3>
+        <div class="code-block">
+-- models/staging/stg_customers_advanced_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='customer_id'
+    )
+}}
+
+WITH current_data AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        email,
+        status,
+        updated_at,
+        FALSE as is_deleted
+    FROM {{ source('crm', 'customers') }}
+    WHERE status != 'DELETED'
+    
+    {% if is_incremental() %}
+        AND updated_at > (
+            SELECT COALESCE(MAX(updated_at), '1900-01-01'::timestamp) 
+            FROM {{ this }}
+            WHERE NOT is_deleted
+        )
+    {% endif %}
+),
+
+deleted_data AS (
+    SELECT 
+        customer_id,
+        customer_name,
+        email,
+        status,
+        updated_at,
+        TRUE as is_deleted
+    FROM {{ source('crm', 'customers') }}
+    WHERE status = 'DELETED'
+    
+    {% if is_incremental() %}
+        AND updated_at > (
+            SELECT COALESCE(MAX(updated_at), '1900-01-01'::timestamp) 
+            FROM {{ this }}
+            WHERE is_deleted
+        )
+    {% endif %}
+)
+
+SELECT * FROM current_data
+UNION ALL
+SELECT * FROM deleted_data
+        </div>
+
+        <h2 id="log-based">6. Log-Based CDC</h2>
+
+        <h3>6.1 Processing WAL/Binlog Data</h3>
+        <div class="code-block">
+-- models/staging/stg_orders_log_based_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key=['order_id', 'log_sequence_number']
+    )
+}}
+
+WITH log_entries AS (
+    SELECT 
+        -- Parse log entry data
+        JSON_EXTRACT_SCALAR(log_data, '$.order_id') as order_id,
+        JSON_EXTRACT_SCALAR(log_data, '$.customer_id') as customer_id,
+        JSON_EXTRACT_SCALAR(log_data, '$.order_status') as order_status,
+        JSON_EXTRACT_SCALAR(log_data, '$.total_amount') as total_amount,
+        
+        -- CDC metadata from log
+        operation_type, -- INSERT, UPDATE, DELETE
+        log_sequence_number,
+        transaction_id,
+        commit_timestamp,
+        
+        -- Row change metadata
+        CASE operation_type
+            WHEN 'UPDATE' THEN JSON_EXTRACT(log_data, '$.before')
+            ELSE NULL
+        END as before_values,
+        
+        CASE operation_type
+            WHEN 'DELETE' THEN JSON_EXTRACT(log_data, '$.before')
+            ELSE JSON_EXTRACT(log_data, '$.after')
+        END as after_values
+        
+    FROM {{ source('cdc_logs', 'order_changes') }}
+    
+    {% if is_incremental() %}
+        WHERE log_sequence_number > (
+            SELECT COALESCE(MAX(log_sequence_number), 0) 
+            FROM {{ this }}
+        )
+    {% endif %}
+),
+
+-- Process changes with conflict resolution
+processed_changes AS (
+    SELECT 
+        *,
+        -- Determine final operation after deduplication
+        LAST_VALUE(operation_type) OVER (
+            PARTITION BY order_id 
+            ORDER BY log_sequence_number 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) as final_operation,
+        
+        -- Mark as latest change for this key
+        ROW_NUMBER() OVER (
+            PARTITION BY order_id 
+            ORDER BY log_sequence_number DESC
+        ) = 1 as is_latest_change
+        
+    FROM log_entries
+)
+
+SELECT * FROM processed_changes
+        </div>
+
+        <h3>6.2 Log-Based CDC Deduplication</h3>
+        <div class="code-block">
+-- models/marts/fct_orders_current_state.sql
+-- Reconstruct current state from log entries
+
+WITH latest_operations AS (
+    SELECT 
+        order_id,
+        customer_id,
+        order_status,
+        total_amount,
+        final_operation,
+        commit_timestamp,
+        
+        -- Only keep the final state per order
+        ROW_NUMBER() OVER (
+            PARTITION BY order_id 
+            ORDER BY log_sequence_number DESC
+        ) = 1 as is_current_state
+        
+    FROM {{ ref('stg_orders_log_based_cdc') }}
+    WHERE is_latest_change
+),
+
+current_orders AS (
+    SELECT 
+        order_id,
+        customer_id,
+        order_status,
+        total_amount,
+        commit_timestamp as last_updated_at
+    FROM latest_operations
+    WHERE is_current_state 
+      AND final_operation != 'DELETE' -- Exclude deleted records
+)
+
+SELECT * FROM current_orders
+        </div>
+
+        <h2 id="trigger-based">7. Trigger-Based CDC</h2>
+
+        <h3>7.1 Processing Audit Table Data</h3>
+        <div class="code-block">
+-- models/staging/stg_inventory_audit_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='audit_id'
+    )
+}}
+
+WITH audit_changes AS (
+    SELECT 
+        audit_id,
+        table_name,
+        operation_type, -- I, U, D
+        primary_key_value,
+        changed_columns,
+        old_values,
+        new_values,
+        changed_by,
+        changed_at,
+        
+        -- Parse the changed data
+        CASE 
+            WHEN operation_type = 'I' THEN new_values
+            WHEN operation_type = 'D' THEN old_values  
+            ELSE new_values
+        END as current_values
+        
+    FROM {{ source('audit', 'inventory_audit') }}
+    WHERE table_name = 'inventory'
+    
+    {% if is_incremental() %}
+        AND changed_at > (
+            SELECT COALESCE(MAX(changed_at), '1900-01-01'::timestamp)
+            FROM {{ this }}
+        )
+    {% endif %}
+),
+
+-- Extract inventory fields from JSON values
+parsed_inventory AS (
+    SELECT 
+        audit_id,
+        primary_key_value::INTEGER as inventory_id,
+        operation_type,
+        changed_by,
+        changed_at,
+        
+        -- Extract fields from JSON
+        JSON_EXTRACT_SCALAR(current_values, '$.product_id')::INTEGER as product_id,
+        JSON_EXTRACT_SCALAR(current_values, '$.quantity_on_hand')::INTEGER as quantity_on_hand,
+        JSON_EXTRACT_SCALAR(current_values, '$.reserved_quantity')::INTEGER as reserved_quantity,
+        JSON_EXTRACT_SCALAR(current_values, '$.location_code') as location_code,
+        
+        -- Track what changed
+        changed_columns
+        
+    FROM audit_changes
+)
+
+SELECT * FROM parsed_inventory
+        </div>
+
+        <h2 id="snapshot-comparison">8. Snapshot Comparison CDC</h2>
+
+        <h3>8.1 Full Snapshot Comparison</h3>
+        <div class="code-block">
+-- models/staging/stg_suppliers_snapshot_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='supplier_id'
+    )
+}}
+
+{% if is_incremental() %}
+
+WITH current_snapshot AS (
+    SELECT 
+        supplier_id,
+        supplier_name,
+        contact_email,
+        phone_number,
+        address,
+        credit_rating,
+        CURRENT_DATE as snapshot_date,
+        {{ dbt_utils.generate_surrogate_key([
+            'supplier_name', 'contact_email', 'phone_number', 
+            'address', 'credit_rating'
+        ]) }} as content_hash
+    FROM {{ source('procurement', 'suppliers') }}
+),
+
+previous_snapshot AS (
+    SELECT 
+        supplier_id,
+        content_hash as previous_content_hash
+    FROM {{ this }}
+    WHERE snapshot_date = (SELECT MAX(snapshot_date) FROM {{ this }})
+),
+
+-- Identify changes
+changes AS (
+    SELECT 
+        c.*,
+        p.previous_content_hash,
+        CASE 
+            WHEN p.supplier_id IS NULL THEN 'INSERT'
+            WHEN c.content_hash != p.previous_content_hash THEN 'UPDATE'
+            ELSE 'NO_CHANGE'
+        END as change_type
+    FROM current_snapshot c
+    LEFT JOIN previous_snapshot p ON c.supplier_id = p.supplier_id
+),
+
+-- Also identify deletes
+deletes AS (
+    SELECT 
+        p.supplier_id,
+        NULL as supplier_name,
+        NULL as contact_email,
+        NULL as phone_number,
+        NULL as address,
+        NULL as credit_rating,
+        CURRENT_DATE as snapshot_date,
+        NULL as content_hash,
+        NULL as previous_content_hash,
+        'DELETE' as change_type
+    FROM previous_snapshot p
+    LEFT JOIN current_snapshot c ON p.supplier_id = c.supplier_id
+    WHERE c.supplier_id IS NULL
+)
+
+SELECT * FROM changes
+WHERE change_type != 'NO_CHANGE'
+
+UNION ALL
+
+SELECT * FROM deletes
+
+{% else %}
+-- Initial load
+SELECT 
+    supplier_id,
+    supplier_name,
+    contact_email,
+    phone_number,
+    address,
+    credit_rating,
+    CURRENT_DATE as snapshot_date,
+    {{ dbt_utils.generate_surrogate_key([
+        'supplier_name', 'contact_email', 'phone_number', 
+        'address', 'credit_rating'
+    ]) }} as content_hash,
+    NULL as previous_content_hash,
+    'INITIAL_LOAD' as change_type
+FROM {{ source('procurement', 'suppliers') }}
+
+{% endif %}
+        </div>
+
+        <h2 id="scd-integration">9. SCD Integration with CDC</h2>
+
+        <h3>9.1 SCD Type 2 with CDC Processing</h3>
+        <div class="code-block">
+-- models/marts/dim_product_scd2_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='surrogate_key',
+        on_schema_change='sync_all_columns'
+    )
+}}
+
+WITH cdc_changes AS (
+    SELECT *
+    FROM {{ ref('stg_products_timestamp_cdc') }}
+    
+    {% if is_incremental() %}
+        WHERE processed_at > (
+            SELECT COALESCE(MAX(processed_at), '1900-01-01'::timestamp)
+            FROM {{ this }}
+        )
+    {% endif %}
+),
+
+-- Get current active records for comparison
+{% if is_incremental() %}
+current_active AS (
+    SELECT *
+    FROM {{ this }}
+    WHERE is_current = TRUE
+),
+{% endif %}
+
+-- Process Type 2 changes
+scd_processing AS (
+    SELECT 
+        {{ dbt_utils.generate_surrogate_key(['product_id', 'updated_at']) }} as surrogate_key,
+        product_id,
+        product_name,
+        category_id,
+        price,
+        updated_at as effective_start_date,
+        NULL as effective_end_date,
+        TRUE as is_current,
+        cdc_operation,
+        processed_at
+    FROM cdc_changes
+    WHERE cdc_operation != 'DELETE'
+),
+
+-- Handle record expiration for updates
+{% if is_incremental() %}
+expired_records AS (
+    SELECT 
+        c.surrogate_key,
+        c.product_id,
+        c.product_name,
+        c.category_id, 
+        c.price,
+        c.effective_start_date,
+        cc.updated_at as effective_end_date, -- Close the record
+        FALSE as is_current,
+        c.cdc_operation,
+        c.processed_at
+    FROM current_active c
+    INNER JOIN cdc_changes cc ON c.product_id = cc.product_id
+    WHERE cc.cdc_operation IN ('UPDATE', 'DELETE')
+),
+{% endif %}
+
+-- Combine all changes
+final_changes AS (
+    SELECT * FROM scd_processing
+    
+    {% if is_incremental() %}
+    UNION ALL
+    SELECT * FROM expired_records
+    {% endif %}
+)
+
+SELECT * FROM final_changes
+        </div>
+
+        <h2 id="real-time">10. Real-Time CDC Processing</h2>
+
+        <h3>10.1 Micro-Batch Processing</h3>
+        <div class="code-block">
+-- models/staging/stg_events_microbatch_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        incremental_strategy='microbatch',
+        event_time='event_timestamp',
+        batch_size='hour',
+        unique_key='event_id'
+    )
+}}
+
+WITH event_stream AS (
+    SELECT 
+        event_id,
+        user_id,
+        event_type,
+        event_data,
+        event_timestamp,
+        ingested_at,
+        
+        -- Add microbatch processing metadata
+        DATE_TRUNC('hour', event_timestamp) as batch_hour,
+        LAG(event_timestamp) OVER (
+            PARTITION BY user_id 
+            ORDER BY event_timestamp
+        ) as previous_event_time
+        
+    FROM {{ source('events', 'user_events') }}
+    WHERE event_timestamp >= '{{ var("start_time") }}'
+      AND event_timestamp < '{{ var("end_time") }}'
+),
+
+-- Process changes within the microbatch
+processed_events AS (
+    SELECT 
+        *,
+        -- Calculate time between events
+        COALESCE(
+            EXTRACT(EPOCH FROM (event_timestamp - previous_event_time))/60,
+            0
+        ) as minutes_since_last_event,
+        
+        -- Detect session boundaries
+        CASE 
+            WHEN previous_event_time IS NULL THEN 'SESSION_START'
+            WHEN EXTRACT(EPOCH FROM (event_timestamp - previous_event_time)) > 1800 THEN 'SESSION_START'
+            ELSE 'SESSION_CONTINUE'
+        END as session_indicator
+        
+    FROM event_stream
+)
+
+SELECT * FROM processed_events
+        </div>
+
+        <h3>10.2 Real-Time Aggregation with CDC</h3>
+        <div class="code-block">
+-- models/marts/fct_user_activity_realtime.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key=['user_id', 'activity_hour'],
+        on_schema_change='sync_all_columns'
+    )
+}}
+
+WITH hourly_activity AS (
+    SELECT 
+        user_id,
+        DATE_TRUNC('hour', event_timestamp) as activity_hour,
+        COUNT(*) as event_count,
+        COUNT(DISTINCT event_type) as unique_event_types,
+        MIN(event_timestamp) as first_event_time,
+        MAX(event_timestamp) as last_event_time,
+        
+        -- Session metrics
+        COUNT(CASE WHEN session_indicator = 'SESSION_START' THEN 1 END) as new_sessions,
+        SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) as purchase_events,
+        
+        -- Real-time processing metadata
+        MAX(ingested_at) as last_processed_at,
+        CURRENT_TIMESTAMP as aggregation_timestamp
+        
+    FROM {{ ref('stg_events_microbatch_cdc') }}
+    
+    {% if is_incremental() %}
+        WHERE activity_hour > (
+            SELECT COALESCE(MAX(activity_hour), '1900-01-01'::timestamp)
+            FROM {{ this }}
+        )
+    {% endif %}
+    
+    GROUP BY user_id, activity_hour
+)
+
+SELECT * FROM hourly_activity
+        </div>
+
+        <h2 id="performance">11. Performance Optimization</h2>
+
+        <h3>11.1 Partition-Based CDC Processing</h3>
+        <div class="code-block">
+-- models/staging/stg_transactions_partitioned_cdc.sql
+{{
+    config(
+        materialized='incremental',
+        unique_key='transaction_id',
+        partition_by={
+            'field': 'transaction_date',
+            'data_type': 'date',
+            'granularity': 'day'
+        },
+        cluster_by=['account_id', 'transaction_type']
+    )
+}}
+
+WITH partitioned_source AS (
+    SELECT 
+        transaction_id,
+        account_id,
+        transaction_type,
+        amount,
+        currency,
+        transaction_timestamp,
+        DATE(transaction_timestamp) as transaction_date,
+        updated_at,
+        
+        -- Partition metadata for optimization
+        DATE_TRUNC('month', transaction_timestamp) as partition_month
+        
+    FROM {{ source('banking', 'transactions') }}
+    
+    {% if is_incremental() %}
+        -- Leverage partition pruning
+        WHERE DATE(transaction_timestamp) >= CURRENT_DATE - INTERVAL '7 days'
+          AND updated_at > (
+              SELECT COALESCE(MAX(updated_at), '1900-01-01'::timestamp)
+              FROM {{ this }}
+              WHERE transaction_date >= CURRENT_DATE - INTERVAL '7 days'
+          )
+    {% endif %}
+),
+
+-- Add processing optimizations
+optimized_processing AS (
+    SELECT 
+        *,
+        -- Pre-calculate common aggregation keys
+        {{ dbt_utils.generate_surrogate_key(['account_id', 'transaction_date']) }} as daily_account_key,
+        
+        -- Add change detection hash for efficiency
+        {{ dbt_utils.generate_surrogate_key([
+            'amount', 'currency', 'transaction_type'
+        ]) }} as transaction_content_hash
+        
+    FROM partitioned_source
+)
+
+SELECT * FROM optimized_processing
+        </div>
+
+        <h3>11.2 Incremental Strategy Optimization</h3>
+        <div class="code-block">
+-- macros/optimize_cdc_merge.sql
+{% macro optimize_cdc_merge(target_relation, temp_relation, unique_key, dest_columns) %}
+
+    {% set merge_sql %}
+        MERGE {{ target_relation }} as target
+        USING (
+            SELECT * FROM {{ temp_relation }}
+        ) as source
+        ON {{ unique_key_to_sql(unique_key, 'target', 'source') }}
+        
+        WHEN MATCHED AND (
+            -- Only update if content actually changed
+            target.content_hash != source.content_hash OR
+            target.updated_at < source.updated_at
+        ) THEN
+            UPDATE SET
+            {% for column in dest_columns -%}
+                {{ column.name }} = source.{{ column.name }}
+                {%- if not loop.last -%},{%- endif %}
+            {%- endfor %}
+        
+        WHEN NOT MATCHED THEN
+            INSERT (
+                {%- for column in dest_columns -%}
+                    {{ column.name }}
+                    {%- if not loop.last -%},{%- endif %}
+                {%- endfor -%}
+            )
+            VALUES (
+                {%- for column in dest_columns -%}
+                    source.{{ column.name }}
+                    {%- if not loop.last -%},{%- endif %}
+                {%- endfor -%}
+            )
+        
+        WHEN MATCHED AND source._operation_type = 'DELETE' THEN
+            DELETE
+    {% endset %}
+
+    {{ return(merge_sql) }}
+
+{% endmacro %}
+        </div>
+
+        <h2 id="monitoring">12. Monitoring and Alerting</h2>
+
+        <h3>12.1 CDC Processing Metrics</h3>
+        <div class="code-block">
+-- models/monitoring/cdc_processing_metrics.sql
+WITH cdc_runs AS (
+    SELECT 
+        model_name,
+        run_started_at,
+        run_completed_at,
+        status,
+        rows_affected,
+        execution_time_seconds,
+        
+        -- Calculate processing lag
+        EXTRACT(EPOCH FROM (
+            run_completed_at - 
+            (SELECT MAX(updated_at) FROM {{ ref('stg_source_table') }})
+        ))/60 as processing_lag_minutes,
+        
+        -- Detect anomalies
+        rows_affected - LAG(rows_affected, 1, 0) OVER (
+            PARTITION BY model_name 
+            ORDER BY run_started_at
+        ) as row_change_from_previous,
+        
+        execution_time_seconds - LAG(execution_time_seconds, 1, 0) OVER (
+            PARTITION BY model_name 
+            ORDER BY run_started_at
+        ) as execution_time_change
+        
+    FROM {{ source('dbt_metadata', 'model_runs') }}
+    WHERE model_name LIKE '%_cdc'
+),
+
+metrics_summary AS (
+    SELECT 
+        model_name,
+        run_completed_at,
+        
+        -- SLA metrics
+        CASE 
+            WHEN processing_lag_minutes > 30 THEN 'SLA_BREACH'
+            WHEN processing_lag_minutes > 15 THEN 'SLA_WARNING' 
+            ELSE 'SLA_OK'
+        END as sla_status,
+        
+        -- Anomaly detection
+        CASE
+            WHEN ABS(row_change_from_previous) > (
+                AVG(ABS(row_change_from_previous)) OVER (
+                    PARTITION BY model_name 
+                    ORDER BY run_started_at 
+                    ROWS BETWEEN 10 PRECEDING AND 1 PRECEDING
+                ) * 3
+            ) THEN 'ANOMALY_DETECTED'
+            ELSE 'NORMAL'
+        END as volume_anomaly,
+        
+        processing_lag_minutes,
+        execution_time_seconds,
+        rows_affected
+        
+    FROM cdc_runs
+    WHERE run_completed_at >= CURRENT_TIMESTAMP - INTERVAL '24 hours'
+)
+
+SELECT * FROM metrics_summary
+        </div>
+
+        <h3>12.2 Data Quality Monitoring for CDC</h3>
+        <div class="code-block">
+-- tests/generic/test_cdc_data_quality.sql
+-- Test for CDC data quality issues
+
+SELECT 
+    'duplicate_keys' as test_type,
+    COUNT(*) as failure_count,
+    'Found duplicate keys in CDC processing' as error_message
+FROM (
+    SELECT {{ unique_key }}
+    FROM {{ ref(model) }}
+    WHERE {{ partition_filter if partition_filter else '1=1' }}
+    GROUP BY {{ unique_key }}
+    HAVING COUNT(*) > 1
+)
+
+UNION ALL
+
+SELECT 
+    'missing_timestamps' as test_type,
+    COUNT(*) as failure_count,
+    'Found records with missing CDC timestamps' as error_message
+FROM {{ ref(model) }}
+WHERE updated_at IS NULL
+  AND {{ partition_filter if partition_filter else '1=1' }}
+
+UNION ALL
+
+SELECT 
+    'future_timestamps' as test_type,
+    COUNT(*) as failure_count,
+    'Found records with future timestamps' as error_message
+FROM {{ ref(model) }}
+WHERE updated_at > CURRENT_TIMESTAMP + INTERVAL '1 hour'
+  AND {{ partition_filter if partition_filter else '1=1' }}
+
+UNION ALL
+
+SELECT 
+    'sequence_gaps' as test_type,
+    COUNT(*) as failure_count,
+    'Found gaps in sequence numbers' as error_message
+FROM (
+    SELECT 
+        sequence_number,
+        LAG(sequence_number) OVER (ORDER BY sequence_number) as prev_seq
+    FROM {{ ref(model) }}
+    WHERE {{ partition_filter if partition_filter else '1=1' }}
+) 
+WHERE sequence_number - prev_seq > 1
+        </div>
+
+        <h2 id="troubleshooting">13. Troubleshooting Guide</h2>
+
+        <div class="warning">
+            <h3>Common CDC Issues and Solutions</h3>
+            
+            <h4>1. Missing Changes</h4>
+            <ul>
+                <li><strong>Cause:</strong> Incorrect timestamp filtering or timezone issues</li>
+                <li><strong>Solution:</strong> Ensure consistent timezone handling and inclusive time ranges</li>
+                <li><strong>Prevention:</strong> Use UTC timestamps and add buffer time to filters</li>
+            </ul>
+            
+            <h4>2. Duplicate Processing</h4>
+            <ul>
+                <li><strong>Cause:</strong> Non-deterministic incremental logic or concurrent runs</li>
+                <li><strong>Solution:</strong> Implement proper deduplication and run locks</li>
+                <li><strong>Prevention:</strong> Use unique keys and sequence numbers</li>
+            </ul>
+            
+            <h4>3. Performance Degradation</h4>
+            <ul>
+                <li><strong>Cause:</strong> Large incremental windows or missing indexes</li>
+                <li><strong>Solution:</strong> Optimize partition strategy and add appropriate indexes</li>
+                <li><strong>Prevention:</strong> Monitor processing volumes and execution times</li>
+            </ul>
+            
+            <h4>4. Data Consistency Issues</h4>
+            <ul>
+                <li><strong>Cause:</strong> Out-of-order processing or incomplete transactions</li>
+                <li><strong>Solution:</strong> Implement proper ordering and transaction boundaries</li>
+                <li><strong>Prevention:</strong> Use sequence numbers and transaction IDs</li>
+            </ul>
+        </div>
+
+        <h2 id="code-examples">14. Code Examples</h2>
+        
+        <p>For detailed implementation examples and ready-to-use code templates, see the comprehensive code examples in the repository:</p>
+        
+        <div class="success">
+            <h3>📁 Code Examples Repository</h3>
+            <p>Access all CDC implementation examples and templates:</p>
+            <ul>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/01_timestamp_based_cdc.sql">Timestamp-Based CDC Implementation</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/02_log_based_cdc.sql">Log-Based CDC Processing</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/03_trigger_based_cdc.sql">Trigger-Based CDC Implementation</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/04_snapshot_comparison_cdc.sql">Snapshot Comparison CDC</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/05_scd_integration.sql">SCD Type 2 with CDC</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/06_real_time_processing.sql">Real-Time CDC Processing</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/07_performance_optimization.sql">Performance Optimization Patterns</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/08_monitoring_and_alerting.sql">Monitoring and Alerting Setup</a></li>
+                <li><a href="https://github.com/konradKolenda/konradKolenda.github.io/blob/main/dbt/code_examples/dbt_change_data_capture_guide/README.md">Complete Setup Guide and Documentation</a></li>
+            </ul>
+        </div>
+
+        <h2 id="best-practices">15. Best Practices</h2>
+
+        <h3>15.1 Design Principles</h3>
+        <div class="info">
+            <ul>
+                <li><strong>Idempotency:</strong> Ensure CDC processes can be safely re-run</li>
+                <li><strong>Monotonic Processing:</strong> Process changes in chronological order</li>
+                <li><strong>Complete Transactions:</strong> Handle transaction boundaries properly</li>
+                <li><strong>Schema Evolution:</strong> Plan for source schema changes</li>
+                <li><strong>Error Handling:</strong> Implement robust error recovery mechanisms</li>
+            </ul>
+        </div>
+
+        <h3>15.2 Implementation Guidelines</h3>
+        <div class="code-block">
+-- CDC Best Practices Checklist
+1. ✅ Use unique keys for deduplication
+2. ✅ Implement proper timestamp handling (UTC)  
+3. ✅ Add sequence numbers for ordering
+4. ✅ Include operation type metadata
+5. ✅ Handle deletes explicitly
+6. ✅ Monitor processing lag and volumes
+7. ✅ Test with edge cases (late arrivals, duplicates)
+8. ✅ Document data lineage and dependencies
+9. ✅ Implement circuit breakers for large volumes
+10. ✅ Plan for disaster recovery scenarios
+        </div>
+
+        <h3>15.3 Production Readiness</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Requirement</th>
+                    <th>Implementation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monitoring</td>
+                    <td>Processing lag alerts</td>
+                    <td>SLA-based alerting on processing delays</td>
+                </tr>
+                <tr>
+                    <td>Data Quality</td>
+                    <td>Automated testing</td>
+                    <td>dbt tests for duplicates, gaps, consistency</td>
+                </tr>
+                <tr>
+                    <td>Performance</td>
+                    <td>Scalable architecture</td>
+                    <td>Partitioning, clustering, micro-batches</td>
+                </tr>
+                <tr>
+                    <td>Recovery</td>
+                    <td>Backfill capability</td>
+                    <td>Historical reprocessing workflows</td>
+                </tr>
+                <tr>
+                    <td>Documentation</td>
+                    <td>Operational runbooks</td>
+                    <td>Troubleshooting guides and escalation</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="advanced-patterns">16. Advanced Patterns</h2>
+
+        <h3>16.1 Multi-Source CDC Federation</h3>
+        <div class="code-block">
+-- models/staging/stg_customer_360_cdc.sql
+-- Federate CDC from multiple customer data sources
+
+WITH crm_changes AS (
+    SELECT 
+        'CRM' as source_system,
+        customer_id,
+        email,
+        phone,
+        NULL as billing_address,
+        updated_at,
+        _operation_type
+    FROM {{ ref('stg_crm_customers_cdc') }}
+),
+
+billing_changes AS (
+    SELECT 
+        'BILLING' as source_system,
+        customer_id,
+        NULL as email,
+        NULL as phone, 
+        billing_address,
+        updated_at,
+        _operation_type
+    FROM {{ ref('stg_billing_customers_cdc') }}
+),
+
+-- Merge and resolve conflicts
+federated_changes AS (
+    SELECT * FROM crm_changes
+    UNION ALL
+    SELECT * FROM billing_changes
+),
+
+-- Apply precedence rules (CRM wins for contact info, Billing for address)
+resolved_changes AS (
+    SELECT 
+        customer_id,
+        FIRST_VALUE(email) OVER (
+            PARTITION BY customer_id 
+            ORDER BY CASE WHEN source_system = 'CRM' THEN 0 ELSE 1 END, updated_at DESC
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) as email,
+        
+        FIRST_VALUE(phone) OVER (
+            PARTITION BY customer_id 
+            ORDER BY CASE WHEN source_system = 'CRM' THEN 0 ELSE 1 END, updated_at DESC
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) as phone,
+        
+        FIRST_VALUE(billing_address) OVER (
+            PARTITION BY customer_id 
+            ORDER BY CASE WHEN source_system = 'BILLING' THEN 0 ELSE 1 END, updated_at DESC
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+        ) as billing_address,
+        
+        MAX(updated_at) as last_updated_at
+        
+    FROM federated_changes
+    GROUP BY customer_id
+)
+
+SELECT * FROM resolved_changes
+        </div>
+
+        <h3>16.2 Event Sourcing with CDC</h3>
+        <div class="code-block">
+-- models/marts/customer_event_store.sql
+-- Implement event sourcing pattern with CDC
+
+{{
+    config(
+        materialized='incremental',
+        unique_key='event_id',
+        order_by='event_timestamp'
+    )
+}}
+
+WITH source_events AS (
+    SELECT 
+        {{ dbt_utils.generate_surrogate_key(['customer_id', 'updated_at', 'source_system']) }} as event_id,
+        customer_id,
+        'CUSTOMER_UPDATED' as event_type,
+        updated_at as event_timestamp,
+        
+        -- Event payload with before/after state
+        JSON_BUILD_OBJECT(
+            'before', JSON_BUILD_OBJECT(
+                'email', LAG(email) OVER (PARTITION BY customer_id ORDER BY updated_at),
+                'phone', LAG(phone) OVER (PARTITION BY customer_id ORDER BY updated_at),
+                'status', LAG(status) OVER (PARTITION BY customer_id ORDER BY updated_at)
+            ),
+            'after', JSON_BUILD_OBJECT(
+                'email', email,
+                'phone', phone, 
+                'status', status
+            ),
+            'source_system', source_system,
+            'operation_type', _operation_type
+        ) as event_payload,
+        
+        -- Event metadata
+        source_system,
+        _operation_type,
+        ROW_NUMBER() OVER (ORDER BY updated_at) as global_sequence_number
+        
+    FROM {{ ref('stg_customer_360_cdc') }}
+    
+    {% if is_incremental() %}
+        WHERE updated_at > (SELECT COALESCE(MAX(event_timestamp), '1900-01-01'::timestamp) FROM {{ this }})
+    {% endif %}
+)
+
+SELECT * FROM source_events
+        </div>
+
+        <div class="success">
+            <h3>🎯 Summary</h3>
+            <p>This comprehensive guide provides everything needed to implement robust Change Data Capture patterns in dbt. From basic timestamp-based approaches to advanced event sourcing architectures, these patterns enable efficient, scalable data synchronization and historical tracking.</p>
+            
+            <p><strong>Key Takeaways:</strong></p>
+            <ul>
+                <li><strong>CDC vs Materialization:</strong> CDC identifies what changed (data pattern), materialization strategies control how to apply changes (SQL execution)</li>
+                <li>Choose the appropriate CDC pattern based on your data sources and requirements</li>
+                <li>Implement proper deduplication, ordering, and conflict resolution</li>
+                <li>Monitor processing performance and data quality continuously</li>
+                <li>Plan for schema evolution and operational complexities</li>
+                <li>Test thoroughly with real-world scenarios and edge cases</li>
+            </ul>
+        </div>
+
+        <hr>
+        <p><strong>Official dbt Documentation:</strong> For the most up-to-date information on dbt incremental models and CDC patterns, visit <a href="https://docs.getdbt.com/docs/build/incremental-models">dbt Incremental Models</a> and <a href="https://docs.getdbt.com/docs/build/incremental-strategy">dbt Incremental Strategies</a>.</p>
+    </div>
+</body>
+</html>
