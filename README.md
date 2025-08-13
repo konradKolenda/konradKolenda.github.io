@@ -11,6 +11,7 @@ Visit the live documentation at: **[konradkolenda.github.io](https://konradkolen
 ### dbt (Data Build Tool)
 Comprehensive guides covering dbt best practices, strategies, and implementation patterns:
 
+- **[dbt Change Data Capture Guide](https://konradkolenda.github.io/dbt/dbt_change_data_capture_guide.html)** - Complete CDC implementation guide with timestamp-based, log-based, trigger-based, and snapshot comparison methods
 - **[dbt CI/CD Pipelines Guide](https://konradkolenda.github.io/dbt/dbt_cicd_pipelines_guide.html)** - Complete production deployment guide with GitHub Actions workflows
 - **[Data Integrity Migration Guide](https://konradkolenda.github.io/dbt/dbt_data_integrity_migration_guide.html)** - Migration from traditional SQL constraints to dbt data testing approach
 - **[dbt Expectations Guide](https://konradkolenda.github.io/dbt/dbt_expectations_comprehensive_summary.html)** - Complete testing framework with dbt-expectations
