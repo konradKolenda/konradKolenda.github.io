@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Debugging in VS Code - Comprehensive Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+        .tip {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .best-practice {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .shortcut {
+            background-color: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Python Debugging in VS Code - Comprehensive Guide</h1>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">1. Introduction to Debugging</a></li>
+                <li><a href="#setup">2. VS Code Setup for Python Debugging</a></li>
+                <li><a href="#basics">3. Debugging Basics</a></li>
+                <li><a href="#breakpoints">4. Working with Breakpoints</a></li>
+                <li><a href="#debug-controls">5. Debug Controls and Navigation</a></li>
+                <li><a href="#inspect-variables">6. Inspecting Variables and State</a></li>
+                <li><a href="#debug-console">7. Debug Console</a></li>
+                <li><a href="#launch-configs">8. Launch Configurations</a></li>
+                <li><a href="#advanced">9. Advanced Debugging Techniques</a></li>
+                <li><a href="#common-scenarios">10. Common Debugging Scenarios</a></li>
+                <li><a href="#best-practices">11. Best Practices and Tips</a></li>
+                <li><a href="#troubleshooting">12. Troubleshooting</a></li>
+                <li><a href="#shortcuts">13. Keyboard Shortcuts</a></li>
+            </ul>
+        </div>
+
+        <h2 id="introduction">1. Introduction to Debugging</h2>
+
+        <p>Debugging is the process of identifying and removing errors from your code. It's a critical skill for every Python developer. While print statements can be useful for simple issues, a proper debugger provides much more power and insight.</p>
+
+        <h3>When to Use a Debugger vs. Print Statements</h3>
+
+        <div class="best-practice">
+            <strong>Use Print Statements When:</strong>
+            <ul>
+                <li>Quick verification of values in a known location</li>
+                <li>Logging application behavior in production</li>
+                <li>Debugging simple, linear code flow</li>
+                <li>Creating permanent logging for monitoring</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <strong>Use the Debugger When:</strong>
+            <ul>
+                <li>Investigating complex logic or control flow</li>
+                <li>Examining object state and relationships</li>
+                <li>Stepping through loops and conditionals</li>
+                <li>Analyzing exception stack traces</li>
+                <li>Understanding third-party library behavior</li>
+                <li>Debugging multi-threaded or async code</li>
+            </ul>
+        </div>
+
+        <h2 id="setup">2. VS Code Setup for Python Debugging</h2>
+
+        <h3>Prerequisites</h3>
+        <ol>
+            <li><strong>Install Python Extension</strong>
+                <ul>
+                    <li>Open VS Code</li>
+                    <li>Go to Extensions (<span class="shortcut">Ctrl+Shift+X</span> or <span class="shortcut">Cmd+Shift+X</span>)</li>
+                    <li>Search for "Python" by Microsoft</li>
+                    <li>Click Install</li>
+                </ul>
+            </li>
+            <li><strong>Select Python Interpreter</strong>
+                <ul>
+                    <li>Press <span class="shortcut">Ctrl+Shift+P</span> (<span class="shortcut">Cmd+Shift+P</span> on Mac)</li>
+                    <li>Type "Python: Select Interpreter"</li>
+                    <li>Choose your Python environment (system Python, virtualenv, conda, etc.)</li>
+                </ul>
+            </li>
+        </ol>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Always verify your Python interpreter is correctly selected. Many debugging issues stem from using the wrong Python environment.
+        </div>
+
+        <h3>Verify Debugger Installation</h3>
+        <div class="code-block">
+# Create a simple test file: test_debug.py
+def greet(name):
+    message = f"Hello, {name}!"
+    return message
+
+if __name__ == "__main__":
+    result = greet("World")
+    print(result)
+        </div>
+
+        <h2 id="basics">3. Debugging Basics</h2>
+
+        <h3>Starting a Debug Session</h3>
+        <p>There are multiple ways to start debugging in VS Code:</p>
+
+        <ol>
+            <li><strong>Method 1: Run and Debug View</strong>
+                <ul>
+                    <li>Click the Run and Debug icon in the Activity Bar (left sidebar)</li>
+                    <li>Click "Run and Debug" button</li>
+                    <li>Select "Python File" from the dropdown</li>
+                </ul>
+            </li>
+            <li><strong>Method 2: Keyboard Shortcut</strong>
+                <ul>
+                    <li>Press <span class="shortcut">F5</span> to start debugging</li>
+                    <li>First time: Select "Python File" debug configuration</li>
+                </ul>
+            </li>
+            <li><strong>Method 3: Right-click Context Menu</strong>
+                <ul>
+                    <li>Right-click in the editor</li>
+                    <li>Select "Run Python File in Debugger"</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>The Debug Interface</h3>
+        <p>When debugging starts, VS Code shows several panels:</p>
+
+        <table>
+            <tr>
+                <th>Panel</th>
+                <th>Location</th>
+                <th>Purpose</th>
+            </tr>
+            <tr>
+                <td>Variables</td>
+                <td>Left sidebar</td>
+                <td>Shows local and global variables with their current values</td>
+            </tr>
+            <tr>
+                <td>Watch</td>
+                <td>Left sidebar</td>
+                <td>Monitor specific expressions or variables</td>
+            </tr>
+            <tr>
+                <td>Call Stack</td>
+                <td>Left sidebar</td>
+                <td>Shows the execution path (function calls)</td>
+            </tr>
+            <tr>
+                <td>Breakpoints</td>
+                <td>Left sidebar</td>
+                <td>Lists all breakpoints in your project</td>
+            </tr>
+            <tr>
+                <td>Debug Console</td>
+                <td>Bottom panel</td>
+                <td>Interactive Python REPL during debugging</td>
+            </tr>
+            <tr>
+                <td>Debug Toolbar</td>
+                <td>Top center</td>
+                <td>Control execution flow (step, continue, stop)</td>
+            </tr>
+        </table>
+
+        <h2 id="breakpoints">4. Working with Breakpoints</h2>
+
+        <h3>Setting Breakpoints</h3>
+        <p>Breakpoints pause execution at specific lines of code.</p>
+
+        <div class="best-practice">
+            <strong>How to Set Breakpoints:</strong>
+            <ol>
+                <li><strong>Click in the gutter</strong> (left of line numbers) - red dot appears</li>
+                <li><strong>Press <span class="shortcut">F9</span></strong> with cursor on desired line</li>
+                <li><strong>Right-click line number</strong> → "Add Breakpoint"</li>
+            </ol>
+        </div>
+
+        <h3>Types of Breakpoints</h3>
+
+        <h4>Regular Breakpoints</h4>
+        <p>Pause execution every time the line is reached.</p>
+        <div class="code-block">
+def calculate_total(items):
+    total = 0  # ← Set breakpoint here
+    for item in items:
+        total += item['price']
+    return total
+        </div>
+
+        <h4>Conditional Breakpoints</h4>
+        <p>Only pause when a condition is true.</p>
+
+        <ol>
+            <li>Right-click on a breakpoint (red dot)</li>
+            <li>Select "Edit Breakpoint..."</li>
+            <li>Choose "Expression" or "Hit Count"</li>
+        </ol>
+
+        <div class="code-block">
+# Example: Break only when price > 100
+def process_items(items):
+    for item in items:
+        price = item['price']  # Conditional: price > 100
+        process(price)
+        </div>
+
+        <div class="tip">
+            <strong>💡 Conditional Breakpoint Examples:</strong>
+            <ul>
+                <li><code>i == 50</code> - Break on 50th iteration</li>
+                <li><code>len(data) > 1000</code> - Break when list exceeds 1000 items</li>
+                <li><code>user.id == '12345'</code> - Break for specific user</li>
+                <li><code>error_count > 5</code> - Break after multiple errors</li>
+            </ul>
+        </div>
+
+        <h4>Logpoints</h4>
+        <p>Log messages to console without pausing execution.</p>
+
+        <ol>
+            <li>Right-click in gutter</li>
+            <li>Select "Add Logpoint..."</li>
+            <li>Enter message with expressions in curly braces</li>
+        </ol>
+
+        <div class="code-block">
+# Logpoint message: "Processing user {user.name} with balance {balance}"
+def process_user(user):
+    balance = get_balance(user)
+    # Logpoint here logs without stopping
+    update_account(user, balance)
+        </div>
+
+        <h4>Exception Breakpoints</h4>
+        <p>Pause when exceptions are raised.</p>
+
+        <ol>
+            <li>Open Breakpoints panel</li>
+            <li>Check "Raised Exceptions" or "Uncaught Exceptions"</li>
+            <li>Debugger pauses when exception occurs</li>
+        </ol>
+
+        <h2 id="debug-controls">5. Debug Controls and Navigation</h2>
+
+        <h3>Debug Toolbar Actions</h3>
+
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Shortcut</th>
+                <th>Icon</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>Continue</td>
+                <td><span class="shortcut">F5</span></td>
+                <td>▶️</td>
+                <td>Resume execution until next breakpoint</td>
+            </tr>
+            <tr>
+                <td>Step Over</td>
+                <td><span class="shortcut">F10</span></td>
+                <td>⤵️</td>
+                <td>Execute current line, don't enter functions</td>
+            </tr>
+            <tr>
+                <td>Step Into</td>
+                <td><span class="shortcut">F11</span></td>
+                <td>⬇️</td>
+                <td>Enter function calls to debug inside them</td>
+            </tr>
+            <tr>
+                <td>Step Out</td>
+                <td><span class="shortcut">Shift+F11</span></td>
+                <td>⬆️</td>
+                <td>Complete current function and return to caller</td>
+            </tr>
+            <tr>
+                <td>Restart</td>
+                <td><span class="shortcut">Ctrl+Shift+F5</span></td>
+                <td>🔄</td>
+                <td>Restart debugging session from beginning</td>
+            </tr>
+            <tr>
+                <td>Stop</td>
+                <td><span class="shortcut">Shift+F5</span></td>
+                <td>⏹️</td>
+                <td>End debugging session</td>
+            </tr>
+        </table>
+
+        <h3>Understanding Step Actions</h3>
+
+        <div class="code-block">
+def calculate_discount(price, discount_rate):
+    discount = price * discount_rate  # Line 2
+    return price - discount            # Line 3
+
+def process_order(order):
+    total = 0                                    # Line 6
+    for item in order['items']:                 # Line 7
+        price = item['price']                   # Line 8
+        discount = calculate_discount(price, 0.1) # Line 9
+        total += discount                       # Line 10
+    return total                                # Line 11
+        </div>
+
+        <div class="tip">
+            <strong>Step Behavior Example (breakpoint on Line 9):</strong>
+            <ul>
+                <li><strong>Step Over (F10):</strong> Execute Line 9 entirely, move to Line 10 (don't enter calculate_discount)</li>
+                <li><strong>Step Into (F11):</strong> Enter calculate_discount function, pause at Line 2</li>
+                <li><strong>Step Out (Shift+F11):</strong> If inside calculate_discount, complete it and return to Line 10</li>
+            </ul>
+        </div>
+
+        <h2 id="inspect-variables">6. Inspecting Variables and State</h2>
+
+        <h3>Variables Panel</h3>
+        <p>Shows all variables in current scope organized by category:</p>
+
+        <ul>
+            <li><strong>Locals:</strong> Variables in current function</li>
+            <li><strong>Globals:</strong> Module-level variables</li>
+            <li><strong>Special Variables:</strong> Python internals (like __name__, __file__)</li>
+        </ul>
+
+        <div class="tip">
+            <strong>💡 Variables Panel Features:</strong>
+            <ul>
+                <li><strong>Expand objects:</strong> Click arrow to see attributes and methods</li>
+                <li><strong>View collections:</strong> Lists, dicts, sets show all elements</li>
+                <li><strong>Modify values:</strong> Double-click value to change during debugging</li>
+                <li><strong>Copy value:</strong> Right-click → Copy Value</li>
+            </ul>
+        </div>
+
+        <h3>Watch Expressions</h3>
+        <p>Monitor specific expressions or variables across execution.</p>
+
+        <ol>
+            <li>Click "+" in Watch panel</li>
+            <li>Enter expression to monitor</li>
+            <li>Value updates as you step through code</li>
+        </ol>
+
+        <div class="code-block">
+# Useful watch expressions:
+len(items)              # Monitor collection size
+user.is_active          # Track boolean state
+sum(order.values())     # Calculate totals
+type(variable)          # Check type changes
+id(object)              # Track object identity
+        </div>
+
+        <h3>Hover Evaluation</h3>
+        <p>Hover over any variable in the editor to see its current value and type.</p>
+
+        <div class="best-practice">
+            <strong>Advanced Hover Tips:</strong>
+            <ul>
+                <li>Hover over expressions like <code>user.name</code> to evaluate them</li>
+                <li>Hover shows rich formatting for complex objects</li>
+                <li>Click small arrow in hover popup to add to Watch</li>
+            </ul>
+        </div>
+
+        <h2 id="debug-console">7. Debug Console</h2>
+
+        <h3>Using the Debug Console</h3>
+        <p>The Debug Console is a Python REPL that runs in your paused program's context.</p>
+
+        <div class="best-practice">
+            <strong>What You Can Do in Debug Console:</strong>
+            <ul>
+                <li>Evaluate expressions: <code>price * 1.1</code></li>
+                <li>Call functions: <code>calculate_total(items)</code></li>
+                <li>Inspect objects: <code>dir(user)</code>, <code>vars(obj)</code></li>
+                <li>Test fixes: <code>new_value = old_value * 2</code></li>
+                <li>Import modules: <code>import json; json.dumps(data)</code></li>
+                <li>Modify state: <code>user.balance = 1000</code></li>
+            </ul>
+        </div>
+
+        <h3>Debug Console Examples</h3>
+
+        <div class="code-block">
+# When paused at a breakpoint, try these in Debug Console:
+
+# Inspect variable types
+type(items)
+# Output: <class 'list'>
+
+# Check object attributes
+dir(user)
+# Output: ['__class__', ..., 'email', 'name', 'id']
+
+# Test transformations
+[item['price'] * 1.1 for item in items if item['price'] > 10]
+# See transformed data without modifying code
+
+# Call helper functions
+import json
+json.dumps(data, indent=2)
+# Pretty print data structures
+
+# Temporarily fix bugs to test
+user.balance += 100
+# Continue execution with modified state
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> Changes made in Debug Console only affect the current debug session. They don't modify your source code.
+        </div>
+
+        <h2 id="launch-configs">8. Launch Configurations</h2>
+
+        <h3>What is launch.json?</h3>
+        <p>Launch configurations define how VS Code starts your debugger. They're stored in <code>.vscode/launch.json</code>.</p>
+
+        <h3>Creating Launch Configurations</h3>
+        <ol>
+            <li>Click "Run and Debug" in sidebar</li>
+            <li>Click "create a launch.json file"</li>
+            <li>Select "Python File" or other template</li>
+        </ol>
+
+        <h3>Common Launch Configurations</h3>
+
+        <h4>Basic Python File</h4>
+        <div class="code-block">
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
+        </div>
+
+        <h4>Python Module</h4>
+        <div class="code-block">
+{
+    "name": "Python: Module",
+    "type": "python",
+    "request": "launch",
+    "module": "mypackage.main",
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>Django Application</h4>
+        <div class="code-block">
+{
+    "name": "Python: Django",
+    "type": "python",
+    "request": "launch",
+    "program": "${workspaceFolder}/manage.py",
+    "args": [
+        "runserver",
+        "8000"
+    ],
+    "django": true,
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>Flask Application</h4>
+        <div class="code-block">
+{
+    "name": "Python: Flask",
+    "type": "python",
+    "request": "launch",
+    "module": "flask",
+    "env": {
+        "FLASK_APP": "app.py",
+        "FLASK_ENV": "development"
+    },
+    "args": [
+        "run",
+        "--no-debugger",
+        "--no-reload"
+    ],
+    "jinja": true,
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>FastAPI Application</h4>
+        <div class="code-block">
+{
+    "name": "Python: FastAPI",
+    "type": "python",
+    "request": "launch",
+    "module": "uvicorn",
+    "args": [
+        "main:app",
+        "--reload"
+    ],
+    "jinja": true,
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>pytest Tests</h4>
+        <div class="code-block">
+{
+    "name": "Python: pytest",
+    "type": "python",
+    "request": "launch",
+    "module": "pytest",
+    "args": [
+        "${file}",
+        "-v",
+        "-s"
+    ],
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>With Command Line Arguments</h4>
+        <div class="code-block">
+{
+    "name": "Python: With Arguments",
+    "type": "python",
+    "request": "launch",
+    "program": "${file}",
+    "args": [
+        "--config",
+        "config.json",
+        "--verbose"
+    ],
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>With Environment Variables</h4>
+        <div class="code-block">
+{
+    "name": "Python: With Env Vars",
+    "type": "python",
+    "request": "launch",
+    "program": "${file}",
+    "env": {
+        "DATABASE_URL": "postgresql://localhost/mydb",
+        "API_KEY": "dev-key-123",
+        "DEBUG": "True"
+    },
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h4>Attach to Running Process</h4>
+        <div class="code-block">
+{
+    "name": "Python: Attach",
+    "type": "python",
+    "request": "attach",
+    "connect": {
+        "host": "localhost",
+        "port": 5678
+    }
+}
+        </div>
+
+        <h3>Launch Configuration Variables</h3>
+        <table>
+            <tr>
+                <th>Variable</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>${workspaceFolder}</code></td>
+                <td>Root folder of your workspace</td>
+            </tr>
+            <tr>
+                <td><code>${file}</code></td>
+                <td>Currently open file</td>
+            </tr>
+            <tr>
+                <td><code>${fileBasename}</code></td>
+                <td>Name of currently open file</td>
+            </tr>
+            <tr>
+                <td><code>${fileDirname}</code></td>
+                <td>Directory of currently open file</td>
+            </tr>
+            <tr>
+                <td><code>${cwd}</code></td>
+                <td>Current working directory</td>
+            </tr>
+            <tr>
+                <td><code>${env:NAME}</code></td>
+                <td>Environment variable NAME</td>
+            </tr>
+        </table>
+
+        <h2 id="advanced">9. Advanced Debugging Techniques</h2>
+
+        <h3>Post-Mortem Debugging</h3>
+        <p>Debug after a crash using the Python debugger.</p>
+
+        <div class="code-block">
+import sys
+import pdb
+
+def problematic_function():
+    data = [1, 2, 3]
+    return data[5]  # Will raise IndexError
+
+if __name__ == "__main__":
+    try:
+        problematic_function()
+    except Exception:
+        # Enter debugger at point of exception
+        pdb.post_mortem()
+        </div>
+
+        <h3>Remote Debugging</h3>
+        <p>Debug Python code running on another machine or container.</p>
+
+        <div class="code-block">
+# 1. Install debugpy in your remote environment
+pip install debugpy
+
+# 2. Add to your Python code:
+import debugpy
+
+# Allow other machines to attach
+debugpy.listen(('0.0.0.0', 5678))
+print("Waiting for debugger attach...")
+debugpy.wait_for_client()
+debugpy.breakpoint()
+
+# Your code here
+print("Debugger attached!")
+        </div>
+
+        <div class="code-block">
+// 3. Create attach configuration in VS Code:
+{
+    "name": "Python: Remote Attach",
+    "type": "python",
+    "request": "attach",
+    "connect": {
+        "host": "remote-server-ip",
+        "port": 5678
+    },
+    "pathMappings": [
+        {
+            "localRoot": "${workspaceFolder}",
+            "remoteRoot": "/app"
+        }
+    ]
+}
+        </div>
+
+        <h3>Multi-threaded Debugging</h3>
+        <p>Debug applications with multiple threads.</p>
+
+        <div class="code-block">
+import threading
+import time
+
+def worker(name):
+    for i in range(5):
+        # Set breakpoint here to debug specific thread
+        print(f"{name}: {i}")
+        time.sleep(1)
+
+# Create threads
+t1 = threading.Thread(target=worker, args=("Thread-1",))
+t2 = threading.Thread(target=worker, args=("Thread-2",))
+
+t1.start()
+t2.start()
+        </div>
+
+        <div class="tip">
+            <strong>💡 Thread Debugging Tips:</strong>
+            <ul>
+                <li>Call Stack panel shows all threads</li>
+                <li>Click thread to switch context</li>
+                <li>Set conditional breakpoints: <code>threading.current_thread().name == "Thread-1"</code></li>
+                <li>Use "Pause on All Threads" in debug toolbar dropdown</li>
+            </ul>
+        </div>
+
+        <h3>Debugging Generators and Iterators</h3>
+        <div class="code-block">
+def fibonacci_generator(n):
+    a, b = 0, 1
+    for _ in range(n):
+        # Breakpoint here to inspect generator state
+        yield a
+        a, b = b, a + b
+
+# Debugging generator execution
+gen = fibonacci_generator(10)
+for num in gen:
+    # Step through each iteration
+    print(num)
+        </div>
+
+        <h3>Debugging Decorators</h3>
+        <div class="code-block">
+import functools
+import time
+
+def timing_decorator(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        # Breakpoint here to inspect decorator behavior
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__} took {end - start:.2f}s")
+        return result
+    return wrapper
+
+@timing_decorator
+def slow_function():
+    time.sleep(1)
+    return "Done"
+
+# Stepping into decorated function shows decorator flow
+slow_function()
+        </div>
+
+        <h3>Debugging Async Code</h3>
+        <div class="code-block">
+import asyncio
+
+async def fetch_data(url):
+    # Breakpoint in async function
+    await asyncio.sleep(1)
+    return f"Data from {url}"
+
+async def main():
+    tasks = [
+        fetch_data("url1"),
+        fetch_data("url2"),
+        fetch_data("url3")
+    ]
+    # Step through async execution
+    results = await asyncio.gather(*tasks)
+    return results
+
+# Run async code
+asyncio.run(main())
+        </div>
+
+        <div class="tip">
+            <strong>💡 Async Debugging Tips:</strong>
+            <ul>
+                <li>Set breakpoints in async functions normally</li>
+                <li>Call stack shows async execution flow</li>
+                <li>Watch expressions work with awaitable objects</li>
+                <li>Debug console can use <code>await</code> keyword</li>
+            </ul>
+        </div>
+
+        <h3>Debugging Context Managers</h3>
+        <div class="code-block">
+class DatabaseConnection:
+    def __enter__(self):
+        # Breakpoint to debug resource acquisition
+        print("Opening connection")
+        self.conn = "connection_object"
+        return self.conn
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Breakpoint to debug cleanup
+        print("Closing connection")
+        if exc_type:
+            print(f"Exception: {exc_val}")
+        return False
+
+with DatabaseConnection() as conn:
+    # Breakpoint here to inspect connection usage
+    print(f"Using {conn}")
+        </div>
+
+        <h2 id="common-scenarios">10. Common Debugging Scenarios</h2>
+
+        <h3>Scenario 1: Debugging Infinite Loops</h3>
+        <div class="code-block">
+def process_queue(queue):
+    while queue:  # Set breakpoint here
+        item = queue.pop(0)
+        process(item)
+        # Use conditional breakpoint: len(queue) > 1000
+        # or watch expression: len(queue)
+        </div>
+
+        <div class="best-practice">
+            <strong>Strategy:</strong>
+            <ol>
+                <li>Set conditional breakpoint to trigger after many iterations</li>
+                <li>Add watch expression to monitor loop variable</li>
+                <li>Check loop exit condition in Debug Console</li>
+                <li>Use "Pause" button (⏸️) to break into running loop</li>
+            </ol>
+        </div>
+
+        <h3>Scenario 2: Finding Where Variable Changes</h3>
+        <div class="code-block">
+def complex_processing(data):
+    result = []
+
+    # Want to know where 'result' gets modified?
+    # 1. Add 'result' to Watch expressions
+    # 2. Step through and observe when value changes
+    # 3. Use Debug Console: id(result) to track object identity
+
+    for item in data:
+        transform1(item, result)
+        transform2(item, result)
+        transform3(item, result)
+
+    return result
+        </div>
+
+        <div class="best-practice">
+            <strong>Strategy:</strong>
+            <ol>
+                <li>Add variable to Watch panel</li>
+                <li>Set breakpoints at suspected modification points</li>
+                <li>Use logpoints to log variable state: "result = {result}"</li>
+                <li>Check <code>id()</code> in Debug Console to detect reassignment</li>
+            </ol>
+        </div>
+
+        <h3>Scenario 3: Debugging Function Called Many Times</h3>
+        <div class="code-block">
+def calculate_price(item, discount):
+    # Called 10,000 times, only interested when discount > 0.5
+    price = item['base_price']
+    discounted = price * (1 - discount)
+    return discounted
+
+# Set conditional breakpoint: discount > 0.5
+for item in items:
+    price = calculate_price(item, get_discount(item))
+        </div>
+
+        <div class="best-practice">
+            <strong>Strategy:</strong>
+            <ol>
+                <li>Use conditional breakpoint with specific condition</li>
+                <li>Or use hit count: Break on 500th hit</li>
+                <li>Or use logpoint to collect data without stopping</li>
+            </ol>
+        </div>
+
+        <h3>Scenario 4: Debugging Exceptions</h3>
+        <div class="code-block">
+def process_data(data):
+    try:
+        result = transform(data)
+        validate(result)
+        return save(result)
+    except Exception as e:
+        # Set breakpoint here to inspect exception
+        logger.error(f"Error: {e}")
+        raise
+        </div>
+
+        <div class="best-practice">
+            <strong>Strategy:</strong>
+            <ol>
+                <li>Enable "Raised Exceptions" in Breakpoints panel</li>
+                <li>Debugger pauses when exception is raised</li>
+                <li>Inspect call stack to see execution path</li>
+                <li>Check variables to understand why exception occurred</li>
+                <li>Use Debug Console to test fixes</li>
+            </ol>
+        </div>
+
+        <h3>Scenario 5: Debugging Third-Party Library Code</h3>
+        <div class="code-block">
+import requests
+
+def fetch_api_data(url):
+    response = requests.get(url)  # Want to debug requests library?
+    # Use Step Into (F11) to enter requests code
+    return response.json()
+        </div>
+
+        <div class="best-practice">
+            <strong>Strategy:</strong>
+            <ol>
+                <li>Use Step Into (F11) to enter library code</li>
+                <li>Set breakpoints in library files (find them via Step Into)</li>
+                <li>Enable "justMyCode": false in launch.json to debug library code</li>
+                <li>Use call stack to navigate through library execution</li>
+            </ol>
+        </div>
+
+        <div class="code-block">
+// launch.json configuration for debugging libraries:
+{
+    "name": "Python: Debug Libraries",
+    "type": "python",
+    "request": "launch",
+    "program": "${file}",
+    "justMyCode": false,  // Enable debugging of library code
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h3>Scenario 6: Debugging List Comprehensions</h3>
+        <div class="code-block">
+# Complex list comprehension - hard to debug
+result = [transform(item) for item in data if validate(item)]
+
+# Better for debugging - use regular loop with breakpoints
+result = []
+for item in data:
+    if validate(item):  # Breakpoint here
+        transformed = transform(item)  # Breakpoint here
+        result.append(transformed)
+        </div>
+
+        <div class="tip">
+            <strong>💡 Tip:</strong> Convert complex comprehensions to regular loops when debugging, then optimize back to comprehensions when fixed.
+        </div>
+
+        <h3>Scenario 7: Debugging Data Transformations</h3>
+        <div class="code-block">
+def process_pipeline(data):
+    # Track data transformation through pipeline
+    step1 = [x * 2 for x in data]          # Breakpoint + watch: step1
+    step2 = [x + 10 for x in step1]        # Breakpoint + watch: step2
+    step3 = [x for x in step2 if x > 20]   # Breakpoint + watch: step3
+    return step3
+
+# Debug Console commands at each breakpoint:
+# len(step1), min(step1), max(step1)
+# [x for x in step2 if x < 0]  # Find unexpected values
+        </div>
+
+        <h3>Scenario 8: Debugging Class Instances</h3>
+        <div class="code-block">
+class Order:
+    def __init__(self, items):
+        self.items = items
+        self.total = 0
+
+    def calculate_total(self):
+        # Breakpoint here
+        self.total = sum(item['price'] for item in self.items)
+        return self.total
+
+# When paused:
+# - Hover over 'self' to see all attributes
+# - Expand 'self' in Variables panel
+# - Debug Console: vars(self), dir(self)
+# - Watch: self.total, len(self.items)
+        </div>
+
+        <h2 id="best-practices">11. Best Practices and Tips</h2>
+
+        <h3>Debugging Workflow Best Practices</h3>
+
+        <div class="best-practice">
+            <strong>1. Start with the Error Message</strong>
+            <ul>
+                <li>Read the full traceback carefully</li>
+                <li>Identify the exact line where error occurred</li>
+                <li>Understand the error type and message</li>
+                <li>Set breakpoint at or before the error line</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <strong>2. Use the Scientific Method</strong>
+            <ol>
+                <li><strong>Observe:</strong> What is the actual behavior?</li>
+                <li><strong>Hypothesize:</strong> What might be causing it?</li>
+                <li><strong>Test:</strong> Set breakpoints to verify hypothesis</li>
+                <li><strong>Iterate:</strong> Refine hypothesis based on findings</li>
+            </ol>
+        </div>
+
+        <div class="best-practice">
+            <strong>3. Narrow Down the Problem</strong>
+            <ul>
+                <li>Binary search: Set breakpoint in middle of suspected code</li>
+                <li>If bug is before, move breakpoint earlier</li>
+                <li>If bug is after, move breakpoint later</li>
+                <li>Repeat until you find exact location</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <strong>4. Inspect Data, Not Just Code</strong>
+            <ul>
+                <li>Check variable types: <code>type(variable)</code></li>
+                <li>Verify data structure: <code>len(), .keys(), .items()</code></li>
+                <li>Look for None, empty strings, zero values</li>
+                <li>Check for type mismatches (string vs int)</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <strong>5. Use Logpoints for High-Frequency Code</strong>
+            <ul>
+                <li>Functions called many times</li>
+                <li>Loop iterations</li>
+                <li>Event handlers</li>
+                <li>Async callbacks</li>
+            </ul>
+        </div>
+
+        <h3>Performance Debugging Tips</h3>
+
+        <div class="code-block">
+# Use time module to identify slow sections
+import time
+
+def slow_function():
+    start = time.time()  # Breakpoint + watch: start
+
+    # Expensive operation 1
+    result1 = expensive_op1()
+    time1 = time.time() - start  # Watch: time1
+
+    # Expensive operation 2
+    result2 = expensive_op2()
+    time2 = time.time() - start - time1  # Watch: time2
+
+    return result1 + result2
+        </div>
+
+        <div class="tip">
+            <strong>💡 Performance Debugging Strategy:</strong>
+            <ol>
+                <li>Add timing watches between operations</li>
+                <li>Use cProfile for detailed profiling</li>
+                <li>Set breakpoints before/after slow sections</li>
+                <li>Inspect data sizes: <code>len(data), sys.getsizeof(obj)</code></li>
+            </ol>
+        </div>
+
+        <h3>Memory Debugging Tips</h3>
+
+        <div class="code-block">
+import sys
+
+def check_memory_usage():
+    data = load_large_dataset()
+
+    # Breakpoint here - check memory in Debug Console:
+    # sys.getsizeof(data)
+    # len(data)
+    # import gc; gc.get_count()
+
+    process(data)
+        </div>
+
+        <h3>Common Debugging Mistakes to Avoid</h3>
+
+        <div class="warning">
+            <strong>❌ Don't:</strong>
+            <ul>
+                <li><strong>Set too many breakpoints:</strong> Makes debugging slow and confusing</li>
+                <li><strong>Ignore the call stack:</strong> Shows valuable execution context</li>
+                <li><strong>Forget to check variable types:</strong> Type mismatches are common bugs</li>
+                <li><strong>Debug with production data:</strong> Use small, controlled test data</li>
+                <li><strong>Modify code while debugging:</strong> Can cause inconsistent behavior</li>
+                <li><strong>Skip exception details:</strong> Exception messages contain crucial info</li>
+            </ul>
+        </div>
+
+        <div class="best-practice">
+            <strong>✅ Do:</strong>
+            <ul>
+                <li><strong>Use minimal test cases:</strong> Smallest data that reproduces bug</li>
+                <li><strong>Document your findings:</strong> Take notes on what you discover</li>
+                <li><strong>Test your fixes:</strong> Run through debugger to verify</li>
+                <li><strong>Learn from bugs:</strong> Understand why the bug occurred</li>
+                <li><strong>Clean up breakpoints:</strong> Remove them when done</li>
+            </ul>
+        </div>
+
+        <h3>Debugging Complex Conditions</h3>
+
+        <div class="code-block">
+# Complex condition - hard to debug
+if (user.is_active and user.balance > 100 and
+    user.subscription_type == 'premium' and
+    not user.is_blocked):
+    # Action
+
+# Better for debugging - break into steps
+is_active = user.is_active
+has_balance = user.balance > 100
+is_premium = user.subscription_type == 'premium'
+not_blocked = not user.is_blocked
+
+# Breakpoint here - inspect each boolean in Variables panel
+if is_active and has_balance and is_premium and not_blocked:
+    # Action
+        </div>
+
+        <h2 id="troubleshooting">12. Troubleshooting</h2>
+
+        <h3>Debugger Won't Start</h3>
+
+        <div class="warning">
+            <strong>Problem:</strong> Pressing F5 does nothing or shows error
+            <br><br>
+            <strong>Solutions:</strong>
+            <ol>
+                <li><strong>Check Python extension is installed</strong>
+                    <ul><li>Extensions → Search "Python" → Install</li></ul>
+                </li>
+                <li><strong>Select correct Python interpreter</strong>
+                    <ul><li>Ctrl+Shift+P → "Python: Select Interpreter"</li></ul>
+                </li>
+                <li><strong>Verify Python is in PATH</strong>
+                    <ul><li>Terminal: <code>python --version</code></li></ul>
+                </li>
+                <li><strong>Check launch.json syntax</strong>
+                    <ul><li>No trailing commas, valid JSON</li></ul>
+                </li>
+                <li><strong>Restart VS Code</strong>
+                    <ul><li>Sometimes extension needs reload</li></ul>
+                </li>
+            </ol>
+        </div>
+
+        <h3>Breakpoints Not Hitting</h3>
+
+        <div class="warning">
+            <strong>Problem:</strong> Breakpoint is set but not triggered
+            <br><br>
+            <strong>Solutions:</strong>
+            <ol>
+                <li><strong>Verify breakpoint is enabled</strong>
+                    <ul><li>Should be solid red dot, not gray</li></ul>
+                </li>
+                <li><strong>Check if code is executed</strong>
+                    <ul><li>Add print statement to verify</li></ul>
+                </li>
+                <li><strong>Verify correct file is running</strong>
+                    <ul><li>Check terminal output for file path</li></ul>
+                </li>
+                <li><strong>Check justMyCode setting</strong>
+                    <ul><li>Set "justMyCode": false for library code</li></ul>
+                </li>
+                <li><strong>Restart debugger</strong>
+                    <ul><li>Stop and start again (Shift+F5, then F5)</li></ul>
+                </li>
+            </ol>
+        </div>
+
+        <h3>Variables Not Showing Values</h3>
+
+        <div class="warning">
+            <strong>Problem:</strong> Variables panel empty or showing wrong values
+            <br><br>
+            <strong>Solutions:</strong>
+            <ol>
+                <li><strong>Check you're paused at breakpoint</strong>
+                    <ul><li>Status bar should show "Paused on breakpoint"</li></ul>
+                </li>
+                <li><strong>Expand variable categories</strong>
+                    <ul><li>Click arrows next to Locals, Globals</li></ul>
+                </li>
+                <li><strong>Check variable scope</strong>
+                    <ul><li>Variable must be in scope at breakpoint</li></ul>
+                </li>
+                <li><strong>Use Debug Console</strong>
+                    <ul><li>Manually evaluate: <code>print(variable)</code></li></ul>
+                </li>
+            </ol>
+        </div>
+
+        <h3>Debugger Too Slow</h3>
+
+        <div class="warning">
+            <strong>Problem:</strong> Debugging is very slow
+            <br><br>
+            <strong>Solutions:</strong>
+            <ol>
+                <li><strong>Reduce number of breakpoints</strong>
+                    <ul><li>Keep only essential ones</li></ul>
+                </li>
+                <li><strong>Use conditional breakpoints</strong>
+                    <ul><li>Instead of breaking every iteration</li></ul>
+                </li>
+                <li><strong>Enable justMyCode</strong>
+                    <ul><li>Set "justMyCode": true in launch.json</li></ul>
+                </li>
+                <li><strong>Use smaller test data</strong>
+                    <ul><li>Reproduce bug with minimal dataset</li></ul>
+                </li>
+                <li><strong>Disable watch expressions</strong>
+                    <ul><li>Remove expensive evaluations</li></ul>
+                </li>
+            </ol>
+        </div>
+
+        <h3>Can't Debug in Virtual Environment</h3>
+
+        <div class="warning">
+            <strong>Problem:</strong> Debugger can't find modules in virtualenv
+            <br><br>
+            <strong>Solutions:</strong>
+            <ol>
+                <li><strong>Select virtualenv interpreter</strong>
+                    <ul><li>Ctrl+Shift+P → "Python: Select Interpreter" → Choose venv</li></ul>
+                </li>
+                <li><strong>Activate venv in launch.json</strong>
+                    <ul><li>Use correct Python path in configuration</li></ul>
+                </li>
+                <li><strong>Check venv is activated in terminal</strong>
+                    <ul><li>Should see (venv) in prompt</li></ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="code-block">
+// launch.json for virtual environment
+{
+    "name": "Python: Virtual Env",
+    "type": "python",
+    "request": "launch",
+    "program": "${file}",
+    "python": "${workspaceFolder}/venv/bin/python",  // Explicit path
+    "console": "integratedTerminal"
+}
+        </div>
+
+        <h2 id="shortcuts">13. Keyboard Shortcuts</h2>
+
+        <h3>Essential Debug Shortcuts</h3>
+
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Windows/Linux</th>
+                <th>macOS</th>
+            </tr>
+            <tr>
+                <td>Start/Continue Debugging</td>
+                <td><span class="shortcut">F5</span></td>
+                <td><span class="shortcut">F5</span></td>
+            </tr>
+            <tr>
+                <td>Stop Debugging</td>
+                <td><span class="shortcut">Shift+F5</span></td>
+                <td><span class="shortcut">Shift+F5</span></td>
+            </tr>
+            <tr>
+                <td>Restart Debugging</td>
+                <td><span class="shortcut">Ctrl+Shift+F5</span></td>
+                <td><span class="shortcut">Cmd+Shift+F5</span></td>
+            </tr>
+            <tr>
+                <td>Step Over</td>
+                <td><span class="shortcut">F10</span></td>
+                <td><span class="shortcut">F10</span></td>
+            </tr>
+            <tr>
+                <td>Step Into</td>
+                <td><span class="shortcut">F11</span></td>
+                <td><span class="shortcut">F11</span></td>
+            </tr>
+            <tr>
+                <td>Step Out</td>
+                <td><span class="shortcut">Shift+F11</span></td>
+                <td><span class="shortcut">Shift+F11</span></td>
+            </tr>
+            <tr>
+                <td>Toggle Breakpoint</td>
+                <td><span class="shortcut">F9</span></td>
+                <td><span class="shortcut">F9</span></td>
+            </tr>
+            <tr>
+                <td>Disable All Breakpoints</td>
+                <td><span class="shortcut">Ctrl+F9</span></td>
+                <td><span class="shortcut">Cmd+F9</span></td>
+            </tr>
+        </table>
+
+        <h3>VS Code General Shortcuts</h3>
+
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Windows/Linux</th>
+                <th>macOS</th>
+            </tr>
+            <tr>
+                <td>Command Palette</td>
+                <td><span class="shortcut">Ctrl+Shift+P</span></td>
+                <td><span class="shortcut">Cmd+Shift+P</span></td>
+            </tr>
+            <tr>
+                <td>Quick Open File</td>
+                <td><span class="shortcut">Ctrl+P</span></td>
+                <td><span class="shortcut">Cmd+P</span></td>
+            </tr>
+            <tr>
+                <td>Toggle Terminal</td>
+                <td><span class="shortcut">Ctrl+`</span></td>
+                <td><span class="shortcut">Cmd+`</span></td>
+            </tr>
+            <tr>
+                <td>Toggle Sidebar</td>
+                <td><span class="shortcut">Ctrl+B</span></td>
+                <td><span class="shortcut">Cmd+B</span></td>
+            </tr>
+            <tr>
+                <td>Go to Line</td>
+                <td><span class="shortcut">Ctrl+G</span></td>
+                <td><span class="shortcut">Cmd+G</span></td>
+            </tr>
+            <tr>
+                <td>Find in Files</td>
+                <td><span class="shortcut">Ctrl+Shift+F</span></td>
+                <td><span class="shortcut">Cmd+Shift+F</span></td>
+            </tr>
+        </table>
+
+        <h3>Debug Panel Shortcuts</h3>
+
+        <table>
+            <tr>
+                <th>Action</th>
+                <th>Windows/Linux</th>
+                <th>macOS</th>
+            </tr>
+            <tr>
+                <td>Show Debug Panel</td>
+                <td><span class="shortcut">Ctrl+Shift+D</span></td>
+                <td><span class="shortcut">Cmd+Shift+D</span></td>
+            </tr>
+            <tr>
+                <td>Focus Debug Console</td>
+                <td><span class="shortcut">Ctrl+Shift+Y</span></td>
+                <td><span class="shortcut">Cmd+Shift+Y</span></td>
+            </tr>
+            <tr>
+                <td>Focus Variables</td>
+                <td><span class="shortcut">Ctrl+Shift+V</span></td>
+                <td><span class="shortcut">Cmd+Shift+V</span></td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Pro Tip:</strong> Customize shortcuts in File → Preferences → Keyboard Shortcuts (or Code → Preferences → Keyboard Shortcuts on Mac)
+        </div>
+
+        <h2>Summary</h2>
+
+        <div class="best-practice">
+            <strong>Key Takeaways:</strong>
+            <ul>
+                <li><strong>Use the debugger</strong> for complex issues instead of print statements</li>
+                <li><strong>Master breakpoints:</strong> Regular, conditional, and logpoints for different scenarios</li>
+                <li><strong>Leverage debug controls:</strong> Step Over, Step Into, Step Out to navigate code</li>
+                <li><strong>Inspect thoroughly:</strong> Use Variables, Watch, and Debug Console to understand state</li>
+                <li><strong>Configure properly:</strong> Create launch.json configurations for your specific needs</li>
+                <li><strong>Practice advanced techniques:</strong> Remote debugging, multi-threading, async code</li>
+                <li><strong>Learn shortcuts:</strong> Speed up debugging workflow significantly</li>
+                <li><strong>Troubleshoot systematically:</strong> Use scientific method to isolate issues</li>
+            </ul>
+        </div>
+
+        <p>Debugging is a skill that improves with practice. The more you use VS Code's debugging features, the more efficient and effective you'll become at finding and fixing bugs in your Python code.</p>
+
+        <div class="tip">
+            <strong>Next Steps:</strong>
+            <ol>
+                <li>Practice with simple examples to master basic debugging</li>
+                <li>Create launch configurations for your projects</li>
+                <li>Learn keyboard shortcuts to speed up workflow</li>
+                <li>Explore advanced features as needed for complex scenarios</li>
+                <li>Share debugging knowledge with your team</li>
+            </ol>
+        </div>
+
+    </div>
+</body>
+</html>
