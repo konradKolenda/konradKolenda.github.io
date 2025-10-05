@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Import Mechanism - Complete Guide</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+        .tip {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .best-practice {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .comparison {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px;
+        }
+        .toc a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .visual-diagram {
+            background-color: #f8f9fa;
+            border: 2px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 5px 0;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Python Import Mechanism - Complete Guide</h1>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#introduction">1. Introduction to Python Imports</a></li>
+                <li><a href="#two-types">2. Two Types of Imports</a></li>
+                <li><a href="#external-imports">3. External Package Imports</a></li>
+                <li><a href="#internal-imports">4. Internal Module Imports</a></li>
+                <li><a href="#import-syntax">5. Import Syntax Variations</a></li>
+                <li><a href="#how-python-finds">6. How Python Finds Imports</a></li>
+                <li><a href="#package-structure">7. Python Package Structure</a></li>
+                <li><a href="#common-patterns">8. Common Import Patterns</a></li>
+                <li><a href="#best-practices">9. Best Practices</a></li>
+                <li><a href="#troubleshooting">10. Troubleshooting Import Errors</a></li>
+                <li><a href="#advanced">11. Advanced Import Concepts</a></li>
+            </ul>
+        </div>
+
+        <h2 id="introduction">1. Introduction to Python Imports</h2>
+
+        <p>Python's import system allows you to use code written in other files and packages. Understanding imports is fundamental to organizing Python projects and using third-party libraries effectively.</p>
+
+        <div class="best-practice">
+            <strong>Key Concept:</strong> Imports make code from other files available in your current file. Think of it as "bringing in" functionality from elsewhere.
+        </div>
+
+        <h2 id="two-types">2. Two Types of Imports</h2>
+
+        <p>Python has two fundamentally different types of imports that work in distinct ways:</p>
+
+        <div class="comparison">
+            <h3>Type 1: External Package Imports (Third-Party Libraries)</h3>
+            <div class="code-block">
+import requests
+import pandas as pd
+import numpy as np
+from flask import Flask
+            </div>
+            <p><strong>Characteristics:</strong></p>
+            <ul>
+                <li>Code written by other developers</li>
+                <li>Must be installed before use</li>
+                <li>Stored in external directories (site-packages)</li>
+                <li>Managed by package managers (pip, uv, poetry)</li>
+            </ul>
+        </div>
+
+        <div class="comparison">
+            <h3>Type 2: Internal Module Imports (Your Own Code)</h3>
+            <div class="code-block">
+from myapp.utils import helper_function
+from myapp.models.user import User
+from .database import connect
+            </div>
+            <p><strong>Characteristics:</strong></p>
+            <ul>
+                <li>Code you wrote in your project</li>
+                <li>No installation needed</li>
+                <li>Stored in your project directory</li>
+                <li>Import path mirrors folder structure</li>
+            </ul>
+        </div>
+
+        <h2 id="external-imports">3. External Package Imports</h2>
+
+        <h3>What Are External Packages?</h3>
+        <p>External packages are libraries written by other developers and distributed through package repositories like PyPI (Python Package Index).</p>
+
+        <h3>How to Install External Packages</h3>
+
+        <div class="code-block">
+# Using pip
+pip install requests
+pip install pandas numpy
+
+# Using uv (modern, faster alternative)
+uv add requests
+uv sync
+
+# Using poetry
+poetry add requests
+        </div>
+
+        <h3>Where Are They Stored?</h3>
+        <p>External packages are installed in special directories separate from your project:</p>
+
+        <div class="visual-diagram">
+Virtual Environment Structure:
+
+project/
+├── .venv/                          ← Virtual environment folder
+│   ├── lib/
+│   │   └── python3.12/
+│   │       └── site-packages/      ← External packages live here
+│   │           ├── requests/
+│   │           ├── pandas/
+│   │           └── numpy/
+│   └── bin/
+│       └── python                  ← Python interpreter
+├── src/
+│   └── myapp/                      ← Your code lives here
+└── pyproject.toml                  ← Package dependencies listed here
+        </div>
+
+        <h3>Dependency Management Files</h3>
+
+        <h4>pyproject.toml (Modern Python Projects)</h4>
+        <div class="code-block">
+[project]
+name = "myapp"
+version = "0.1.0"
+dependencies = [
+    "requests>=2.31.0",
+    "pandas>=2.0.0",
+    "flask>=3.0.0"
+]
+        </div>
+
+        <h4>requirements.txt (Traditional Approach)</h4>
+        <div class="code-block">
+requests==2.31.0
+pandas==2.0.3
+flask==3.0.0
+        </div>
+
+        <div class="tip">
+            <strong>💡 Key Point:</strong> External packages <span class="highlight">must be installed</span> before you can import them. Running <code>import requests</code> without installing requests first will cause an ImportError.
+        </div>
+
+        <h3>Example: External Package Import Flow</h3>
+
+        <div class="code-block">
+# Step 1: Install the package
+$ pip install requests
+
+# Step 2: Import and use in your code
+import requests
+
+response = requests.get('https://api.example.com/data')
+print(response.json())
+        </div>
+
+        <div class="visual-diagram">
+Import Flow for External Packages:
+
+1. You write: import requests
+2. Python searches: .venv/lib/python3.12/site-packages/
+3. Python finds: site-packages/requests/__init__.py
+4. Python loads: requests module into memory
+5. You can use: requests.get(), requests.post(), etc.
+        </div>
+
+        <h2 id="internal-imports">4. Internal Module Imports</h2>
+
+        <h3>What Are Internal Imports?</h3>
+        <p>Internal imports bring in code from other files within your own project. The import path directly corresponds to your folder structure.</p>
+
+        <h3>Import Path = Folder Structure</h3>
+
+        <div class="visual-diagram">
+Project Structure:
+
+myapp/
+├── src/
+│   └── myapp/
+│       ├── __init__.py
+│       ├── config.py
+│       ├── utils/
+│       │   ├── __init__.py
+│       │   ├── helpers.py
+│       │   └── validators.py
+│       └── models/
+│           ├── __init__.py
+│           ├── user.py
+│           └── product.py
+└── tests/
+        </div>
+
+        <h3>Path Translation Examples</h3>
+
+        <table>
+            <tr>
+                <th>Import Statement</th>
+                <th>File Path</th>
+            </tr>
+            <tr>
+                <td><code>from myapp import config</code></td>
+                <td><code>src/myapp/config.py</code></td>
+            </tr>
+            <tr>
+                <td><code>from myapp.utils import helpers</code></td>
+                <td><code>src/myapp/utils/helpers.py</code></td>
+            </tr>
+            <tr>
+                <td><code>from myapp.utils.helpers import clean_data</code></td>
+                <td><code>src/myapp/utils/helpers.py</code> (function: clean_data)</td>
+            </tr>
+            <tr>
+                <td><code>from myapp.models.user import User</code></td>
+                <td><code>src/myapp/models/user.py</code> (class: User)</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Key Point:</strong> Dots (.) in import paths = folder separators (/) in file system
+            <br><code>from a.b.c import d</code> → <code>a/b/c.py</code> (function/class d)
+        </div>
+
+        <h3>The Role of __init__.py</h3>
+
+        <p>The <code>__init__.py</code> file makes a directory a Python package. It can be empty or contain initialization code.</p>
+
+        <div class="code-block">
+# myapp/utils/__init__.py
+
+# Option 1: Empty file (just marks directory as package)
+# (file is empty)
+
+# Option 2: Re-export functions for convenient imports
+from myapp.utils.helpers import clean_data, format_date
+from myapp.utils.validators import validate_email
+
+# Now users can do: from myapp.utils import clean_data
+# Instead of: from myapp.utils.helpers import clean_data
+        </div>
+
+        <h3>Practical Example</h3>
+
+        <p>File: <code>src/myapp/utils/helpers.py</code></p>
+        <div class="code-block">
+def clean_data(data):
+    """Remove null values and duplicates"""
+    return list(set([x for x in data if x is not None]))
+
+def format_date(date_str):
+    """Convert string to datetime"""
+    from datetime import datetime
+    return datetime.strptime(date_str, '%Y-%m-%d')
+        </div>
+
+        <p>File: <code>src/myapp/main.py</code></p>
+        <div class="code-block">
+# Import from internal module
+from myapp.utils.helpers import clean_data, format_date
+
+# Use the imported functions
+raw_data = [1, 2, None, 2, 3, None, 4]
+cleaned = clean_data(raw_data)
+print(cleaned)  # [1, 2, 3, 4]
+
+date = format_date('2024-01-15')
+print(date)  # 2024-01-15 00:00:00
+        </div>
+
+        <h2 id="import-syntax">5. Import Syntax Variations</h2>
+
+        <h3>Basic Import Patterns</h3>
+
+        <h4>1. Import Entire Module</h4>
+        <div class="code-block">
+import math
+
+# Use with module prefix
+result = math.sqrt(16)
+pi = math.pi
+        </div>
+
+        <h4>2. Import Specific Items</h4>
+        <div class="code-block">
+from math import sqrt, pi
+
+# Use directly without prefix
+result = sqrt(16)
+circle = 2 * pi * radius
+        </div>
+
+        <h4>3. Import with Alias</h4>
+        <div class="code-block">
+import pandas as pd
+import numpy as np
+
+# Use short alias
+df = pd.DataFrame(data)
+array = np.array([1, 2, 3])
+        </div>
+
+        <h4>4. Import All (Not Recommended)</h4>
+        <div class="code-block">
+from math import *
+
+# Can use everything from math without prefix
+result = sqrt(16)  # Works, but unclear where sqrt comes from
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> Avoid <code>from module import *</code> as it:
+            <ul>
+                <li>Makes code unclear (where did this function come from?)</li>
+                <li>Can cause name conflicts</li>
+                <li>Imports potentially hundreds of unnecessary items</li>
+            </ul>
+        </div>
+
+        <h3>Relative vs Absolute Imports</h3>
+
+        <div class="visual-diagram">
+Project Structure:
+
+myapp/
+├── database/
+│   ├── __init__.py
+│   ├── connection.py
+│   └── queries.py
+└── api/
+    ├── __init__.py
+    └── routes.py
+        </div>
+
+        <h4>Absolute Imports (Recommended)</h4>
+        <div class="code-block">
+# In myapp/api/routes.py
+
+# Absolute import - full path from project root
+from myapp.database.connection import get_db
+from myapp.database.queries import get_user
+
+# Clear and unambiguous
+        </div>
+
+        <h4>Relative Imports</h4>
+        <div class="code-block">
+# In myapp/api/routes.py
+
+# Relative import - using dots
+from ..database.connection import get_db  # .. means "parent directory"
+from ..database.queries import get_user
+
+# . = current directory
+# .. = parent directory
+# ... = grandparent directory
+        </div>
+
+        <div class="comparison">
+            <h4>When to Use Each:</h4>
+            <table>
+                <tr>
+                    <th>Import Type</th>
+                    <th>Use When</th>
+                    <th>Example</th>
+                </tr>
+                <tr>
+                    <td>Absolute</td>
+                    <td>Default choice, clearest intent</td>
+                    <td><code>from myapp.utils import helper</code></td>
+                </tr>
+                <tr>
+                    <td>Relative</td>
+                    <td>Within same package, easier refactoring</td>
+                    <td><code>from .utils import helper</code></td>
+                </tr>
+            </table>
+        </div>
+
+        <h2 id="how-python-finds">6. How Python Finds Imports</h2>
+
+        <h3>The Python Import Search Path</h3>
+
+        <p>When you import a module, Python searches for it in a specific order:</p>
+
+        <div class="code-block">
+import sys
+
+# View the import search path
+print(sys.path)
+
+# Example output:
+# [
+#     '/home/user/myproject',              # 1. Current directory
+#     '/home/user/myproject/src',          # 2. PYTHONPATH directories
+#     '/usr/lib/python3.12',               # 3. Standard library
+#     '/home/user/.venv/lib/python3.12/site-packages'  # 4. Third-party packages
+# ]
+        </div>
+
+        <h3>Import Search Order</h3>
+
+        <ol>
+            <li><strong>Current directory:</strong> Where the script is running from</li>
+            <li><strong>PYTHONPATH:</strong> Environment variable with additional directories</li>
+            <li><strong>Standard library:</strong> Python's built-in modules</li>
+            <li><strong>Site-packages:</strong> Third-party installed packages</li>
+        </ol>
+
+        <div class="visual-diagram">
+Import Resolution Example:
+
+import requests
+
+Python searches in order:
+1. ./requests.py or ./requests/           ← Your project directory
+2. (PYTHONPATH directories)               ← Custom paths
+3. /usr/lib/python3.12/requests/          ← Standard library
+4. .venv/lib/python3.12/site-packages/requests/  ← FOUND! ✓
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Name Collision Warning:</strong> If you create <code>requests.py</code> in your project, it will override the installed <code>requests</code> package! Always avoid naming files after popular libraries.
+        </div>
+
+        <h3>Modifying sys.path (Advanced)</h3>
+
+        <div class="code-block">
+import sys
+import os
+
+# Add custom directory to import path
+project_root = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, project_root)
+
+# Now can import from that directory
+from mymodule import myfunction
+        </div>
+
+        <h2 id="package-structure">7. Python Package Structure</h2>
+
+        <h3>Proper Project Layout</h3>
+
+        <div class="visual-diagram">
+Modern Python Project Structure:
+
+myproject/
+├── pyproject.toml              ← Project metadata & dependencies
+├── README.md                   ← Project documentation
+├── .venv/                      ← Virtual environment (external packages)
+│   └── lib/python3.12/site-packages/
+├── src/                        ← Source code root
+│   └── myapp/                  ← Your package
+│       ├── __init__.py
+│       ├── main.py
+│       ├── config.py
+│       ├── utils/
+│       │   ├── __init__.py
+│       │   └── helpers.py
+│       └── models/
+│           ├── __init__.py
+│           └── user.py
+├── tests/                      ← Test files
+│   ├── __init__.py
+│   └── test_main.py
+└── docs/                       ← Documentation
+        </div>
+
+        <h3>Making Your Package Installable</h3>
+
+        <p>To use internal imports like <code>from myapp.utils import helpers</code>, you need to install your package in editable mode:</p>
+
+        <div class="code-block">
+# Using pip
+pip install -e .
+
+# Using uv
+uv pip install -e .
+
+# Using poetry
+poetry install
+        </div>
+
+        <p>This adds your <code>src/</code> directory to Python's import path.</p>
+
+        <h3>pyproject.toml Configuration</h3>
+
+        <div class="code-block">
+[project]
+name = "myapp"
+version = "0.1.0"
+description = "My Python application"
+requires-python = ">=3.10"
+
+dependencies = [
+    "requests>=2.31.0",
+    "pandas>=2.0.0"
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+        </div>
+
+        <h2 id="common-patterns">8. Common Import Patterns</h2>
+
+        <h3>Pattern 1: Importing Configuration</h3>
+
+        <p>File: <code>src/myapp/config.py</code></p>
+        <div class="code-block">
+# Configuration constants
+DATABASE_URL = "postgresql://localhost/mydb"
+API_KEY = "secret-key-123"
+DEBUG = True
+        </div>
+
+        <p>File: <code>src/myapp/main.py</code></p>
+        <div class="code-block">
+from myapp import config
+
+# Access configuration
+print(config.DATABASE_URL)
+print(config.DEBUG)
+        </div>
+
+        <h3>Pattern 2: Importing Classes</h3>
+
+        <p>File: <code>src/myapp/models/user.py</code></p>
+        <div class="code-block">
+class User:
+    def __init__(self, name, email):
+        self.name = name
+        self.email = email
+
+    def greet(self):
+        return f"Hello, {self.name}!"
+        </div>
+
+        <p>File: <code>src/myapp/main.py</code></p>
+        <div class="code-block">
+from myapp.models.user import User
+
+# Create instance
+user = User("Alice", "alice@example.com")
+print(user.greet())  # Hello, Alice!
+        </div>
+
+        <h3>Pattern 3: Importing Functions</h3>
+
+        <p>File: <code>src/myapp/utils/validators.py</code></p>
+        <div class="code-block">
+def validate_email(email):
+    return "@" in email and "." in email
+
+def validate_age(age):
+    return 0 < age < 150
+        </div>
+
+        <p>File: <code>src/myapp/main.py</code></p>
+        <div class="code-block">
+from myapp.utils.validators import validate_email, validate_age
+
+# Use validators
+if validate_email("user@example.com"):
+    print("Valid email")
+
+if validate_age(25):
+    print("Valid age")
+        </div>
+
+        <h3>Pattern 4: Namespace Package (Convenient Access)</h3>
+
+        <p>File: <code>src/myapp/utils/__init__.py</code></p>
+        <div class="code-block">
+# Re-export for convenient access
+from myapp.utils.validators import validate_email, validate_age
+from myapp.utils.helpers import clean_data, format_date
+
+# Now users can do:
+# from myapp.utils import validate_email
+# Instead of:
+# from myapp.utils.validators import validate_email
+        </div>
+
+        <h3>Pattern 5: Conditional Imports</h3>
+
+        <div class="code-block">
+# Import different modules based on condition
+import sys
+
+if sys.platform == "win32":
+    from myapp.windows_utils import special_function
+else:
+    from myapp.unix_utils import special_function
+
+# Use special_function regardless of platform
+        </div>
+
+        <h3>Pattern 6: Lazy Imports (Performance)</h3>
+
+        <div class="code-block">
+def process_data():
+    # Import only when function is called
+    import pandas as pd  # Heavy library
+
+    df = pd.DataFrame(data)
+    return df
+
+# pandas only imported if process_data() is called
+        </div>
+
+        <h2 id="best-practices">9. Best Practices</h2>
+
+        <div class="best-practice">
+            <h3>1. Import Organization</h3>
+            <p>Group imports in this order:</p>
+            <div class="code-block">
+# 1. Standard library imports
+import os
+import sys
+from datetime import datetime
+
+# 2. Third-party imports
+import requests
+import pandas as pd
+from flask import Flask
+
+# 3. Local/internal imports
+from myapp.utils import helpers
+from myapp.models.user import User
+            </div>
+        </div>
+
+        <div class="best-practice">
+            <h3>2. Use Absolute Imports by Default</h3>
+            <div class="code-block">
+# ✅ Good - clear and explicit
+from myapp.database.connection import get_db
+
+# ❌ Avoid - unclear, harder to refactor
+from ..database.connection import get_db
+            </div>
+        </div>
+
+        <div class="best-practice">
+            <h3>3. Import Specific Items</h3>
+            <div class="code-block">
+# ✅ Good - clear what you're using
+from myapp.utils import clean_data, format_date
+
+# ❌ Avoid - imports everything, unclear
+from myapp.utils import *
+            </div>
+        </div>
+
+        <div class="best-practice">
+            <h3>4. Avoid Circular Imports</h3>
+            <p>Circular imports occur when two modules import each other:</p>
+            <div class="code-block">
+# module_a.py
+from module_b import function_b  # ❌ Circular!
+
+def function_a():
+    return function_b()
+
+# module_b.py
+from module_a import function_a  # ❌ Circular!
+
+def function_b():
+    return function_a()
+            </div>
+            <p><strong>Solution:</strong> Restructure code or use lazy imports</p>
+        </div>
+
+        <div class="best-practice">
+            <h3>5. Keep Imports at Top of File</h3>
+            <div class="code-block">
+# ✅ Good - all imports at top
+import requests
+from myapp.utils import helper
+
+def main():
+    response = requests.get(url)
+    result = helper(response)
+
+# ❌ Avoid - imports scattered throughout
+def main():
+    import requests  # Don't do this (unless lazy loading)
+    response = requests.get(url)
+            </div>
+        </div>
+
+        <div class="best-practice">
+            <h3>6. Use __init__.py for Package Interfaces</h3>
+            <div class="code-block">
+# myapp/__init__.py
+# Define what's available when someone does: from myapp import X
+
+from myapp.main import run_app
+from myapp.config import settings
+
+__all__ = ['run_app', 'settings']  # Explicit export list
+            </div>
+        </div>
+
+        <h2 id="troubleshooting">10. Troubleshooting Import Errors</h2>
+
+        <h3>Common Error 1: ModuleNotFoundError</h3>
+
+        <div class="warning">
+            <strong>Error:</strong>
+            <div class="code-block">
+ModuleNotFoundError: No module named 'requests'
+            </div>
+        </div>
+
+        <p><strong>Causes & Solutions:</strong></p>
+        <ol>
+            <li><strong>Package not installed</strong>
+                <div class="code-block">
+# Solution: Install the package
+pip install requests
+                </div>
+            </li>
+            <li><strong>Wrong virtual environment</strong>
+                <div class="code-block">
+# Solution: Activate correct virtual environment
+source .venv/bin/activate  # Linux/Mac
+.venv\Scripts\activate     # Windows
+                </div>
+            </li>
+            <li><strong>Wrong Python interpreter in IDE</strong>
+                <ul>
+                    <li>VS Code: Select correct interpreter (Ctrl+Shift+P → "Python: Select Interpreter")</li>
+                    <li>PyCharm: Settings → Project → Python Interpreter</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Common Error 2: ImportError (Cannot Import Name)</h3>
+
+        <div class="warning">
+            <strong>Error:</strong>
+            <div class="code-block">
+ImportError: cannot import name 'User' from 'myapp.models'
+            </div>
+        </div>
+
+        <p><strong>Causes & Solutions:</strong></p>
+        <ol>
+            <li><strong>Name doesn't exist in module</strong>
+                <div class="code-block">
+# Check the file actually has that name
+# myapp/models/user.py should have:
+class User:  # Make sure this exists
+    pass
+                </div>
+            </li>
+            <li><strong>Typo in name</strong>
+                <div class="code-block">
+# ❌ Wrong
+from myapp.models.user import user  # lowercase
+
+# ✅ Correct
+from myapp.models.user import User  # uppercase
+                </div>
+            </li>
+        </ol>
+
+        <h3>Common Error 3: Circular Import</h3>
+
+        <div class="warning">
+            <strong>Error:</strong>
+            <div class="code-block">
+ImportError: cannot import name 'X' from partially initialized module
+            </div>
+        </div>
+
+        <p><strong>Solutions:</strong></p>
+        <ol>
+            <li><strong>Restructure code to remove circular dependency</strong></li>
+            <li><strong>Use lazy import (import inside function)</strong>
+                <div class="code-block">
+def my_function():
+    from myapp.other_module import something  # Import when needed
+    return something()
+                </div>
+            </li>
+            <li><strong>Move common code to separate module</strong></li>
+        </ol>
+
+        <h3>Common Error 4: Relative Import in Non-Package</h3>
+
+        <div class="warning">
+            <strong>Error:</strong>
+            <div class="code-block">
+ImportError: attempted relative import with no known parent package
+            </div>
+        </div>
+
+        <p><strong>Causes & Solutions:</strong></p>
+        <ol>
+            <li><strong>Running file directly that uses relative imports</strong>
+                <div class="code-block">
+# ❌ Don't run file with relative imports directly
+python myapp/utils/helpers.py
+
+# ✅ Run as module
+python -m myapp.utils.helpers
+                </div>
+            </li>
+            <li><strong>Missing __init__.py files</strong>
+                <div class="code-block">
+# Ensure every directory has __init__.py
+myapp/
+├── __init__.py  ← Required
+└── utils/
+    ├── __init__.py  ← Required
+    └── helpers.py
+                </div>
+            </li>
+        </ol>
+
+        <h3>Debugging Import Issues</h3>
+
+        <div class="code-block">
+import sys
+
+# 1. Check Python version
+print(f"Python: {sys.version}")
+
+# 2. Check import search path
+print(f"Import path: {sys.path}")
+
+# 3. Check where a module comes from
+import requests
+print(f"requests location: {requests.__file__}")
+
+# 4. Check what's in sys.modules (already imported)
+print(f"Loaded modules: {list(sys.modules.keys())}")
+
+# 5. Verify package is installed
+import pkg_resources
+print(pkg_resources.get_distribution('requests').version)
+        </div>
+
+        <h2 id="advanced">11. Advanced Import Concepts</h2>
+
+        <h3>Dynamic Imports (importlib)</h3>
+
+        <div class="code-block">
+import importlib
+
+# Import module by string name
+module_name = "myapp.utils.helpers"
+module = importlib.import_module(module_name)
+
+# Call function from dynamically imported module
+result = module.clean_data(data)
+
+# Import specific attribute
+User = importlib.import_module("myapp.models.user").User
+        </div>
+
+        <h3>Reloading Modules (Development)</h3>
+
+        <div class="code-block">
+import importlib
+import myapp.utils.helpers
+
+# Make changes to helpers.py...
+
+# Reload the module to get latest changes
+importlib.reload(myapp.utils.helpers)
+
+# Now uses updated code
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> <code>reload()</code> is mainly for interactive development (REPL). Don't use in production code.
+        </div>
+
+        <h3>Import Hooks (Very Advanced)</h3>
+
+        <p>Python allows customizing the import system with import hooks. This is advanced and rarely needed.</p>
+
+        <div class="code-block">
+import sys
+
+class CustomImporter:
+    def find_module(self, fullname, path=None):
+        # Custom logic to find module
+        pass
+
+    def load_module(self, fullname):
+        # Custom logic to load module
+        pass
+
+# Register custom importer
+sys.meta_path.insert(0, CustomImporter())
+        </div>
+
+        <h3>Namespace Packages (PEP 420)</h3>
+
+        <p>Namespace packages allow splitting a package across multiple directories without __init__.py:</p>
+
+        <div class="code-block">
+# Directory structure (no __init__.py needed)
+location1/
+└── mypackage/
+    └── module_a.py
+
+location2/
+└── mypackage/
+    └── module_b.py
+
+# Both can be imported as mypackage
+from mypackage import module_a
+from mypackage import module_b
+        </div>
+
+        <h3>Type Checking Imports</h3>
+
+        <div class="code-block">
+from typing import TYPE_CHECKING
+
+# Imports only used for type hints (not at runtime)
+if TYPE_CHECKING:
+    from myapp.models.user import User
+
+def process_user(user: 'User') -> None:
+    # Type hint works, but no runtime import overhead
+    pass
+        </div>
+
+        <h2>Summary</h2>
+
+        <div class="best-practice">
+            <h3>Key Takeaways</h3>
+            <ul>
+                <li><strong>Two types of imports:</strong> External packages (installed) vs internal modules (your code)</li>
+                <li><strong>External packages:</strong> Must install first, stored in site-packages</li>
+                <li><strong>Internal imports:</strong> Import path = folder structure (dots = slashes)</li>
+                <li><strong>Search path:</strong> Python searches sys.path in order</li>
+                <li><strong>Best practices:</strong> Absolute imports, organize by type, avoid <code>import *</code></li>
+                <li><strong>Common errors:</strong> ModuleNotFoundError (not installed), ImportError (wrong name/circular)</li>
+            </ul>
+        </div>
+
+        <div class="visual-diagram">
+<strong>Quick Reference:</strong>
+
+External Package Import:
+  import requests          → .venv/lib/python3.12/site-packages/requests/
+  Must install first!
+
+Internal Module Import:
+  from myapp.utils import helpers  → src/myapp/utils/helpers.py
+  Follows folder structure
+
+Import Syntax:
+  import module                    → Use as: module.function()
+  from module import function      → Use as: function()
+  import module as m              → Use as: m.function()
+  from module import *            → Avoid this!
+        </div>
+
+    </div>
+</body>
+</html>
