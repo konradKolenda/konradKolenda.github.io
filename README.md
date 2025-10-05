@@ -24,6 +24,11 @@ Comprehensive guides covering dbt best practices, strategies, and implementation
 - **[dbt Modeling Guidelines](https://konradkolenda.github.io/dbt/dbt_modeling_guidelines.html)** - Structure and organization best practices
 - **[dbt Utils Macros](https://konradkolenda.github.io/dbt/dbt_utils_macros_comprehensive_summary.html)** - Complete macro reference and examples
 
+### Python
+Comprehensive guides for Python development and debugging:
+
+- **[Python Debugging in VS Code - Comprehensive Guide](https://konradkolenda.github.io/python/python_debugging_vscode_guide.html)** - Master Python debugging in Visual Studio Code with breakpoints, watch expressions, debug console, launch configurations, and advanced techniques for remote debugging, async code, and multi-threading
+
 ## 🔧 What You'll Find
 
 ✅ **Practical Examples** - Real-world code samples you can use immediately  
