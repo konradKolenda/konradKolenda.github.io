@@ -27,6 +27,7 @@ Comprehensive guides covering dbt best practices, strategies, and implementation
 ### Python
 Comprehensive guides for Python development and debugging:
 
+- **[Python Import Mechanism - Complete Guide](https://konradkolenda.github.io/python/python_import_mechanism_guide.html)** - Understanding Python's import system including external packages vs internal modules, how Python finds imports, import syntax variations, package structure, and troubleshooting import errors
 - **[Python Debugging in VS Code - Comprehensive Guide](https://konradkolenda.github.io/python/python_debugging_vscode_guide.html)** - Master Python debugging in Visual Studio Code with breakpoints, watch expressions, debug console, launch configurations, and advanced techniques for remote debugging, async code, and multi-threading
 
 ## 🔧 What You'll Find
